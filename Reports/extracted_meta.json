@@ -1,0 +1,184 @@
+[
+  {
+    "rel_path": "CNN - Mamba\\A hybrid architecture based on structured state space sequence model and.pdf",
+    "folder": "CNN - Mamba",
+    "filename": "A hybrid architecture based on structured state space sequence model and.pdf",
+    "pages": 12,
+    "abstract": "Contents lists available at ScienceDirect\nEngineering Applications of Artificial Intelligence\njournal homepage: www.elsevier.com/locate/engappai  \nResearch paper\nA hybrid architecture based on structured state space sequence model and \nconvolutional neural network for real-time object detection\nJie Chen, Meng Joo Er\n ∗\nCollege of Marine Electrical Engineering, Dalian Maritime University, 1 Linghai Road, Dalian, 116026, Liaoning, China\nA R T I C L E  I N F O\nDataset link: https://github.com/chenjie04/Hy\nbrid-YOLO\nKeywords:\nUnderwater object detection\nStructured state space sequence model\nLong-range dependencies\nSpatial attention\nCost-efficient module\n A B S T R A C T\nReal-time performance is essential for practical deployment of object detection on edge devices, where high \nprocessing spe"
+  },
+  {
+    "rel_path": "CNN - Mamba\\UAVDet A CNN–Mamba hybrid network for efficient small object detection.pdf",
+    "folder": "CNN - Mamba",
+    "filename": "UAVDet A CNN–Mamba hybrid network for efficient small object detection.pdf",
+    "pages": 22,
+    "abstract": "Computer Vision and Image Understanding 264 (2026) 104637\n \nContents lists available at ScienceDirect\nComputer Vision and Image Understanding\njournal homepage: www.elsevier.com/locate/cviu  \nUAVDet: A CNN–Mamba hybrid network for efficient small object detection \nin UAV imagery\nYiming Yang, Feng Guo ∗, Pei Niu\nSchool of Qilu Transportation, Shandong University, Jinan, Shandong 250000, China\nA R T I C L E  I N F O\nCommunicated by Ribana Roscher\nKeywords:\nUAV object detection\nSmall objects\nComplex backgrounds\nMamba structure\nReal-time detection\n A B S T R A C T\nReal-time object detection is pivotal in traffic-related Unmanned Aerial Vehicles (UAV) applications. However, \nUAV imagery presents significant challenges due to the predominance of small objects and complex back-\ngrounds. Traditiona"
+  },
+  {
+    "rel_path": "CNN - Mamba\\VMamba\\A Survey on Transformer-Based Long-Range DependencyModeling in Intelligent Document Understanding.pdf",
+    "folder": "CNN - Mamba\\VMamba",
+    "filename": "A Survey on Transformer-Based Long-Range DependencyModeling in Intelligent Document Understanding.pdf",
+    "pages": 38,
+    "abstract": "A Survey on Transformer-Based Long-Range Dependency\nModeling in Intelligent Document Understanding\nXUMU JIANG, University of New South Wales, Australia\nYU ZHANG, University of New South Wales Canberra at ADFA, Australia\nALIREZA ABBASI, University of New South Wales, Australia\nTransformers have revolutionized Natural Language Processing (NLP) by capturing complex patterns in\ndata, but they still face challenges in modeling long-range dependency, especially in tasks like Intelligent\nDocument Understanding (IDU), where maintaining coherence across lengthy and varied documents is crucial.\nThis survey reviews Transformer-based models for addressing long-range dependency challenges in IDU.\nIt introduces a taxonomy of key approaches and discusses representative models within memory-focused,\natten"
+  },
+  {
+    "rel_path": "CNN - Mamba\\VMamba\\VSS-SpatioNet a multi-scale feature fusion network for multimodal image integrations.pdf",
+    "folder": "CNN - Mamba\\VMamba",
+    "filename": "VSS-SpatioNet a multi-scale feature fusion network for multimodal image integrations.pdf",
+    "pages": 20,
+    "abstract": "VSS-SpatioNet: a multi-scale \nfeature fusion network for \nmultimodal image integrations\nZeyu Xiang\nInfrared and visible image fusion (vis-ir) enhances diagnostic accuracy in medical imaging and biological \nanalysis. Existing CNN-based and Transformer-based methods face computational inefficiencies in \nmodeling global dependencies. The author proposes VSS-SpatioNet, a lightweight architecture that \nreplaces self-attention in Transformers with a Visual State Space (VSS) module for efficient dependency \nmodeling. The framework employs an asymmetric encoder-decoder with a multi-scale autoencoder \nand a novel VSS-Spatial (VS) fusion block for local-global feature integration. Evaluations on TNO, \nHarvard Medical, and RoadScene datasets demonstrate superior performance. On TNO, VSS-SpatioNet \nac"
+  },
+  {
+    "rel_path": "CNN - Mamba\\Vision Mamba in Remote Sensing A Comprehensive Survey of Techniques, Applications and Outlook.pdf",
+    "folder": "CNN - Mamba",
+    "filename": "Vision Mamba in Remote Sensing A Comprehensive Survey of Techniques, Applications and Outlook.pdf",
+    "pages": 46,
+    "abstract": "Abstract\nDeep learning has profoundly transformed remote sensing, yet prevailing architectures\nlike Convolutional Neural Networks (CNNs) and Vision Transformers (ViTs) remain con-\nstrained by critical trade-offs: CNNs suffer from limited receptive fields, while ViTs grapple\nwith quadratic computational complexity, hindering the"
+  },
+  {
+    "rel_path": "Evaluation\\A Survey of Robustness and Safety of 2D and 3D DeepLearning Models against Adversarial Attacks.pdf",
+    "folder": "Evaluation",
+    "filename": "A Survey of Robustness and Safety of 2D and 3D DeepLearning Models against Adversarial Attacks.pdf",
+    "pages": 37,
+    "abstract": "138 \nA Survey of Robustness and Safety of 2D and 3D Deep \nLearning Models against Adversarial Attacks \nYANJIE LI and BIN XIE , The Hong Kong Polytechnic University, Hong Kong \nSONGTAO GUO , Chongqing University, China \nY UAN Y UAN YANG , Stony Brook University, USA \nBIN XIAO , The Hong Kong Polytechnic University, Hong Kong \nBenefiting from the rapid development of deep learning, 2D and 3D computer vision applications are deployed \nin many safe-critical systems, such as autopilot and identity authentication. However, deep learning models \nare not trustworthy enough because of their limited robustness against adversarial attacks. The physically \nrealizable adversarial attacks further pose fatal threats to the application and human safety. Lots of papers \nhave emerged to investigate the robu"
+  },
+  {
+    "rel_path": "Evaluation\\A comprehensive review of network pruning based on pruning granularity.pdf",
+    "folder": "Evaluation",
+    "filename": "A comprehensive review of network pruning based on pruning granularity.pdf",
+    "pages": 16,
+    "abstract": "Neurocomputing 626 (2025) 129382\nAvailable online 14 January 2025\n0925-2312/© 2025 Elsevier B.V. All rights are reserved, including those for text and data mining, AI training, and similar technologies.\nContents lists available at ScienceDirect\nNeurocomputing\njournal homepage: www.elsevier.com/locate/neucom\nSurvey paper\nA comprehensive review of network pruning based on pruning granularity\nand pruning time perspectives\nKehan Zhu a, Fuyi Hu a, Yuanbing Ding a, Wei Zhou a, Ruxin Wang b\n ,∗\na National Pilot School of Software and the Engineering Research Center of Cyberspace, 650504, Kunming, China\nb The Alibaba Group, Beijing, China\nA R T I C L E I N F O\nCommunicated by N. Passalis\nKeywords:\nDeep learning\nComputer vision\nModel compression\nNetwork pruning\nA B S T R A C T\nThe prevalence of dee"
+  },
+  {
+    "rel_path": "Evaluation\\Complexity metrics for process models – A systematic literature review.pdf",
+    "folder": "Evaluation",
+    "filename": "Complexity metrics for process models – A systematic literature review.pdf",
+    "pages": 14,
+    "abstract": "ABSTRACT\nContext: One of the focal purposes of using ‘visual’ process models (i.e. process diagrams) is to ensure easier,\nuniversally understood and unambiguous diagrammatic communication. Thus the models should be easy to\ncomprehend and maintain, which is directly related to their complexity. In order to systematically address\nprocess models complexity, it has to be measured.\nObjective: The goal of our work was to provide a better overview and understanding in the ﬁeld of process\nmodels complexity and to provide an overview of the corresponding metrics.\nMethod: A systematic literature review (SLR) was conducted, being the most suitable method for achieving\naforementioned goals. In addition, to answer the stated research questions, di ﬀerent techniques for qualitative\nand quantitative data analysis and synthesis were used.\nResults: We identi ﬁed 43 relevant articles which were systematically analyzed according to a pre-de ﬁned\nprocess and data acquisition form. Out of these articles we collected 66 process models complexity metrics.\nConclusion: Modelers can use the ‘catalogue’ of process complexity metrics to establish and ensure good quality\nof diagrams, whereas researches can rel"
+  },
+  {
+    "rel_path": "Evaluation\\Edge Computing A Survey On the Hardware Requirements in the Internet of Things World.pdf",
+    "folder": "Evaluation",
+    "filename": "Edge Computing A Survey On the Hardware Requirements in the Internet of Things World.pdf",
+    "pages": 25,
+    "abstract": "Abstract: In today’s world, ruled by a great amount of data and mobile devices, cloud-based systems\nare spreading all over. Such phenomenon increases the number of connected devices, broadcast\nbandwidth, and information exchange. These ﬁne-grained interconnected systems, which enable the\nInternet connectivity for an extremely large number of facilities (far beyond the current number of\ndevices) go by the name of Internet of Things (IoT). In this scenario, mobile devices have an operating\ntime which is proportional to the battery capacity, the number of operations performed per cycle and\nthe amount of exchanged data. Since the transmission of data to a central cloud represents a very\nenergy-hungry operation, new computational paradigms have been implemented. The computation\nis not completely performed in the cloud, distributing the power load among the nodes of the system,\nand data are compressed to reduce the transmitted power requirements. In the edge-computing\nparadigm, part of the computational power is moved toward data collection sources, and, only after\na ﬁrst elaboration, collected data are sent to the central cloud server. Indeed, the “edge” term refers\nto the extremities o"
+  },
+  {
+    "rel_path": "Evaluation\\Enhancing Reproducibility and Replicability in Remote Sensing Deep Learning Research and Practice.pdf",
+    "folder": "Evaluation",
+    "filename": "Enhancing Reproducibility and Replicability in Remote Sensing Deep Learning Research and Practice.pdf",
+    "pages": 12,
+    "abstract": "Abstract: Many issues can reduce the reproducibility and replicability of deep learning (DL) research\nand application in remote sensing, including the complexity and customizability of architectures,\nvariable model training and assessment processes and practice, inability to fully control random\ncomponents of the modeling workﬂow, data leakage, computational demands, and the inherent\nnature of the process, which is complex, difﬁcult to perform systematically, and challenging to fully\ndocument. This communication discusses key issues associated with convolutional neural network\n(CNN)-based DL in remote sensing for undertaking semantic segmentation, object detection, and\ninstance segmentation tasks and offers suggestions for best practices for enhancing reproducibility\nand replicability and the subsequent utility of research results, proposed workﬂows, and generated\ndata. We also highlight lingering issues and challenges facing researchers as they attempt to improve\nthe reproducibility and replicability of their experiments.\nKeywords: deep learning; replicability; reproducibility; semantic segmentation; object detection\n1. Introduction\nDeep learning (DL) has many applications for ana"
+  },
+  {
+    "rel_path": "Evaluation\\Evaluation metrics and statistical tests for machine learning.pdf",
+    "folder": "Evaluation",
+    "filename": "Evaluation metrics and statistical tests for machine learning.pdf",
+    "pages": 14,
+    "abstract": "1\nVol.:(0123456789)Scientific Reports |         (2024) 14:6086  | https://doi.org/10.1038/s41598-024-56706-x\nwww.nature.com/scientificreports\nEvaluation metrics and statistical \ntests for machine learning\nOona Rainio *, Jarmo Teuho  & Riku Klén \nResearch on different machine learning (ML) has become incredibly popular during the past few \ndecades. However, for some researchers not familiar with statistics, it might be difficult to understand \nhow to evaluate the performance of ML models and compare them with each other. Here, we \nintroduce the most common evaluation metrics used for the typical supervised ML tasks including \nbinary, multi-class, and multi-label classification, regression, image segmentation, object detection, \nand information retrieval. We explain how to choose a suitable"
+  },
+  {
+    "rel_path": "Evaluation\\Model Compression for Deep Neural Networks A Survey.pdf",
+    "folder": "Evaluation",
+    "filename": "Model Compression for Deep Neural Networks A Survey.pdf",
+    "pages": 22,
+    "abstract": "Abstract: Currently, with the rapid development of deep learning, deep neural networks (DNNs)\nhave been widely applied in various computer vision tasks. However, in the pursuit of performance,\nadvanced DNN models have become more complex, which has led to a large memory footprint\nand high computation demands. As a result, the models are difﬁcult to apply in real time. To\naddress these issues, model compression has become a focus of research. Furthermore, model\ncompression techniques play an important role in deploying models on edge devices. This study\nanalyzed various model compression methods to assist researchers in reducing device storage space,\nspeeding up model inference, reducing model complexity and training costs, and improving model\ndeployment. Hence, this paper summarized the state-of-the-art techniques for model compression,\nincluding model pruning, parameter quantization, low-rank decomposition, knowledge distillation,\nand lightweight model design. In addition, this paper discusses research challenges and directions\nfor future work.\nKeywords: deep neural networks; model compression; model pruning; parameter quantization;\nlow-rank decomposition; knowledge distillation;"
+  },
+  {
+    "rel_path": "Evaluation\\One-shot pruning of gated recurrent unit neural network by sensitivity.pdf",
+    "folder": "Evaluation",
+    "filename": "One-shot pruning of gated recurrent unit neural network by sensitivity.pdf",
+    "pages": 10,
+    "abstract": "abstract\nAlthough deep learning models have been successfully adopted in many applications, they are facing\nchallenges to be deployed on energy-limited devices ( e.g., some mobile devices, etc.) due to their high\ncomputation complexity. In this paper, we focus on reducing the costs of Gated Recurrent Units\n(GRUs) for time-series prediction tasks and we propose a new pruning method that can recognize and\nremove the neural connections that have little inﬂuence on the network loss, using a controllable thresh-\nold on the absolute value of the pre-trained GRU weights. This is different from existing approaches\nwhich usually try to ﬁnd and preserve the connections with large weight values. We further propose a\nsparse-connection GRU model (SCGRU) that only needs a one-time pruning (with ﬁne-tuning), rather\nthan using multiple prune-retrain cycles. A large number of experimental results demonstrate that the\nproposed method is able to largely reduce the storage and computation costs while achieving the\nstate-of-arts performance in two datasets. Code is available ( https://github.com/imLingo/SCGRU).\n/C211 2022 The Author(s). Published by Elsevier B.V. This is an open access article under th"
+  },
+  {
+    "rel_path": "Evaluation\\Optimized container scheduling for data-intensive serverless edge.pdf",
+    "folder": "Evaluation",
+    "filename": "Optimized container scheduling for data-intensive serverless edge.pdf",
+    "pages": 13,
+    "abstract": "FutureGenerationComputerSystems114(2021)259–271\nContents lists available at ScienceDirect\nFutureGenerationComputerSystems\njournal homepage: www.elsevier.com/locate/fgcs\nOptimizedcontainerschedulingfordata-intensiveserverlessedge\ncomputing\nThomasRausch ∗,AlexanderRashed,SchahramDustdar\nDistributedSystemsGroup,TUWien,Austria\na r t i c l e i n f o\nArticlehistory:\nReceived21February2020\nReceivedinrevisedform13June2020\nAccepted6July2020\nAvailableonline7August2020\nKeywords:\nEdgecomputing\nServerless\nContainerscheduling\nMachinelearning\na b s t r a c t\nOperatingdata-intensiveapplicationsonedgesystemsischallenging,duetotheextremeworkload\nanddeviceheterogeneity,aswellasthegeographicdispersionofcomputeandstorageinfrastructure.\nServerlesscomputinghasemergedasacompellingmodeltomanagethecomplexityofsuchs"
+  },
+  {
+    "rel_path": "Evaluation\\Simulation-based inference benchmark for weak lensing.pdf",
+    "folder": "Evaluation",
+    "filename": "Simulation-based inference benchmark for weak lensing.pdf",
+    "pages": 20,
+    "abstract": "ABSTRACT\nContext. Standard cosmological analysis, which is based on two-point statistics, fails to extract all the information embedded in the\ncosmological data. This limits our ability to precisely constrain cosmological parameters. Through willingness to use modern analysis\ntechniques to match the power of upcoming telescopes, recent years have seen a paradigm shift from analytical likelihood-based to\nsimulation-based inference. However, such methods require a large number of costly simulations.\nAims. We focused on full-ﬁeld inference, which is considered the optimal form of inference as it enables the recovery of cosmological\nconstraints from simulations without any loss of cosmological information. Our objective is to review and benchmark several ways\nof conducting full-ﬁeld inference to gain insight into the number of simulations required for each method. Speciﬁcally, we made a\ndistinction between explicit inference methods that require an explicit form of the likelihood, such that it can be evaluated and thus\nsampled through sampling schemes and implicit inference methods that can be used when only an implicit version of the likelihood is\navailable through simulations. Moreov"
+  },
+  {
+    "rel_path": "Evaluation\\Water Resources Research - 2018 - Höge - A Primer for Model Selection  The Decisive Role of Model Complexity.pdf",
+    "folder": "Evaluation",
+    "filename": "Water Resources Research - 2018 - Höge - A Primer for Model Selection  The Decisive Role of Model Complexity.pdf",
+    "pages": 28,
+    "abstract": "Abstract Selecting a ‘‘best’’ model among several competing candidate models poses an often encoun-\ntered problem in water resources modeling (and other disciplines which employ models). For a modeler,\nthe best model fulﬁlls a certain purpose best (e.g., ﬂood prediction), which is typically assessed by compar-\ning model simulations to data (e.g., stream ﬂow). Model selection methods ﬁnd the ‘‘best’’ trade-off between\ngood ﬁt with data and model complexity. In this context, the interpretations of model complexity implied\nby different model selection methods are crucial, because they represent different underlying goals of\nmodeling. Over the last decades, numerous model selection criteria have been proposed, but modelers\nwho primarily want to apply a model selection criterion often face a lack of guidance for choosing the right\ncriterion that matches their goal. We propose a classiﬁcation scheme for model selection criteria that helps\nto ﬁnd the right criterion for a speciﬁc goal, i.e., which employs the correct complexity interpretation. We\nidentify four model selection classes which seek to achieve high predictive density, low predictive error,\nhigh model probability, or shortest c"
+  },
+  {
+    "rel_path": "FPN\\An empirical study of multi-scale object detection in high resolution.pdf",
+    "folder": "FPN",
+    "filename": "An empirical study of multi-scale object detection in high resolution.pdf",
+    "pages": 10,
+    "abstract": "abstract\nObject detection in images collected by Unmanned Aerial Vehicles (UAVs) constitutes a challenging task\nin computer vision, due to difﬁculties of learning a well-trained object detection model for handling\ninstances in UAV images with arbitrary orientations, variation in different scales, irregular shapes, etc.\nIn order to facilitate object detection research and extend its applications in natural scenarios by using\nUAVs, this paper presents a large-scale benchmark dataset, MOHR, aiming at performing multi-scale\nobject detection in UAV images with high resolution. A total of 90,014 object instances with labels and\nbounding boxes were annotated. In order to build a baseline for object detection on the MOHR dataset,\nwe performed an empirical study by evaluating six state-of-the-art deep learning-based object detection\nmodels trained on our proposed dataset. Experimental results show promising detection performance,\nbut also demonstrate that the dataset is quite challenging for adopting natural image-based object detec-\ntion models for UAV images.\n/C211 2020 Elsevier B.V. All rights reserved.\n1. Introduction\nRecent advances in the Unmanned Aerial Vehicles (UAVs)\nindustry and a"
+  },
+  {
+    "rel_path": "FPN\\MDFN Multi-scale deep feature learning network for object detection.pdf",
+    "folder": "FPN",
+    "filename": "MDFN Multi-scale deep feature learning network for object detection.pdf",
+    "pages": 13,
+    "abstract": "abstract ones with semantic information. It considers not only individual objects \nand local contexts but also their relationships by building a multi-scale deep feature learning network \n(MDFN). MDFN eﬃciently detects the objects by introducing information square and cubic inception mod- \nules into the high-level layers, which employs parameter-sharing to enhance the computational eﬃciency. \nMDFN provides a multi-scale object detector by integrating multi-box, multi-scale and multi-level tech- \nnologies. Although MDFN employs a simple framework with a relatively small base network (VGG-16), \nit achieves better or competitive detection results than those with a macro hierarchical structure that is \neither very deep or very wide for stronger ability of feature extraction. The proposed technique is evalu- \nated extensively on KITTI, PASCAL VOC, and COCO datasets, which achieves the best results on KITTI and \nleading performance on PASCAL VOC and COCO. This study reveals that deep features provide prominent \nsemantic information and a variety of contextual contents, which contribute to its superior performance \nin detecting small or occluded objects. In addition, the MDFN model is com"
+  },
+  {
+    "rel_path": "FPN\\Multi-scale object detection in UAV images based on adaptive feature fusion.pdf",
+    "folder": "FPN",
+    "filename": "Multi-scale object detection in UAV images based on adaptive feature fusion.pdf",
+    "pages": 21,
+    "abstract": "Abstract\nWith the widespread use of UAVs, UAV aerial image target detection technology can be\nused for practical applications in the military, traffic planning, personnel search and rescue\nand other fields. In this paper, we propose a multi-scale UAV aerial image detection method\nbased on adaptive feature fusion for solving the problem of detecting small target objects in\nUAV aerial images. This method automatically adjusts the convolution kernel receptive field\nand reduces the redundant background of the image by adding an adaptive feature extrac-\ntion module (AFEM) to the backbone network. This enables it to obtain more accurately and\neffectively small target feature information. In addition, we design an adaptive feature\nweighted fusion network (SBiFPN) to effectively enhance the representation of shallow fea-\nture information of small targets. Finally, we add an additional small target detection scale to\nthe original network to expand the receptive field of the network and strengthen the detection\nof small target objects. The training and testing are carried out on the VisDrone public data-\nset. The experimental results show that the proposed method can achieve 38.5% mAP,\nwhich"
+  },
+  {
+    "rel_path": "Related work\\A comprehensive survey of deep learning-based lightweight object detection models for edge devices.pdf",
+    "folder": "Related work",
+    "filename": "A comprehensive survey of deep learning-based lightweight object detection models for edge devices.pdf",
+    "pages": 49,
+    "abstract": "Abstract\nThis study concentrates on deep learning-based lightweight object detection models on \nedge devices. Designing such lightweight object recognition models is more difficult than \never due to the growing demand for accurate, quick, and low-latency models for various \nedge devices. The most recent deep learning-based lightweight object detection methods \nare comprehensively described in this work. Information on the lightweight backbone \narchitectures used by these object detectors has been listed. The training and inference \nprocesses concerning to deep learning applications on edge devices is being discussed. \nTo raise readers’ awareness of this developing domain, a variety of applications for deep \nlearning-based lightweight object detectors and related utilities have been offered. Design-\ning potent, lightweight object detectors based on deep learning has been suggested as a \ncounter to such problems. On well-known datasets such as MS-COCO and PASCAL-VOC, \nwe thoroughly examine the performance of certain conventional deep learning-based light-\nweight object detectors.\nKeywords Deep learning · Lightweight networks · Object detection · Computer vision · \nEdge devices · Comp"
+  },
+  {
+    "rel_path": "Related work\\Edge-YOLO Lightweight Infrared Object Detection Method Deployed on Edge Devices.pdf",
+    "folder": "Related work",
+    "filename": "Edge-YOLO Lightweight Infrared Object Detection Method Deployed on Edge Devices.pdf",
+    "pages": 15,
+    "abstract": "Abstract: Existing target detection algorithms for infrared road scenes are often computationally\nintensive and require large models, which makes them unsuitable for deployment on edge devices.\nIn this paper, we propose a lightweight infrared target detection method, called Edge-YOLO, to\naddress these challenges. Our approach replaces the backbone network of the YOLOv5m model\nwith a lightweight ShufﬂeBlock and a strip depthwise convolutional attention module. We also\napplied CAU-Lite as the up-sampling operator and EX-IoU as the bounding box loss function. Our\nexperiments demonstrate that, compared with YOLOv5m, Edge-YOLO is 70.3% less computationally\nintensive, 71.6% smaller in model size, and 44.4% faster in detection speed, while maintaining the\nsame level of detection accuracy. As a result, our method is better suited for deployment on embedded\nplatforms, making effective infrared target detection in real-world scenarios possible.\nKeywords: infrared object detection; lightweight network; convolutional attention; YOLOv5; RK3588\n1. Introduction\nVisible light images are commonly used in target detection due to their high resolution,\ndeﬁnition, and detailed visual information that"
+  },
+  {
+    "rel_path": "Related work\\LEAF-YOLO Lightweight Edge-Real-Time Small Object Detection on Aerial.pdf",
+    "folder": "Related work",
+    "filename": "LEAF-YOLO Lightweight Edge-Real-Time Small Object Detection on Aerial.pdf",
+    "pages": 22,
+    "abstract": "Contents lists available at ScienceDirect\nIntelligent Systems with Applications\njournal homepage: www.journals.elsevier.com/intelligent-systems-with-applications\nLEAF-YOLO: Lightweight Edge-Real-Time Small Object Detection on Aerial\nImagery\nNghiem Van Quang\n , Nguyen Huy Hoang\n ∗, Hoang Minh Son\nHanoi University of Science and Technology, Hanoi, 10000, Viet Nam\nA R T I C L E I N F O\nKeywords:\nAerial imagery\nUAV imagery\nSmall object detection\nEdge-real-time algorithm\nYou only look once (YOLO)\nA B S T R A C T\nAdvances in Unmanned Aerial Vehicles (UAVs) and deep learning have spotlighted the challenges of detecting\nsmall objects in UAV imagery, where limited computational resources complicate deployment on edge devices.\nWhile many high-accuracy deep learning solutions have been developed, the"
+  },
+  {
+    "rel_path": "Related work\\MambaNeXt-YOLO A Hybrid State Space Model for Real-time Object.pdf",
+    "folder": "Related work",
+    "filename": "MambaNeXt-YOLO A Hybrid State Space Model for Real-time Object.pdf",
+    "pages": 7,
+    "abstract": "Abstract\nReal-time object detection is a fundamental but challenging task in computer vision, particularly when computational\nresources are limited. Although YOLO-series models have set strong benchmarks by balancing speed and accuracy,\nthe increasing need for richer global context modeling has led to the use of Transformer-based architectures. Nev-\nertheless, Transformers have high computational complexity because of their self-attention mechanism, which limits\ntheir practicality for real-time and edge deployments. To overcome these challenges, recent developments in linear\nstate space models, such as Mamba, provide a promising alternative by enabling e fficient sequence modeling with\nlinear complexity. Building on this insight, we propose MambaNeXt-YOLO, a novel object detection framework that\nbalances accuracy and efficiency through three key contributions: (1) MambaNeXt Block: a hybrid design that inte-\ngrates CNNs with Mamba to e ffectively capture both local features and long-range dependencies; (2) Multi-branch\nAsymmetric Fusion Pyramid Network (MAFPN): an enhanced feature pyramid architecture that improves multi-scale\nobject detection across various object sizes; and (3) Ed"
+  },
+  {
+    "rel_path": "Yolo\\Accuracy–Efficiency Trade-Off Optimizing YOLOv8 for Structural Crack Detection.pdf",
+    "folder": "Yolo",
+    "filename": "Accuracy–Efficiency Trade-Off Optimizing YOLOv8 for Structural Crack Detection.pdf",
+    "pages": 30,
+    "abstract": "Abstract\nTo address the accuracy–efficiency trade-off faced by deep learning models in structural\ncrack detection, this paper proposes an optimized version of the YOLOv8 model. YOLO\n(You Only Look Once) is a real-time object detection algorithm known for its high speed and\ndecent accuracy. To improve crack feature representation, the backbone is enhanced with\nthe SimAM attention mechanism. A lightweight C3Ghost module reduces parameter count\nand computation, while a bidirectional multi-scale feature fusion structure replaces the\nstandard neck to enhance efficiency. Experimental results show that the proposed model\nachieves a mean Average Precision (mAP) of 88.7% at 0.5 IoU and 69.4% for mAP@0.5:0.95,\nwith 12.3% fewer Giga Floating Point Operations (GFlops), and faster inference. These\nimprovements significantly enhance the detection of fine cracks while maintaining real-time\nperformance, making it suitable for engineering scenarios.\nKeywords: YOLOv8; crack detection; attention mechanism; SimAM; C3Ghost; feature\npyramid; accuracy–efficiency trade-off\n1. Introduction\nWith the acceleration of urbanization and the extension of building service life, concrete\nstructures are increasingly"
+  },
+  {
+    "rel_path": "Yolo\\Redmon_You_Only_Look_CVPR_2016_paper.pdf",
+    "folder": "Yolo",
+    "filename": "Redmon_You_Only_Look_CVPR_2016_paper.pdf",
+    "pages": 10,
+    "abstract": "Abstract\nWe present YOLO, a new approach to object detection.\nPrior work on object detection repurposes classiﬁers to per-\nform detection. Instead, we frame object detection as a re-\ngression problem to spatially separated bounding boxes and\nassociated class probabilities. A single neural network pre-\ndicts bounding boxes and class probabilities directly from\nfull images in one evaluation. Since the whole detection\npipeline is a single network, it can be optimized end-to-end\ndirectly on detection performance.\nOur uniﬁed architecture is extremely fast. Our base\nYOLO model processes images in real-time at 45 frames\nper second. A smaller version of the network, Fast YOLO,\nprocesses an astounding 155 frames per second while\nstill achieving double the mAP of other real-time detec-\ntors. Compared to state-of-the-art detection systems, YOLO\nmakes more localization errors but is less likely to predict\nfalse positives on background. Finally, YOLO learns very\ngeneral representations of objects. It outperforms other de-\ntection methods, including DPM and R-CNN, when gener-\nalizing from natural images to other domains like artwork.\n1. Introduction\nHumans glance at an image and instantly know w"
+  },
+  {
+    "rel_path": "Yolo\\Ultralytics YOLO Evolution An Overview of YOLO27, YOLO26, YOLO11, YOLOv8, and YOLOv5 Object Detectors for Computer Vision and Pattern Recognition.pdf",
+    "folder": "Yolo",
+    "filename": "Ultralytics YOLO Evolution An Overview of YOLO27, YOLO26, YOLO11, YOLOv8, and YOLOv5 Object Detectors for Computer Vision and Pattern Recognition.pdf",
+    "pages": 22,
+    "abstract": "ABSTRACT\nThis paper presents a comprehensive overview of the Ultralytics YOLO family, emphasizing ar-\nchitectural evolution, benchmarking, deployment, and emerging directions from YOLOv5 through\nYOLO27. The review begins with YOLO27 (or YOLOv27), which introduces a scale-adaptive\ndual-architecture strategy: compact YOLO27n/s detectors employ streamlined CNNs with dual-scale\nprediction, strengthened high-resolution features, foreground-alignment supervision, and conven-\ntional or NMS-free inference, whereas YOLO27m/l adopt query-based transformer decoding for\nnative NMS-free detection. YOLO27l further incorporates an UltraViT backbone with deep-stage\nself-attention for global-context modeling. Preliminary COCO results span 42.3-60.4 mAP at 640-\npixel resolution and 0.62-2.32 ms TensorRT 11 FP16 latency, with YOLO27l reaching 61.2 mAP\nat 800 pixels. The evolution is subsequently traced through YOLO26, including DFL removal,\nProgressive Loss Balancing, Small-Target-Aware Label Assignment, MuSGD optimization, and\nNMS-free inference; YOLO11, emphasizing efficiency and task integration; YOLOv8, introducing\ndecoupled anchor-free detection; and YOLOv5, which established the modular PyTorch"
+  }
+]

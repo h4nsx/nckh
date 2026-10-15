@@ -1,0 +1,61 @@
+\section{Proposed Method}
+\label{sec:methodology}
+
+% Follows G_paper_and_latex/paper_outline.md (Section 3) and
+% E_research_design/architecture_candidates.md.
+% All formulations, dimensions, and blocks must represent the actual implemented system.
+
+\subsection{Problem Formulation}
+\label{sec:formulation}
+% TODO: Define input image space X \in R^{H x W x 3}, bounding box parameters (x, y, w, h),
+% class label set C, and optimization objective.
+\noindent [TODO: Formally define the 2D multi-class object detection task in warehouse scenes: input resolution $H \times W \times 3$, ground truth bounding box format, class set $\mathcal{C}$ derived from the validated dataset taxonomy, and overall optimization objectives. Reference \texttt{E\_research\_design/research\_questions\_and\_hypotheses.md}].
+
+\subsection{Overall Architecture Overview}
+\label{sec:arch_overview}
+% TODO: High-level architectural pipeline, tensor flow, and multi-scale feature hierarchies.
+% Include reference to Figure (e.g., figures/architecture_overview.pdf).
+\noindent [TODO: Describe the complete hybrid architecture pipeline from input image to multi-scale predictions. Detail the role of the CNN backbone stages, the hybrid CNN--Mamba contextual block, the multi-scale feature neck (e.g., PAN/FPN), and the detection head. Reference \texttt{E\_research\_design/architecture\_candidates.md}].
+
+% \begin{figure}[!t]
+% \centering
+% \includegraphics[width=\columnwidth]{figures/architecture_overview.pdf}
+% \caption{Schematic overview of the proposed lightweight hybrid YOLO-Mamba architecture.}
+% \label{fig:arch_overview}
+% \end{figure}
+
+\subsection{CNN Local Feature Extraction}
+\label{sec:cnn_features}
+% TODO: Specify the exact CNN backbone blocks used (e.g., CSP/C2f/C3k2 blocks),
+% layer channels, strides, and receptive field characteristics.
+\noindent [TODO: Specify the exact CNN backbone architecture, layer dimensions, feature strides ($P_3, P_4, P_5$), and inductive bias for local feature extraction].
+
+\subsection{Mamba/State-Space Contextual Block}
+\label{sec:mamba_integration}
+% TODO: 2D-to-1D sequence flattening, scanning mechanisms (e.g., 2-way or 4-way selective scan),
+% state dimension, projection matrices, and computational implications.
+\noindent [TODO: Define the mathematical formulation of the Mamba state-space block, including sequence conversion from 2D feature maps, scanning directions, discretization parameters, and linear state updates. Detail exact tensor dimensions and channel projections. See \texttt{E\_research\_design/architecture\_candidates.md} (Section 5)].
+
+\subsection{Multi-Scale Feature Fusion}
+\label{sec:fusion}
+% TODO: Mathematical definition of the feature fusion mechanism (e.g., residual addition,
+% concatenation with projection, or learned gating).
+\noindent [TODO: Present the formal equations for fusing local CNN representations and global Mamba contextual representations. Specify channel alignment and projection operations. Reference \texttt{E\_research\_design/architecture\_candidates.md} (Section 3)].
+
+\subsection{Detection Head and Loss Functions}
+\label{sec:head_loss}
+% TODO: Anchor-free / anchor-based head formulation, classification loss (BCE/Focal),
+% bounding-box regression loss (CIoU/GIoU/DFL).
+\noindent [TODO: Detail the detection head architecture and multi-task loss formulation (classification loss, box regression loss, and distribution focal loss). Specify hyperparameters and loss weighting coefficients].
+
+\subsection{Computational Complexity Analysis}
+\label{sec:complexity}
+% TODO: Analytical parameter count, FLOPs/MACs calculation, and comparison of asymptotic
+% complexity: O(N) for SSM vs O(N^2) for Multi-Head Self-Attention.
+\noindent [TODO: Provide analytical complexity formulas comparing the hybrid block with standard self-attention mechanisms, detailing parameter footprint, FLOPs/MACs at standard input resolution ($640 \times 640$), and theoretical memory bounds. See \texttt{E\_research\_design/architecture\_candidates.md} (Section 4)].
+
+\subsection{Training and Inference Workflow}
+\label{sec:training_workflow}
+% TODO: End-to-end training pipeline, optimization schedule, checkpoint selection,
+% and deployment conversion steps (e.g., export to ONNX/TensorRT).
+\noindent [TODO: Document the step-by-step training pipeline, convergence criteria, and export workflow for edge inference runtimes. Reference \texttt{E\_research\_design/baseline\_plan.md}].

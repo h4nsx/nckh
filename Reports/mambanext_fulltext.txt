@@ -1,0 +1,615 @@
+
+=== PAGE 1 ===
+MambaNeXt-YOLO: A Hybrid State Space Model for Real-time Object
+Detection
+Xiaochun Leia,b,1, Siqi Wua,1,∗, Weilin Wua, Zetao Jianga,b
+aSchool of Computer Science and Information Security, Guilin University of Electronic Technology, Guilin, 541010, Guangxi, China
+bGuangxi Key Laboratory of Image and Graphic Intelligent Processing, Guilin University of Electronic
+Technology, Guilin, 541010, Guangxi, China
+Abstract
+Real-time object detection is a fundamental but challenging task in computer vision, particularly when computational
+resources are limited. Although YOLO-series models have set strong benchmarks by balancing speed and accuracy,
+the increasing need for richer global context modeling has led to the use of Transformer-based architectures. Nev-
+ertheless, Transformers have high computational complexity because of their self-attention mechanism, which limits
+their practicality for real-time and edge deployments. To overcome these challenges, recent developments in linear
+state space models, such as Mamba, provide a promising alternative by enabling e fficient sequence modeling with
+linear complexity. Building on this insight, we propose MambaNeXt-YOLO, a novel object detection framework that
+balances accuracy and efficiency through three key contributions: (1) MambaNeXt Block: a hybrid design that inte-
+grates CNNs with Mamba to e ffectively capture both local features and long-range dependencies; (2) Multi-branch
+Asymmetric Fusion Pyramid Network (MAFPN): an enhanced feature pyramid architecture that improves multi-scale
+object detection across various object sizes; and (3) Edge-focused E fficiency: our method achieved 66.6% mAP at
+31.9 FPS on the PASCAL VOC dataset without any pre-training and supports deployment on edge devices such as the
+NVIDIA Jetson Xavier NX and Orin NX.
+Keywords: Real-time Object Detection, State Space Models, Mamba, Computer Vision, Deep Neural Networks
+1. Introduction
+Real-time object detection remains critical in com-
+puter vision, with diverse applications in autonomous
+driving, surveillance, robotics, and edge-computing sce-
+narios such as UA V-assisted Internet of Vehicles, where
+deep reinforcement learning is used to optimize task
+offloading[24] and energy consumption[25]. In recent
+years, YOLO-series[13, 14, 15, 1, 6, 8, 19, 7, 20, 18, 16]
+models have become the preferred solutions for these
+scenarios due to their strong balance of speed and accu-
+racy. Nonetheless, as real-world environments become
+increasingly complex, there is a growing need for mod-
+els that efficiently capture both local features and global
+context while maintaining low computational overhead.
+One promising direction is the Mamba[3] architec-
+ture, a recent innovation based on state space models
+(SSMs)[4] that achieves linear time complexity for se-
+quence modeling. Its e fficiency and scalability have
+∗Corresponding author.
+1Equal contribution.
+generated increasing interest in adapting Mamba for vi-
+sual tasks. A notable example is MambaYOLO[21],
+which introduces a simple yet e ffective SSM-based
+backbone alongside a specialized RG Block to augment
+local feature modeling in object detection. This design
+sets a new baseline for real-time detection. However,
+although MambaYOLO demonstrates the potential of
+SSMs in object detection, it relies heavily on a mono-
+lithic architecture and does not explicitly explore the
+synergy between convolutional operations and SSMs,
+nor does it incorporate advanced multi-scale feature fu-
+sion strategies for detecting objects of varying sizes.
+Motivated by these insights, we propose
+MambaNeXt-YOLO, a novel object detection frame-
+work that combines the local feature modeling strengths
+of CNNs with the efficient long-range sequence model-
+ing capabilities of Mamba. Specifically, we introduce
+the MambaNeXt Block, a hybrid module designed to
+seamlessly integrate CNN layers and Mamba blocks
+for e fficient global and local feature representation.
+To further improve multi-scale feature extraction, we
+This paper is under consideration at Image and Vision Computing. July 25, 2025
+arXiv:2506.03654v3  [cs.CV]  24 Jul 2025
+=== PAGE 2 ===
+adopted the Multi-branch Asymmetric Fusion Pyramid
+Network (MAFPN)[26], which boosted detection
+performance across objects of varying sizes.
+Our main contributions are as follows:
+• We introduce MambaNeXt, a novel hybrid block
+that combines CNNs with Mamba to capture both
+local features and long-range dependencies e ffi-
+ciently.
+• To optimize multi-scale feature representation, we
+employed the MAFPN, which enhanced detection
+performance across objects of different sizes.
+• Our method achieved 66.6% mAP at 31.9 FPS on
+the PASCAL VOC dataset without any pre-training
+and was successfully deployed on resource-
+constrained edge devices such as the NVIDIA Jet-
+son Xavier NX and Orin NX.
+2. Related Work
+2.1. Real-time Object Detection
+Real-time object detection has long been a central fo-
+cus in computer vision, with numerous models striv-
+ing to strike a balance between accuracy and speed.
+The YOLO series has made significant advances by
+introducing single-stage detectors that directly predict
+bounding boxes and class probabilities. Later ver-
+sions, such as YOLOv5[6] and YOLOv8[7], incorpo-
+rated more optimized backbones, lightweight modules,
+and improved feature fusion strategies, enhancing their
+suitability for edge applications. Nevertheless, their re-
+liance on convolutional operations limits their capacity
+to capture global dependencies, which are essential for
+understanding complex scenes.
+2.2. Lightweight Vision Models and Hybrid Architec-
+tures
+In pure Transformer[17] architectures, the computa-
+tion and memory requirements of self-attention scale
+quadratically as O(N2) with the number of tokens N,
+creating a latency bottleneck for high-resolution inputs
+and resource-constrained devices. To overcome this in-
+efficiency, various hybrid architectures have been devel-
+oped. Models such as MobileViT[11], EdgeViT[12],
+and E fficientFormer[9] combine convolutional opera-
+tions with lightweight attention or token-mixing mech-
+anisms to strike a balance between speed and accuracy.
+These approaches use CNNs for efficient local process-
+ing while incorporating simplified attention blocks to
+capture long-range interactions. However, many still
+struggle to maintain competitive accuracy under strict
+latency constraints, particularly on low-power edge de-
+vices.
+2.3. State Space Models in Vision
+State space models (SSMs) have recently emerged
+as a promising alternative for sequence modeling, of-
+fering linear time complexity. Mamba introduced a
+selective state space mechanism that enables e fficient
+modeling of long-range dependencies, attracting signif-
+icant interest from both the NLP and vision commu-
+nities. Visual adaptations such as Vision Mamba[27],
+VMamba[10], and LocalMamba[5] have demonstrated
+competitive performance in classification tasks by inte-
+grating SSMs with 2D visual structures.
+In the field of object detection, Mamba YOLO is an
+early effort to integrate Mamba into a detection frame-
+work. It introduces the ODMamba backbone and RG
+Block to address the weak local modeling of SSMs.
+Nonetheless, Mamba YOLO relies mainly on a mono-
+lithic design and lacks explicit multi-scale fusion strate-
+gies, which limits its adaptability across different object
+scales.
+3. Method
+3.1. Overview
+Given a color image I∈ RH×W×C, our goal is to pre-
+dict a set of bounding boxes bk with the corresponding
+class labels yk. Here H, W, and C denote the image
+height, width, and number of colour channels, respec-
+tively.
+As sketched in Fig. 1, the proposed MambaNeXt-
+YOLO detector follows the classical backbone–neck–
+head paradigm, with each component redesigned to op-
+timize both accuracy and real-time e fficiency. It con-
+sists of (i) a CNN–Mamba hybrid backbone that simul-
+taneously captures local details and global context si-
+multaneously, (ii) a Multi-Asymmetric Fusion Pyramid
+Network (MAFPN) neck for cross-scale feature aggre-
+gation, and (iii) a lightweight detection head that pro-
+duces predictions at three resolutions (P3, P4, P5).
+Backbone. The backbone begins with a shallow Stem
+for patch embedding, followed by a cascade of
+MambaNeXt blocks. Each block combines depth-
+wise–separable convolutions with a Mamba state space
+model, allowing for the joint modelling of local spa-
+tial patterns and long-range dependencies. After each
+stage, a Vision Clue Merge (VCM; Fig. 3) unit down-
+samples the feature map while preserving important fea-
+tures. Lastly, a Spatial Pyramid Pooling Fast (SPPF)
+2
+=== PAGE 3 ===
+Backbone MAFPN
+STEM
+Vision Clue Merge
+MambaNeXt
+MambaNeXt
+Vision Clue Merge
+MambaNeXt
+Vision Clue Merge
+MambaNeXt
+SPPF
+U DUpsample Downsample
+Conv
+MambaNeXt
+U
+Conv
+Conv Conv MambaNeXt
+MambaNeXt Conv MambaNeXt
+MambaNeXt Conv MambaNeXt
+U D
+D
+Prediction
+P5 Large
+Head
+Prediction
+P4 Medium
+Prediction
+P3 Small
+Figure 1: Illustration of the overall architecture of MambaNeXt-YOLO.
+Conv 2D
+Batch Norm
+SiLU
+ConvNeXt
+Layer Norm
+Layer Norm
+SS2D
+ResGate
+DW Conv
+Batch Norm
+Conv 2D
+GELU
+Conv 2D
+Proj
+DW Conv
+GELU
+Linear
+DW Conv
+SiLU
+Scan
+Layer Norm
+Linear
+Proj
+Proj
+Figure 2: Illustration of the MambaNeXt block architecture.
+layer further expands the receptive field before passing
+the features to the neck.
+Neck. Our redesigned MAFPN strengthens bidirec-
+tional information flow by integrating top-down
+Batch Norm
+SiLU
+Conv 2D
+Figure 3: Illustration of the Vision Clue Merge Block.
+and bottom-up pathways with asymmetric kernels,
+reparametrized convolutions, and Mamba modules.
+This design strengthens multi-scale feature representa-
+tion while maintaining low latency.
+Head. The fused features are finally decoded by a
+decoupled classification and regression head that pro-
+cesses three feature levels: P3 for small objects, P4 for
+medium objects, and P5 for large objects.
+3.2. Vision Clue Merge (VCM)
+To preserve informative visual cues during downsam-
+pling, we used the Vision Clue Merge Block introduced
+in VMamba. Rather than applying a 3 × 3 convolution
+with stride 2, the feature map was first spatially split and
+then compressed using 1 × 1 pointwise convolutions.
+These compressed features are concatenated along the
+channel axis, and further reduced by another pointwise
+3
+=== PAGE 4 ===
+convolution, achieving a fourfold spatial reduction over-
+all. Following Mamba-YOLO, all normalisation layers
+were removed from this unit to maintain a leaner imple-
+mentation.
+3.3. MambaNeXt Block
+The MambaNeXt block (Fig. 2) consists of three
+parts: (a) a ConvNeXt block for local feature extraction,
+(b) an SS2D Mamba block for global context model-
+ing, and (c) a ResGate block for adaptive fusion. ⊙ de-
+notes the Hadamard (element-wise) product. Given an
+input feature map X∈ RH×W×C, we first apply a point-
+wise convolution followed by batch normalization and
+the SiLU activation to obtain the pre-processed feature
+X′:
+X′ = SiLU BN(Conv1×1(X)) (1)
+(a) ConvNeXt local block. To capture fine-grained spa-
+tial details, we applied a depthwise convolution on
+X′, followed by batch normalization. A subsequent
+pointwise convolution expanded the channel dimension,
+which was then passed through a GELU activation and
+another pointwise convolution to generate the local fea-
+ture map Flocal:
+Xdw = DWConv(X′) (2)
+Xbn = BN(Xdw) (3)
+Flocal = Conv1×1
+ GELU(Conv1×1(Xbn)) (4)
+(b) Mamba global block. The local feature Flocal was
+first normalized using Layer Normalization (LN) to sta-
+bilize the feature distribution across channels:
+F′local = LN(Flocal) (5)
+It was then refined through a pointwise linear projec-
+tion followed by an activation to refine the normalized
+features:
+Fscan = SiLU DWConv(Linear(F′local)) (6)
+where Linear(·) is a 1× 1 convolution and DWConv(·)
+is a depthwise convolution. We then reshape Fscan ∈
+RC×H×W into a sequence {xt}Lt=1 with L = H× W by
+flattening the spatial dimensions.
+At each time step t, the current token xt was fed into
+three parallel linear projections to produce the input-
+conditioned parameters:
+At = LinearA(xt), (7)
+Bt = LinearB(xt), (8)
+∆t = Linear∆(xt), (9)
+where LinearA, LinearB and Linear∆ are learnable point-
+wise convolutions. The 1-D Mamba kernel then updated
+the hidden state ht recursively:
+ht+1 = e−∆t⊙ ht + At + Bt⊙ ht, (10)
+with h1 initialized. After processing all L tokens, the
+sequence of hidden states{ht}Lt=1 was reshaped back into
+a feature map and further transformed to produce the
+final global feature:
+Fmamba = reshape {ht}Lt=1   ∈ RC×H×W, (11)
+F′mamba = LN Fmamba, (12)
+Fglobal = Linear F′mamba. (13)
+(c) ResGate fusion block. Since Fglobal already encodes
+contextual information from Flocal, we first added a
+residual connection with the pre-processed input X′,
+followed by normalization:
+eFglobal = Fglobal + X′ (14)
+F′global = LN eFglobal (15)
+Next, two parallel pointwise projections generated
+gating activations U and V:
+U = Proj2
+ F′global, V = Proj1 F′global.
+A depthwise convolution combined with a GELU acti-
+vation produced an information-bearing tensor, which
+was modulated by V:
+Z = GELU DWConv(U) + U ⊙ V.
+Finally, a pointwise projection and second residual con-
+nection yield the fused output:
+Y = F′global + Proj3(Z).
+Final output. The outputs of the global branch Fglobal
+and the fusion branch Y are combined via a residual
+connection to form the final block output:
+Ffinal = eFglobal + Y (16)
+3.4. MAFPN
+We build upon the MAFPN from MHAF-YOLO, re-
+placing its internal blocks with our MambaNeXt mod-
+ules. In contrast to standard FPNs that use only a top-
+down pathway, MAFPN employs asymmetric branches
+to enable bidirectional information flow via both upsam-
+pling and downsampling. We substitute max-pooling
+4
+=== PAGE 5 ===
+with 3×3 convolutions of stride 2 followed by batch nor-
+malization, yielding more learnable and consistent fea-
+ture transformations. At inference time, MambaNeXt’s
+multi-size kernels fuse into a single equivalent kernel,
+providing adaptive receptive fields without extra cost.
+As a result, our version achieves e fficient multi-scale
+fusion, better small-object localization, and keeps the
+network lightweight.
+4. Experiment
+4.1. Experimental Settings
+Dataset and evaluation. We evaluated our model on
+two benchmark datasets: Pascal VOC[2] and DOTA
+v1.5[22]. For Pascal VOC, the training set consisted of
+the combined train-val splits from VOC 2007 and VOC
+2012, while the VOC 2007 test set was used for both
+validation and testing. To further assess the general-
+izability of our approach, we also included the DOTA
+v1.5 dataset in our evaluation. Performance was mea-
+sured using the AP50 and AP50:95 metrics.
+Implementation details. All experiments were con-
+ducted on a single NVIDIA RTX 3090 GPU using an
+input resolution of 640 × 640 and a batch size of 16.
+The model was trained for 1,000 epochs with the SGD
+optimizer, starting from an initial learning rate of 1e-2.
+For architecture-specific settings, the ConvNeXt blocks
+employed a layer scale initialization value of 1e-6 with
+default kernel configurations. The MambaNeXt mod-
+ule, including its core SS2D components, was config-
+ured with a state dimension of 16, a convolutional di-
+mension of 3, and an SSM ratio factor of 2.0. As shown
+in Tables 1 and 2, MambaNeXt-YOLO consistently out-
+performed all baseline models across the mAP metrics
+on both the PASCAL VOC and DOTA v1.5 datasets.
+Specifically, it achieved 66.6% mAP on PASCAL VOC
+and 27.8% mAP on DOTA v1.5.
+As shown in Table 1 and Table 2, MambaNeXt-
+YOLO outperforms all baselines across mAP met-
+rics in both PASCAL VOC and DOTAv1.5 dataset.
+MambaNeXt-YOLO achieves 66.6% mAP on PASCAL
+VOC, and achieves 27.8% mAP on DOTAv1.5.
+4.2. Ablation Studies on MAFPN Designs
+Impact of the downsampling method. Table 3 compares
+different downsampling strategies within MAFPN, fo-
+cusing on the effect of replacing conventional 2×2 max-
+pooling layers with stride convolutions (stride 2). The
+results indicated that convolution-based downsampling
+yielded a significant performance improvement, raising
+mAP from 63.2% to 66.0%.
+Table 1: Comparison of real-time object detectors in PASCAL VOC.
+Model Params FLOPs APval50 (%) APval(%)
+YOLOv8-S 11.1M 28.7G 83.9 64.4
+YOLOv9-T 2.7M 11.1G 84.1 65.5
+YOLOv10-S 8.1M 24.9G 84.3 65.0
+YOLO11-S 9.4M 21.6G 84.4 65.1
+YOLOv12-S 9.1M 19.6G 82.2 62.4
+Gold-YOLO-N 5.8M 12.2G 82.2 60.7
+Hyper-YOLO-N 3.9M 11.0G 82.6 62.9
+Mamba-YOLO-T 5.9M 13.6G 84.6 66.0
+MambaNeXt-YOLO 7.1M 22.4G 85.1 66.6
+Table 2: Comparison of real-time object detectors in DOTAv1.5.
+Model Params FLOPs APval50 (%) APval(%)
+YOLOv8-S 11.1M 28.7G 43.0 27.2
+YOLOv9-T 2.7M 11.1G 39.4 24.6
+YOLOv10-S 8.1M 24.8G 40.7 25.2
+YOLO11-S 9.4M 21.6G 43.5 27.6
+YOLOv12-S 9.1M 19.6G 43.1 27.7
+Gold-YOLO-N 5.8M 12.2G 13.0 5.3
+Hyper-YOLO-N 3.9M 11.0G 40.6 25.4
+Mamba-YOLO-T 5.9M 13.6G 41.3 25.7
+MambaNeXt-YOLO 7.1M 22.4G 43.5 27.8
+4.3. Ablation Studies on MambaNeXt Block Designs
+Impact of ConvNeXt and ResGate integration. Table 4
+presents an ablation study evaluating di fferent config-
+urations of the MambaNeXt block. Individually, both
+ConvNeXt and ResGate modules achieved solid perfor-
+mance, with ResGate offering a slight advantage due to
+its capacity for modeling adaptive feature relationships.
+However, combining both modules led to further gains.
+The configuration with ResGate preceding ConvNeXt
+(ResGate→ ConvNeXt) yielded the highest mAP at
+66.2%.
+Impact of parameters of ConvNeXt. Next, we also ex-
+amined ConvNeXt-specific design parameters, includ-
+ing the layer scale initialization value, feature dimen-
+sion width, and convolution kernel size. As shown in
+Table 6, setting the layer scale init value to 1e-6 deliv-
+ered the best performance. Increasing the feature width
+to four times the input dimension resulted in optimal
+accuracy without introducing computational overhead.
+Furthermore, using a kernel size of 7 resulted in the
+highest mAP, confirming the benefit of larger receptive
+fields in the early stages of the network.
+Impact of parameters of Mamba module. We then
+investigated several key hyperparameters within the
+Mamba block, including the state dimension( dstate),
+5
+=== PAGE 6 ===
+Table 3: Ablation study on MAFPN designs.
+Method Params FLOPs APval50 (%) APval(%)
+Max-Pooling 5.9M 16.4G 82.3 63.2
+Conv 5.9M 18.3G 84.8 66.0
+Table 4: Ablation study on MambaNeXt block designs.
+Method Params FLOPs APval50 (%) APval(%)
+ConvNeXt only 6.3M 15.2G 82.3 63.3
+ResGate only 7.0M 19.8G 84.6 65.6
+ConvNeXt first 7.2M 22.4G 85.0 65.9
+ResGate first 7.1M 22.4G 85.1 66.2
+state space expansion ratio (SSM ratio), and MLP ex-
+pansion ratio (MLP ratio). As shown in Table 5, in-
+creasing the dstate from 8 to 32 steadily boosted mAP,
+peaking at 66.6% when set to 32. The optimal SSM ra-
+tio was 2, striking a balance between performance and
+computational efficiency. For the MLP ratio, the best
+result was achieved at a value of 4; further increasing it
+added more parameters without improving accuracy.
+4.4. Inference E fficiency on NVIDIA Devices
+To assess the deployment potential of our model, we
+benchmarked its inference speed on several NVIDIA
+hardware platforms, including the desktop RTX 3090
+GPU and edge-oriented devices such as the Jetson
+Xavier NX and Jetson Orin. For the edge devices, all
+tests were conducted using TensorRT with FP16 preci-
+sion and a batch size of 1. Table 7 further summarizes
+these results. Of note, MambaNeXt-YOLO achieved a
+66.6% mAP while delivering efficient inference, reach-
+ing 31.9 FPS on the Orin.
+5. Conclusion
+Herein, we propose MambaNeXt-YOLO, a novel hy-
+brid object detection framework that merges the e ffi-
+ciency of CNNs with the global modeling strengths of
+state space models, specifically Mamba. By introduc-
+ing the MambaNeXt block alongside the MAFPN, our
+approach effectively captures both fine-grained local de-
+tails and long-range dependencies, achieving strong per-
+formance across multiple object scales. Extensive ex-
+periments on PASCAL VOC and DOTA v1.5 showed
+that MambaNeXt-YOLO achieved both higher accu-
+racy and competitive real-time inference speeds, even
+on resource-limited devices like the Jetson Orin NX and
+Xavier NX. Importantly, our results highlight the ef-
+fectiveness of combining SSM and CNN architectures
+Table 5: Impact of Mamba module parameters on detection perfor-
+mance.
+Setting Value Params FLOPs APval50 (%) APval(%)
+dstate
+8 6.9M 22.4G 85.1 65.9
+16 7.1M 22.4G 85.1 66.2
+32 7.7M 22.4G 85.1 66.6
+ssm ratio
+1 6.2M 20.4G 84.1 64.9
+2 7.1M 22.4G 85.1 66.2
+4 11.3M 36.6G 84.3 65.4
+mlp ratio
+2 6.4M 19.8G 85.0 65.8
+4 7.1M 22.4G 85.1 66.2
+8 8.7M 27.7G 84.4 65.7
+Table 6: Impact of ConvNeXt parameters on detection performance.
+Setting Value Params FLOPs APval50 (%) APval(%)
+layer scale
+10−5 7.1M 22.4G 84.7 65.9
+10−6 7.1M 22.4G 85.1 66.2
+10−7 7.1M 22.4G 84.8 65.6
+dim
+2× 6.4M 19.9G 84.4 65.3
+4× 7.1M 22.4G 85.1 66.2
+8× 8.7M 27.5G 84.8 66.1
+kernel size
+3 7.1M 22.2G 84.4 65.1
+5 7.1M 22.3G 84.7 65.7
+7 7.1M 22.4G 85.1 66.2
+for real-time vision tasks, particularly in edge deploy-
+ment settings. Future work will focus on extending
+MambaNeXt-YOLO to video object detection, multi-
+modal perception, and semantic- and emotion-driven
+dual latent variable generation for dialogue systems[23]
+to demonstrate the broad applicability of this hybrid
+framework across diverse deep generative tasks.
+References
+[1] Bochkovskiy, A., Wang, C.Y ., Liao, H.Y .M.: Yolov4: Op-
+timal speed and accuracy of object detection. arXiv preprint
+arXiv:2004.10934 (2020)
+[2] Everingham, M., Gool, L., Williams, C.K., Winn, J.,
+Zisserman, A.: The pascal visual object classes (voc)
+challenge. Int. J. Comput. Vision 88(2), 303–338 (Jun
+2010). https: //doi.org/10.1007/s11263-009-0275-4, https://
+doi.org/10.1007/s11263-009-0275-4
+[3] Gu, A., Dao, T.: Mamba: Linear-time sequence modeling with
+selective state spaces. arXiv preprint arXiv:2312.00752 (2023)
+[4] Gu, A., Goel, K., R ´e, C.: E fficiently modeling long sequences
+with structured state spaces. arXiv preprint arXiv:2111.00396
+(2021)
+[5] Huang, T., Pei, X., You, S., Wang, F., Qian, C., Xu, C.: Local-
+mamba: Visual state space model with windowed selective scan.
+arXiv preprint arXiv:2403.09338 (2024)
+[6] Jocher, G.: YOLOv5 by Ultralytics (May 2020).
+https://doi.org/10.5281/zenodo.3908559, https://github.
+com/ultralytics/yolov5
+6
+=== PAGE 7 ===
+Table 7: Inference speed comparison on NVIDIA devices. Speed is
+measured in frames per second (FPS).
+Method FPSOrin FPSNX FPSRTX3090
+YOLOv8-S 67.5 25.5 50.3
+YOLOv9-T 27.1 18.7 36.8
+YOLOv10-S 38.9 20.2 39.8
+YOLO11-S 66.2 26.0 51.3
+YOLOv12-S 36.5 19.0 37.5
+Gold-YOLO-N 33.9 20.6 40.7
+Hyper-YOLO-N 30.5 20.0 39.3
+Mamba-YOLO-T 34.3 20.9 45.2
+MambaNeXt-YOLO 31.9 19.5 34.6
+[7] Jocher, G., Qiu, J., Chaurasia, A.: Ultralytics YOLO (Jan 2023),
+https://github.com/ultralytics/ultralytics
+[8] Li, C., Li, L., Jiang, H., Weng, K., Geng, Y ., Li, L., Ke, Z., Li,
+Q., Cheng, M., Nie, W., et al.: Yolov6: A single-stage object
+detection framework for industrial applications. arXiv preprint
+arXiv:2209.02976 (2022)
+[9] Li, Y ., Yuan, G., Wen, Y ., Hu, J., Evangelidis, G., Tulyakov, S.,
+Wang, Y ., Ren, J.: Efficientformer: Vision transformers at mo-
+bilenet speed. Advances in Neural Information Processing Sys-
+tems 35, 12934–12949 (2022)
+[10] Liu, Y ., Tian, Y ., Zhao, Y ., Yu, H., Xie, L., Wang, Y ., Ye, Q.,
+Liu, Y .: Vmamba: Visual state space model. arXiv preprint
+arXiv:2401.10166 (2024)
+[11] Mehta, S., Rastegari, M.: Mobilevit: light-weight, general-
+purpose, and mobile-friendly vision transformer. arXiv preprint
+arXiv:2110.02178 (2021)
+[12] Pan, J., Bulat, A., Tan, F., Zhu, X., Dudziak, L., Li, H., Tz-
+imiropoulos, G., Martinez, B.: Edgevits: Competing light-
+weight cnns on mobile devices with vision transformers. In: Eu-
+ropean conference on computer vision. pp. 294–311. Springer
+(2022)
+[13] Redmon, J., Divvala, S., Girshick, R., Farhadi, A.: You only
+look once: Unified, real-time object detection. In: Proceedings
+of the IEEE Conference on Computer Vision and Pattern Recog-
+nition (CVPR) (June 2016)
+[14] Redmon, J., Farhadi, A.: Yolo9000: Better, faster, stronger. In:
+Proceedings of the IEEE Conference on Computer Vision and
+Pattern Recognition (CVPR) (July 2017)
+[15] Redmon, J., Farhadi, A.: Yolov3: An incremental improvement.
+arXiv preprint arXiv:1804.02767 (2018)
+[16] Tian, Y ., Ye, Q., Doermann, D.: Yolov12: Attention-centric
+real-time object detectors. arXiv preprint arXiv:2502.12524
+(2025)
+[17] Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L.,
+Gomez, A.N., Kaiser, Ł., Polosukhin, I.: Attention is all you
+need. Advances in neural information processing systems 30
+(2017)
+[18] Wang, A., Chen, H., Liu, L., Chen, K., Lin, Z., Han, J., et al.:
+Yolov10: Real-time end-to-end object detection. Advances in
+Neural Information Processing Systems 37, 107984–108011
+(2024)
+[19] Wang, C.Y ., Bochkovskiy, A., Liao, H.Y .M.: Yolov7: Trainable
+bag-of-freebies sets new state-of-the-art for real-time object de-
+tectors. In: Proceedings of the IEEE /CVF conference on com-
+puter vision and pattern recognition. pp. 7464–7475 (2023)
+[20] Wang, C.Y ., Yeh, I.H., Mark Liao, H.Y .: Yolov9: Learning what
+you want to learn using programmable gradient information. In:
+European conference on computer vision. pp. 1–21. Springer
+(2024)
+[21] Wang, Z., Li, C., Xu, H., Zhu, X.: Mamba yolo: Ssms-based
+yolo for object detection (2024), https://arxiv.org/abs/
+2406.05835
+[22] Xia, G.S., Bai, X., Ding, J., Zhu, Z., Belongie, S., Luo, J., Datcu,
+M., Pelillo, M., Zhang, L.: Dota: A large-scale dataset for object
+detection in aerial images. In: The IEEE Conference on Com-
+puter Vision and Pattern Recognition (CVPR) (June 2018)
+[23] Yan, M., Lou, X., Chan, C.A., Wang, Y ., Jiang, W.: A semantic
+and emotion-based dual latent variable generation model for a
+dialogue system. CAAI transactions on intelligence technology
+8(2), 319–330 (2023)
+[24] Yan, M., Xiong, R., Wang, Y ., Li, C.: Edge computing task of-
+floading optimization for a uav-assisted internet of vehicles via
+deep reinforcement learning. IEEE Transactions on Vehicular
+Technology 73(4), 5647–5658 (2023)
+[25] Yan, M., Zhang, L., Jiang, W., Chan, C.A., Gygax, A.F., Nir-
+malathas, A.: Energy consumption modeling and optimization
+of uav-assisted mec networks using deep reinforcement learn-
+ing. IEEE Sensors Journal (2024)
+[26] Yang, Z., Guan, Q., Yu, Z., Xu, X., Long, H., Lian, S., Hu,
+H., Tang, Y .: Mhaf-yolo: Multi-branch heterogeneous auxil-
+iary fusion yolo for accurate object detection. arXiv preprint
+arXiv:2502.04656 (2025)
+[27] Zhu, L., Liao, B., Zhang, Q., Wang, X., Liu, W., Wang, X.: Vi-
+sion mamba: E fficient visual representation learning with bidi-
+rectional state space model. In: Forty-first International Confer-
+ence on Machine Learning (2024)
+7

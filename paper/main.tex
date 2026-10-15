@@ -1,0 +1,59 @@
+\documentclass[10pt,a4paper]{article}
+
+% --- Packages ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{microtype}
+\usepackage{cite}
+\usepackage{url}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{geometry}
+\geometry{margin=1in}
+
+% --- Hyperref setup ---
+\usepackage[colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue]{hyperref}
+
+% --- Working Metadata ---
+\title{\textbf{A Lightweight Hybrid YOLO-Mamba Architecture for Real-Time Multi-Class Warehouse Object Detection on Edge Devices}\footnote{Working title. Subject to revision following experimental validation and literature synthesis.}}
+
+% Authors placeholder (do not fabricate author identities or affiliations)
+\author{
+    [Author Names Withheld / TBD]\thanks{Affiliations and contact details to be updated upon venue selection and submission preparation. See \texttt{README.md}.}
+}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+% TODO: Abstract must be written last, after experimental completion.
+% Do not place expected, simulated, or fabricated results in the abstract.
+% Follow guidelines in G_paper_and_latex/paper_outline.md.
+\noindent [TODO: Draft abstract following completion of experiments. Target content: (1) Problem statement and industrial relevance of multi-class warehouse perception; (2) Research gap supported by the literature review; (3) High-level overview of the proposed lightweight hybrid CNN--Mamba detector; (4) Formal evaluation protocol and benchmark datasets (e.g., NVIDIA PhysicalAI-SmartSpaces); (5) Key measured empirical outcomes on accuracy and edge inference efficiency; (6) Bounded, evidence-grounded conclusion. See \texttt{G\_paper\_and\_latex/paper\_outline.md}].
+\end{abstract}
+
+\vspace{0.5em}
+\noindent\textbf{Keywords:} Object detection, YOLO, Mamba, State space models, Lightweight neural networks, Edge AI, Warehouse perception.
+
+\vspace{1em}
+\hrule
+\vspace{1em}
+
+% --- Main Sections ---
+\input{sections/01_introduction}
+\input{sections/02_related_work}
+\input{sections/03_methodology}
+\input{sections/04_experimental_setup}
+\input{sections/05_results_discussion}
+\input{sections/06_conclusion}
+
+% --- References ---
+\bibliographystyle{ieeetr}
+\bibliography{references}
+
+\end{document}

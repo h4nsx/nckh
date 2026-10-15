@@ -1,0 +1,474 @@
+
+=======================================================
+=== Hybrid-YOLO (Chen & Er) ===
+=======================================================
+
+--- Page 1 ---
+ 
+Contents lists available at ScienceDirect
+Engineering Applications of Artificial Intelligence
+journal homepage: www.elsevier.com/locate/engappai  
+Research paper
+A hybrid architecture based on structured state space sequence model and 
+convolutional neural network for real-time object detection
+Jie Chen, Meng Joo Er
+ ∗
+College of Marine Electrical Engineering, Dalian Maritime University, 1 Linghai Road, Dalian, 116026, Liaoning, China
+A R T I C L E  I N F O
+Dataset link: https://github.com/chenjie04/Hy
+brid-YOLO
+Keywords:
+Underwater object detection
+Structured state space sequence model
+Long-range dependencies
+Spatial attention
+Cost-efficient module
+ A B S T R A C T
+Real-time performance is essential for practical deployment of object detection on edge devices, where high 
+processing speed and low latency are paramount. This paper introduces a novel approach aimed at boosting 
+real-time object detection while strictly adhering to computational constraints. A structured state space 
+sequence model, Mamba, is strategically embedded in the early stages of the backbone network to capture 
+long-range dependencies, thereby enhancing the model’s representation capability. Given the limitations of 
+Mamba in directional perception, a lightweight spatial attention mechanism is introduced to integrate global 
+context into each spatial location. Additionally, a computationally efficient module inspired by the Ghost 
+module is developed to reduce resource demands. This dual-strategy approach optimizes both performance 
+and efficiency in real-time object detection. Extensive experiments demonstrate the superiority of this proposed 
+approach; on the Microsoft Common Objects in Context (MS COCO) dataset, it achieves a +1.6 AP (Average 
+Precision) improvement over state-of-the-art methods, reaching 41.1 AP with minimal added model complexity 
+on the nano scale. The effectiveness and efficiency of each component are further substantiated through 
+ablation studies on the Pascal Visual Object Classes (Pascal VOC dataset). To verify the universality of the 
+proposed method, this study selects underwater object detection, characterized by an extremely complex 
+background environment, as the other validation scenario. Through the application of this proposed approach 
+to underwater object detection, a state-of-the-art result of 69.5 AP was obtained on the Detecting Underwater 
+Objects (DUO) dataset, exceeding that of You Only Look Once Detector version 11 (YOLO11) by +0.3 AP. 
+Code: https://github.com/chenjie04/Hybrid-YOLO.
+1. Introduction
+The rapid development of machine learning has driven transforma-
+tive innovations across industries and demonstrated significant poten-
+tial to promote sustainable practices in industrial applications, such 
+as electrohydrodynamic (Peng et al., 2024, 2025) and geotechnical 
+engineering (Azarafza et al., 2021; Zhu et al., 2022), etc. With ad-
+vancements in deep learning and computer vision, object detection 
+technology has found widespread application across various real-world 
+domains, including security surveillance (Wang and Deng, 2021), au-
+tonomous driving (Song et al., 2024), marine engineering (Er et al., 
+2023), agriculture (Mendoza-Bernal et al., 2024), and industrial manu-
+facturing (Ahmad and Rahimi, 2022). The continuous improvement in 
+accuracy and speed of object detection has not only elevated the level of 
+automation in numerous sectors but also enhanced convenience in daily 
+life. For the deployment of object detection on edge devices, such as 
+smartphones and embedded platforms, not only must the performance 
+of the model be considered, but also its computation efficiency (Liu 
+∗ DEFAULTCorresponding author.
+E-mail address: mjer@dlmu.edu.cn (M.J. Er).
+et al., 2024a; Qin et al., 2024). These resource-constrained devices 
+impose stringent requirements on the real-time capabilities of object 
+detection algorithms.
+Over the past decade, the YOLO series (Redmon, 2016, 2018; Jocher 
+et
+
+=======================================================
+=== UAVDet ===
+=======================================================
+
+--- Page 1 ---
+Computer Vision and Image Understanding 264 (2026) 104637
+ 
+Contents lists available at ScienceDirect
+Computer Vision and Image Understanding
+journal homepage: www.elsevier.com/locate/cviu  
+UAVDet: A CNN–Mamba hybrid network for efficient small object detection 
+in UAV imagery
+Yiming Yang, Feng Guo ∗, Pei Niu
+School of Qilu Transportation, Shandong University, Jinan, Shandong 250000, China
+A R T I C L E  I N F O
+Communicated by Ribana Roscher
+Keywords:
+UAV object detection
+Small objects
+Complex backgrounds
+Mamba structure
+Real-time detection
+ A B S T R A C T
+Real-time object detection is pivotal in traffic-related Unmanned Aerial Vehicles (UAV) applications. However, 
+UAV imagery presents significant challenges due to the predominance of small objects and complex back-
+grounds. Traditional backbones generally perform aggressive early-stage downsampling, causing the loss of 
+fine-grained features. To address these issues, we propose UAVDet, a real-time detection model that combines 
+Convolutional Neural Network (CNN) and Mamba architectures. First, we revisit the conventional backbone 
+design by reconfiguring its depth and width, with a focus on preserving fine-grained details crucial for small 
+object detection. Second, we propose the Cross Stage Partial Mamba (CSPMB) module, which integrates the 
+Mamba structure into the CNN framework to enhance global feature representation and improve robustness 
+against complex background interference. Third, we design Tiny-focused Feature Pyramid Network (TFPN) 
+by rebalancing the feature fusion flow and replacing the large-object detection head with a tiny-object 
+detection head, which significantly improves the perception of small objects. Comprehensive experiments on 
+the VisDrone dataset show that our method improves AP and APS by 4.5% and 5.0%, respectively, while 
+reducing parameters by 84.9% compared to the baseline. It also reaches 53 FPS on an RTX 4090, exceeding 
+the 30 FPS real-time threshold. Additional evaluations on UAVDT and DroneVehicle further verify the method’s 
+robust generalization. These results indicate the effectiveness of the developed method in UAV image detection.
+1. Introduction
+In recent years, with the significant advancement of object detection 
+algorithms and rapid development of UAV technologies, object detec-
+tion has been widely applied in UAV platforms. Especially in the field 
+of transportation (Kong et al., 2024; Zhang et al., 2024), due to high 
+mobility and a wide perspective, the integration of object detection al-
+gorithms into UAVs can quickly detect the location and type of vehicles, 
+even kinematics states across complex environments, such as highways, 
+urban intersections or construction zones. These capacities enable UAVs 
+to dynamically monitor large-scale traffic networks, efficiently avoid 
+the congestion and prevent the road accidents, thereby improving the 
+intelligent level of traffic management.
+Another potentially valuable application is UAVs surveillance of 
+railway safety operation, including rail surface defect detection (Wu 
+et al., 2018), abnormal target intrusion monitoring (Yundong et al., 
+2020) and transmission line inspection (Liu et al., 2019). Because of its 
+low cost and flexible, UAVs equipped with object detection algorithms 
+are able to easily capture high-resolution images and accurately detect 
+targets across any high-risk or inaccessible areas. However, different 
+∗ Corresponding author.
+E-mail address: fengg@sdu.edu.cn (F. Guo).
+from images captured by fixed cameras, the UAV aerial images typically 
+have a wide field of view, high proportion of small objects and complex 
+background, as shown in Fig.  1. The above challenges make the current 
+conventional detectors perform poorly in such scenarios, leading to a 
+high rate of missed detections or false positives. Therefore, it is essential 
+to develop new methods that go beyond the constraints of existing 
+object detection frameworks.
+Currently, most
+
+=======================================================
+=== VSS-SpatioNet ===
+=======================================================
+
+--- Page 1 ---
+VSS-SpatioNet: a multi-scale 
+feature fusion network for 
+multimodal image integrations
+Zeyu Xiang
+Infrared and visible image fusion (vis-ir) enhances diagnostic accuracy in medical imaging and biological 
+analysis. Existing CNN-based and Transformer-based methods face computational inefficiencies in 
+modeling global dependencies. The author proposes VSS-SpatioNet, a lightweight architecture that 
+replaces self-attention in Transformers with a Visual State Space (VSS) module for efficient dependency 
+modeling. The framework employs an asymmetric encoder-decoder with a multi-scale autoencoder 
+and a novel VSS-Spatial (VS) fusion block for local-global feature integration. Evaluations on TNO, 
+Harvard Medical, and RoadScene datasets demonstrate superior performance. On TNO, VSS-SpatioNet 
+achieves state-of-the-art Entropy (En = 7.0058) and Mutual Information (MI = 14.0116), outperforming 
+12 benchmark methods. For RoadScene, it attains gradient-based fusion performance ( QG=0.5712), 
+Piella’s metric ( QS=0.7926), and average gradient (AG = 5.2994), surpassing prior works. On Harvard 
+Medical, the VS strategy improves Mean Gradient by 18.7% (0.0224 vs. 0.0198) against FusionGAN, 
+validating enhanced feature preservation. Results confirm the framework’s efficacy in medical 
+applications, particularly precise tissue characterization.
+Keywords Infrared and visible image fusion, Visual state space (VSS) module, Lightweight asymmetric 
+encoder-decoder, Multi-scale feature integration, Medical imaging applications
+Image fusion enhances image quality by integrating information from multiple imaging sources, creating a 
+more complete view than any single sensor can provide. Different sensor types capture unique aspects: infrared 
+sensors detect thermal signatures1, while visible light sensors capture fine textures 2. In medical imaging3, MRI 
+and CT scans reveal structural details 4, whereas PET imaging highlights functional aspects 5. However, no 
+single sensor can independently capture all relevant details due to hardware limitations. Image fusion addresses 
+this by combining images from various sources to generate enriched representations that improve diagnostic 
+accuracy and image clarity, especially in infrared-visible fusion and medical imaging, where both clarity and 
+noise reduction are essential.
+Traditional fusion methods, such as Discrete Cosine Transform (DCT) 6, Sparse Representation (SR) 7,8, 
+and Principal Component Analysis (PCA) 9, extract specific features for fusion. However, these methods are 
+typically designed for particular data types, which limits their adaptability. Recently, deep learning methods10–13 
+have shown potential for more flexible feature extraction and processing of large datasets by learning complex 
+relationships across modalities. Deep learning-based fusion models fall into four main categories: Convolutional 
+Neural Networks (CNNs) 14, Generative Adversarial Networks (GANs) 15, Auto-Encoders (AEs) 16, and 
+Transformer-based models17. CNNs capture spatial features and generate fused images by focusing on key 
+details from each source. Auto-encoders compress input images into feature spaces and reconstruct them as 
+combined representations. GANs improve the realism of fused images through adversarial training, blending 
+relevant details from each source. Transformers, using self-attention mechanisms, achieve refined multi-modal 
+fusion by focusing on relevant features and capturing both local and global information.
+Despite these advancements, current models encounter challenges in feature-level fusion. Static convolutional 
+layers, for example, scan images uniformly, limiting their ability to capture global context due to small receptive 
+fields, which can overlook subtle spatial differences. Although Transformer-based models effectively capture 
+global features, they are computationally demanding, especially with larger images. Hybrid models combining 
+CNN and Transformer layers al
+
+=======================================================
+=== Vision Mamba RS Survey ===
+=======================================================
+
+--- Page 1 ---
+Academic Editor: Fa-Ming Fang
+Received: 30 December 2025
+Revised: 30 January 2026
+Accepted: 10 February 2026
+Published: 14 February 2026
+Copyright: © 2026 by the authors.
+Licensee MDPI, Basel, Switzerland.
+This article is an open access article
+distributed under the terms and
+conditions of the Creative Commons
+Attribution (CC BY) license.
+Review
+Vision Mamba in Remote Sensing: A Comprehensive Survey of
+Techniques, Applications and Outlook
+Muyi Bao 1, Shuchang Lyu 2
+ , Zhaoyang Xu 3, Huiyu Zhou 4, Jinchang Ren 5, Shiming Xiang 6
+ , Xiangtai Li 7
+and Guangliang Cheng 8,*
+1 School of Advanced Technology, Xi’an Jiaotong-Liverpool University, Suzhou 215123, China
+2 School of Electronics and Information Engineering, Beihang University, Beijing 100191, China
+3 Department of Paediatrics, Cambridge University, Cambridge CB2 1TN, UK
+4 School of Computing and Mathematical Sciences, University of Leicester, Leicester LE1 7RH, UK
+5 Department of Computing Science, Robert Gordon University, Aberdeen AB10 7AQ, UK
+6 National Laboratory of Pattern Recognition, Institute of Automation, Chinese Academy of Sciences,
+Beijing 100864, China
+7 College of Computing and Data Science, Nanyang Technological University, Singapore 639798, Singapore
+8 School of Computer Science and Informatics, University of Liverpool, Liverpool L69 7ZX, UK
+* Correspondence: guangliang.cheng@liverpool.ac.uk
+Highlights
+What are the main findings?
+• State Space Models (SSMs), especially Mamba, provide linear computational scal-
+ing while capturing long-range/global context, making them well-suited to high-
+resolution remote sensing imagery where CNN receptive fields and ViT quadratic
+attention become bottlenecks.
+• This paper delivers the first systematic remote sensing-focused survey of Vision
+Mamba, proposing a holistic taxonomy that covers micro-level innovations (SSM
+formula refinements, scan strategies, multi-modal/bi-temporal interaction) and macro-
+level integrations (CNN/Transformer hybrids, framework substitutions, learning
+paradigms, frequency-domain adaptations), alongside cross-task benchmarking and
+an outlook on open challenges.
+What are the implications of the main finding?
+• The taxonomy clarifies the design space of Mamba-based remote sensing models and
+provides actionable guidance for choosing architectural mechanisms (e.g., scanning
+and hybridization choices) across key tasks such as detection, segmentation, and
+change detection.
+• The curated open-source repository and the identified research gaps can accelerate
+reproducible development, standardized evaluation, and community adoption of
+SSM-based foundations for next-generation remote sensing analysis.
+Abstract
+Deep learning has profoundly transformed remote sensing, yet prevailing architectures
+like Convolutional Neural Networks (CNNs) and Vision Transformers (ViTs) remain con-
+strained by critical trade-offs: CNNs suffer from limited receptive fields, while ViTs grapple
+with quadratic computational complexity, hindering their scalability for high-resolution
+remote sensing data. State Space Models (SSMs), particularly the recently proposed Mamba
+architecture, have emerged as a paradigm-shifting solution, combining linear compu-
+tational scaling with global context modeling. This survey presents a comprehensive
+review of Mamba-based methodologies in remote sensing, systematically analyzing about
+Remote Sens. 2026, 18, 594 https://doi.org/10.3390/rs18040594
+--- Page 2 ---
+Remote Sens. 2026, 18, 594 2 of 46
+120 Mamba-based remote sensing studies to construct a holistic taxonomy of innovations
+and applications. Our contributions are structured across five dimensions: (i) foundational
+principles of Vision Mamba architectures, (ii) micro-architectural advancements such as
+adaptive scan strategies and hybrid SSM formulations, (iii) macro-architectural integrations,
+including CNN–Transformer–Mamba hybrids and frequency-domain adaptations, (iv) rig-
+orous benchmarking against state-of-the-art metho
+
+=======================================================
+=== Edge-YOLO ===
+=======================================================
+
+--- Page 1 ---
+Citation: Li, J.; Ye, J. Edge-YOLO:
+Lightweight Infrared Object
+Detection Method Deployed on Edge
+Devices. Appl. Sci. 2023, 13, 4402.
+https://doi.org/10.3390/
+app13074402
+Academic Editor: Dimitris Mourtzis
+Received: 26 February 2023
+Revised: 20 March 2023
+Accepted: 28 March 2023
+Published: 30 March 2023
+Copyright: © 2023 by the authors.
+Licensee MDPI, Basel, Switzerland.
+This article is an open access article
+distributed under the terms and
+conditions of the Creative Commons
+Attribution (CC BY) license (https://
+creativecommons.org/licenses/by/
+4.0/).
+applied  
+sciences 
+Article
+Edge-YOLO: Lightweight Infrared Object Detection Method
+Deployed on Edge Devices
+Junqing Li and Jiongyao Ye *
+School of Information Science and Engineering, East China University of Science and Technology,
+Shanghai 200237, China; lijq2020@outlook.com
+* Correspondence: yejy@ecust.edu.cn
+Abstract: Existing target detection algorithms for infrared road scenes are often computationally
+intensive and require large models, which makes them unsuitable for deployment on edge devices.
+In this paper, we propose a lightweight infrared target detection method, called Edge-YOLO, to
+address these challenges. Our approach replaces the backbone network of the YOLOv5m model
+with a lightweight ShufﬂeBlock and a strip depthwise convolutional attention module. We also
+applied CAU-Lite as the up-sampling operator and EX-IoU as the bounding box loss function. Our
+experiments demonstrate that, compared with YOLOv5m, Edge-YOLO is 70.3% less computationally
+intensive, 71.6% smaller in model size, and 44.4% faster in detection speed, while maintaining the
+same level of detection accuracy. As a result, our method is better suited for deployment on embedded
+platforms, making effective infrared target detection in real-world scenarios possible.
+Keywords: infrared object detection; lightweight network; convolutional attention; YOLOv5; RK3588
+1. Introduction
+Visible light images are commonly used in target detection due to their high resolution,
+deﬁnition, and detailed visual information that is easily interpreted by the human eye.
+However, these images are sensitive to external factors such as weather and lighting con-
+ditions, which can reduce image quality and negatively impact target detection accuracy.
+This is where infrared imaging technology plays a crucial role. By overcoming these limita-
+tions, infrared imaging allows for image acquisition under diverse lighting and weather
+conditions, including foggy days and nighttime scenarios. As a result, this technology has
+been widely adopted in various ﬁelds, such as autonomous driving, security monitoring,
+and remote sensing, and offers a broader range of use cases than visible images. Therefore,
+the importance of infrared imaging technology in enabling efﬁcient and reliable target
+detection cannot be overstated.
+Traditional infrared target detection techniques [1–3] are mainly model-based methods,
+such as template matching, threshold segmentation, and the Hausdorff metric. However,
+with the development of deep learning, target detection techniques based on convolutional
+neural networks have emerged in recent years. These methods are primarily divided into
+two-stage algorithms (e.g., Faster-RCNN [4]) and single-stage algorithms (e.g., SSD [5] and
+YOLO [6]). The single-stage algorithm is designed to achieve a balance between detection
+speed and accuracy, resulting in a signiﬁcant improvement in detection speed while main-
+taining accuracy compared with the two-stage algorithm. Consequently, the YOLO series
+has become a widely used representative of the single-stage algorithm. Among the main-
+stream YOLO algorithms, YOLOv5 (version 6.2) has achieved signiﬁcant improvement in
+both detection accuracy and speed compared with its predecessor by using Mosaic data en-
+hancement, C3 modules, and an improved SPPF module. Although YOLOv5 performs well
+on visible images, it encounters several challenges when applied to infrare
+
+=======================================================
+=== LEAF-YOLO ===
+=======================================================
+
+--- Page 1 ---
+Contents lists available at ScienceDirect
+Intelligent Systems with Applications
+journal homepage: www.journals.elsevier.com/intelligent-systems-with-applications
+LEAF-YOLO: Lightweight Edge-Real-Time Small Object Detection on Aerial
+Imagery
+Nghiem Van Quang
+ , Nguyen Huy Hoang
+ ∗, Hoang Minh Son
+Hanoi University of Science and Technology, Hanoi, 10000, Viet Nam
+A R T I C L E I N F O
+Keywords:
+Aerial imagery
+UAV imagery
+Small object detection
+Edge-real-time algorithm
+You only look once (YOLO)
+A B S T R A C T
+Advances in Unmanned Aerial Vehicles (UAVs) and deep learning have spotlighted the challenges of detecting
+small objects in UAV imagery, where limited computational resources complicate deployment on edge devices.
+While many high-accuracy deep learning solutions have been developed, their large parameter sizes hinder
+deployment on edge devices where low latency and efficient resource use are essential. To address this,
+we propose LEAF-YOLO, a lightweight and efficient object detection algorithm with two versions: LEAF-
+YOLO (standard) and LEAF-YOLO-N (nano). Using Lightweight-Efficient Aggregating Fusion along with other
+blocks and techniques, LEAF-YOLO enhances multiscale feature extraction while reducing complexity, targeting
+small object detection in dense and varied backgrounds. Experimental results show that both LEAF-YOLO
+and LEAF-YOLO-N outperform models with fewer than 20 million parameters in accuracy and efficiency on
+the Visdrone2019-DET-val dataset, running in real-time ( >30 FPS) on the Jetson AGX Xavier. LEAF-YOLO-N
+achieves 21.9% AP.50∶.95 and 39.7% AP.50 with only 1.2M parameters. LEAF-YOLO achieves 28.2% AP.50∶.95 and
+48.3% AP.50 with 4.28M parameters. Furthermore, LEAF-YOLO attains 23% AP .50 on the TinyPerson dataset,
+outperforming models with ≥ 20 million parameters, making it suitable for UAV-based human detection.
+1. Introduction
+Detecting small objects in aerial photographs acquired by drones,
+Unmanned Aerial Vehicles (UAVs), and other airborne platforms is
+crucial for various applications, such as construction monitoring (Tao,
+Zheng, Wang, Qiu, & Stojanovic, 2024; Zhu, Zhu, Bu, & Gao, 2022),
+precision agriculture (Zualkernan, Abuhani, Hussain, Khan, & ElMohan-
+des, 2023), violence detection (Nguyen, Trung Le, Nghiem, Son Hoang,
+& Pham, 2023), simultaneous localization and mapping (SLAM) (Li,
+Shen, Fu, & Wang, 2024), and pedestrian surveillance (Nguyen et al.,
+2021). However, UAV aerial images present several unique challenges
+that complicate the detection process (Du, Zhu, & Wen, 2019). One
+of the primary issues is scale variation: objects appear at drastically
+different sizes depending on factors such as altitude, camera angle,
+and distance from the UAV (Li, Wan, Cheng, Meng, & Han, 2020). For
+instance, vehicles, people, or equipment on the ground may occupy
+only a few pixels, which limits the model’s ability to learn distinct
+features for accurate classification. Furthermore, small objects in low-
+resolution images often blend into the background, leading to missed
+detections or false positives, especially in cluttered environments.
+The complexity of backgrounds in aerial imagery is another sig-
+nificant challenge (Xia et al., 2018). Unlike controlled settings, UAV
+∗ Corresponding author.
+E-mail addresses: quang.nv203547@sis.hust.edu.vn (Nghiem V.Q.), Hoang.nguyenhuy@hust.edu.vn (Nguyen H.H.), son.hm193081@sis.hust.edu.vn
+(Hoang M.S.).
+images often contain varied landscapes – such as urban areas, agricul-
+tural fields, and natural environments – each with its own textures,
+colors, and lighting conditions. This variety introduces high back-
+ground noise and may cause small objects to be overshadowed by
+larger, more complex background elements. Additionally, objects of
+interest may be camouflaged due to similar colors or textures, making
+it difficult for detection algorithms to distinguish them from their sur-
+roundings. Finally, the dense distribution of objects within UAV images
+int
+
+=======================================================
+=== Ultralytics YOLO Evolution ===
+=======================================================
+
+--- Page 1 ---
+ULTRALYTICSYOLO EVOLUTION: ANOVERVIEW OFYOLO27,
+YOLO26, YOLO11, YOLOV8,ANDYOLOV5 OBJECT
+DETECTORS FORCOMPUTERVISION ANDPATTERN
+RECOGNITION
+Ranjan Sapkota
+ Manoj Karkee
+Cornell University, Biological & Environmental Engineering, Ithaca, NY 14850, USA
+rs2672@cornell.edu
+September 17, 2026
+ABSTRACT
+This paper presents a comprehensive overview of the Ultralytics YOLO family, emphasizing ar-
+chitectural evolution, benchmarking, deployment, and emerging directions from YOLOv5 through
+YOLO27. The review begins with YOLO27 (or YOLOv27), which introduces a scale-adaptive
+dual-architecture strategy: compact YOLO27n/s detectors employ streamlined CNNs with dual-scale
+prediction, strengthened high-resolution features, foreground-alignment supervision, and conven-
+tional or NMS-free inference, whereas YOLO27m/l adopt query-based transformer decoding for
+native NMS-free detection. YOLO27l further incorporates an UltraViT backbone with deep-stage
+self-attention for global-context modeling. Preliminary COCO results span 42.3-60.4 mAP at 640-
+pixel resolution and 0.62-2.32 ms TensorRT 11 FP16 latency, with YOLO27l reaching 61.2 mAP
+at 800 pixels. The evolution is subsequently traced through YOLO26, including DFL removal,
+Progressive Loss Balancing, Small-Target-Aware Label Assignment, MuSGD optimization, and
+NMS-free inference; YOLO11, emphasizing efficiency and task integration; YOLOv8, introducing
+decoupled anchor-free detection; and YOLOv5, which established the modular PyTorch-based Ultra-
+lytics ecosystem. Comparative benchmarking examines accuracy, precision, recall, F1-score, mAP,
+latency, and computational complexity alongside representative contemporary detectors. The review
+further examines detection, segmentation, depth, classification, pose, oriented detection, tracking,
+export, quantization, and deployment across robotics, agriculture, surveillance, and manufacturing.
+Finally, challenges involving dense scenes, CNN-Transformer integration, open-vocabulary percep-
+tion, domain generalization, and hardware-aware optimization are discussed as directions for future
+YOLO systems.
+KeywordsYOLO·Ultralytics·YOLOv5·YOLOv8·YOLO11·YOLO26·YOLO27·You Only Look Once
+1 Introduction
+Object detection is one of the fundamental tasks in computer vision, enabling machines to simultaneously identify
+and spatially localize multiple objects within complex images and video streams [ 1, 2]. Its importance extends
+across autonomous driving, robotics, surveillance, medical imaging, agriculture, and smart manufacturing, where
+accurate and computationally efficient perception can directly influence safety, productivity, autonomy, and real-time
+decision-making [3, 4]. Among the numerous detection frameworks developed over the past decade, theYou Only Look
+Once(YOLO) paradigm has become one of the most influential families of real-time object detectors by combining
+competitive accuracy with high inference speed [ 5]. Since its original introduction in 2016, YOLO has undergone
+extensive architectural evolution, incorporating advances in convolutional feature extraction, multi-scale fusion, anchor
+design, task assignment, optimization, end-to-end prediction, attention, and deployment-oriented inference [5]. Within
+the Ultralytics ecosystem, this progression is particularly evident from YOLOv5 through YOLOv8, YOLO11, YOLO26,
+arXiv:2510.09653v4  [cs.CV]  16 Sep 2026
+--- Page 2 ---
+Ultralytics YOLO EvolutionFROMYOLOV5TOYOLO26
+and the emerging YOLO27 generation. As summarized in Figure 1, this evolution reflects not only increasing task
+breadth, but also a gradual transition from conventional dense CNN-based prediction toward end-to-end and query-based
+detection mechanisms.
+YOLOv5
+2020
+YOLOv8
+2023
+YOLO11
+2024
+YOLO26
+2026
+YOLO27
+2026
+Modular CNN
+Anchor-Based
+Anchor-Free CNN
+Decoupled Head
+Efficient CNN
+Multi-Task Design
+End-to-End Option
+NMS-Free Inference
+Scale-Adaptive
+Dual Architecture
+Object Detection
+Instance Segmentation*
+Classification*
+Pose / K

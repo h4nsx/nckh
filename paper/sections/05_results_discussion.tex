@@ -1,0 +1,85 @@
+\section{Results and Discussion}
+\label{sec:results}
+
+% Follows G_paper_and_latex/paper_outline.md (Section 5) and
+% E_research_design/experiment_matrix.md.
+% STRICT RULE: No fabricated values or simulated benchmark numbers.
+% Placeholders are explicitly provided for post-experiment population.
+
+\subsection{Main Detection Performance Comparison}
+\label{sec:res_main}
+% TODO: Compare proposed hybrid detector against established baselines (YOLOv8, YOLOv10, YOLOv11).
+% Reference: E_research_design/experiment_matrix.md (Table 4)
+\noindent [TODO: Present empirical detection performance comparisons across models on the target warehouse test set. Populate Table~\ref{tab:main_results} with verified experimental data from \texttt{templates/experiment\_record.md}].
+
+\begin{table}[!t]
+\caption{Overall Performance Comparison on Warehouse Benchmark Dataset (Placeholder)}
+\label{tab:main_results}
+\centering
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Model} & \textbf{Params (M)} & \textbf{FLOPs (G)} & \textbf{mAP@0.5 (\%)} & \textbf{mAP@0.5:0.95 (\%)} & \textbf{Latency (ms)} & \textbf{FPS} \\
+\midrule
+YOLO Baseline A & [TBD] & [TBD] & [TBD] & [TBD] & [TBD] & [TBD] \\
+YOLO Baseline B & [TBD] & [TBD] & [TBD] & [TBD] & [TBD] & [TBD] \\
+Lightweight Baseline & [TBD] & [TBD] & [TBD] & [TBD] & [TBD] & [TBD] \\
+\textbf{Proposed Hybrid} & \textbf{[TBD]} & \textbf{[TBD]} & \textbf{[TBD]} & \textbf{[TBD]} & \textbf{[TBD]} & \textbf{[TBD]} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Ablation Studies}
+\label{sec:res_ablation}
+% TODO: Isolate individual design choices:
+% 1. Effect of Mamba contextual block vs CNN-only baseline (ABL-01).
+% 2. Mamba placement in backbone vs neck vs low-resolution stages (ABL-02).
+% 3. Feature fusion mechanism alternatives (ABL-03).
+% 4. Auxiliary pretraining impact (ABL-04).
+% Reference: E_research_design/ablation_plan.md
+\noindent [TODO: Report ablation results isolating the contributions of the Mamba state-space block, integration locations, and fusion mechanisms. Ground analysis in Table~\ref{tab:ablation_results}].
+
+\begin{table}[!t]
+\caption{Ablation Analysis of Architectural Components (Placeholder)}
+\label{tab:ablation_results}
+\centering
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Configuration} & \textbf{Mamba Block} & \textbf{Placement} & \textbf{Fusion Type} & \textbf{mAP@0.5:0.95 (\%)} & \textbf{GFLOPs} \\
+\midrule
+V0 (CNN-only baseline) & No & None & Baseline & [TBD] & [TBD] \\
+V1 (Backbone hybrid) & Yes & Backbone & Residual Add & [TBD] & [TBD] \\
+V2 (Neck hybrid) & Yes & Neck & Concat+Proj & [TBD] & [TBD] \\
+\textbf{V3 (Proposed Design)} & \textbf{Yes} & \textbf{[Selected]} & \textbf{[Selected]} & \textbf{[TBD]} & \textbf{[TBD]} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Edge Hardware Deployment and Efficiency Benchmarks}
+\label{sec:res_edge}
+% TODO: Measured latency, throughput, peak RAM, and power consumption across runtimes
+% (PyTorch vs ONNX Runtime vs TensorRT) and precisions (FP32 vs FP16 vs INT8).
+% Reference: E_research_design/deployment_plan.md (Table 6)
+\noindent [TODO: Detail measured inference latency (median p50, p95), memory footprint, and frame-rate on physical edge hardware (e.g., Jetson / Raspberry Pi). Discuss runtime engine optimizations. Reference \texttt{E\_research\_design/deployment\_plan.md}].
+
+\subsection{Robustness and Per-Class Analysis}
+\label{sec:res_robustness}
+% TODO: Performance across object scales (small, medium, large), dense pallet occlusions,
+% lighting variations, and class imbalance.
+\noindent [TODO: Analyze performance breakdowns across individual warehouse classes (e.g., pallets, forklifts, cartons, personnel) and challenging visual scenarios (occlusions, variable illumination)].
+
+\subsection{Qualitative Visualizations}
+\label{sec:res_qualitative}
+% TODO: Qualitative detection figures comparing baseline vs proposed model in occluded,
+% cluttered, and low-light scenes. Include success cases and failure modes.
+\noindent [TODO: Present qualitative detection visual examples highlighting improved boundary localization, reduced false negatives under occlusion, and representative failure cases].
+
+\subsection{Discussion and Interpretation}
+\label{sec:res_discussion}
+% TODO: Connect observed metrics to theoretical hypotheses. Avoid over-claiming causality.
+\noindent [TODO: Discuss the empirical findings, explaining why the hybrid CNN--Mamba design achieves its observed trade-offs, and compare trends with findings in related literature].
+
+\subsection{Threats to Validity and Limitations}
+\label{sec:res_limitations}
+% TODO: Rigorously discuss dataset synthetic-to-real gap, evaluation scope, hardware constraints.
+% Follow template in E_research_design/threats_to_validity.md (Section 7)
+\noindent [TODO: Disclose project limitations: domain gaps between synthetic assets and real-world warehouse environments, hardware backend operator coverage for state-space scanning, and computational bounds during training. Follow \texttt{E\_research\_design/threats\_to\_validity.md}].

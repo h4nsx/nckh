@@ -1,0 +1,45 @@
+\section{Introduction}
+\label{sec:introduction}
+
+% TODO: Context & Practical Importance
+% - Warehouse object perception in automated logistics and human-robot collaboration.
+% - Critical constraints: real-time latency, compact memory footprint, energy efficiency, complex occlusions, dense pallet arrangements.
+% Reference: E_research_design/research_questions_and_hypotheses.md (Section 2)
+\noindent [TODO: Establish industrial importance of multi-class warehouse perception (e.g., AGVs, AMRs, overhead monitoring) and operational constraints in resource-constrained edge computing environments. See \texttt{E\_research\_design/research\_questions\_and\_hypotheses.md}].
+
+% TODO: Strengths and Limitations of Relevant CNN Detectors
+% - Merits of lightweight YOLO detectors (inductive bias, high throughput, mature edge toolchains).
+% - Limitations in handling long-range spatial context, multi-scale occlusions, and global scene layout.
+% Reference: G_paper_and_latex/paper_outline.md (Section 1)
+\noindent [TODO: Analyze strengths and limitations of CNN-based lightweight YOLO detectors in capturing global warehouse context without excessive computational overhead. Ground all claims in verified sources registered in \texttt{F\_literature\_and\_evidence/source\_registry.md}].
+
+% TODO: Relevant Mamba / State-Space Approaches
+% - Linear-complexity sequence modeling capabilities of selective state space models (SSMs).
+% - Distinguish what prior vision-Mamba studies have established from open challenges in 2D multi-class dense object detection.
+\noindent [TODO: Introduce state-space models (Mamba) as a candidate mechanism for global context modeling with linear complexity, highlighting current boundaries of visual SSM adoption. See \texttt{F\_literature\_and\_evidence/literature\_review\_template.md}].
+
+% TODO: Specific Research Gap
+% - Clearly identify the specific gap: lack of hardware-aware, efficient hybrid CNN-Mamba designs tailored for multi-class warehouse detection on edge platforms.
+% Reference: E_research_design/research_gap_matrix.md
+\noindent [TODO: Articulate the defensible research gap supported by the literature review matrix. Distinguish from general classification and non-edge detection models. See \texttt{E\_research\_design/research\_gap\_matrix.md}].
+
+% TODO: Research Questions & Method Overview
+% - State RQ1 (core trade-off) and relevant secondary RQs (placement, fusion, deployment).
+% Reference: E_research_design/research_questions_and_hypotheses.md (Sections 3 & 4)
+\noindent [TODO: Present the primary research question (RQ1) and relevant secondary questions (RQ2--RQ6) investigating placement, fusion, auxiliary data, and edge deployment feasibility].
+
+\subsection{Research Contributions}
+\label{sec:contributions}
+
+% TODO: Contributions must be bounded, provisional, and demonstrated by experiments.
+% Do not claim novelty or state-of-the-art status without empirical proof.
+% Follow template in G_paper_and_latex/paper_outline.md (Section 1)
+\begin{itemize}
+    \item \textbf{Architectural Design:} [TODO: Formulate the specific architectural contribution, e.g., an efficient hybrid CNN--Mamba block and multi-scale integration strategy designed for edge constraints, distinguishing it from closest prior works].
+    \item \textbf{Empirical Evaluation:} [TODO: Specify the comprehensive benchmark and controlled ablation study on warehouse detection datasets, isolating the contribution of the state-space mechanism].
+    \item \textbf{Edge Deployment Analysis:} [TODO: Specify the deployment contribution on targeted edge hardware (e.g., Jetson/Raspberry Pi) under a strict, reproducible timing protocol, only if measured empirical data is collected. See \texttt{E\_research\_design/deployment\_plan.md}].
+\end{itemize}
+
+\subsection{Paper Organization}
+\label{sec:organization}
+\noindent [TODO: Provide structural roadmap of the remaining sections (Section~\ref{sec:related_work} through Section~\ref{sec:conclusion})].
