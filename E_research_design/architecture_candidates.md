@@ -15,6 +15,8 @@ The architecture should be justified against:
 - implementation/runtime support;
 - ablation evidence.
 
+> Comprehensive literature analysis, empirical latency/parameter benchmarks, and research gap definitions are detailed in [research_problem_and_architectural_comparison.md](file:///d:/nckh/E_research_design/research_problem_and_architectural_comparison.md).
+
 ## 2. Candidate integration strategies
 
 | Candidate | Concept | Potential benefit | Main risk | Evidence required |
