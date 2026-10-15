@@ -24,15 +24,21 @@ The title is provisional. The final title, research gap, architecture, and contr
 ### E — Research design
 - `E_research_design/research_questions_and_hypotheses.md`
 - `E_research_design/research_gap_matrix.md`
-- `E_research_design/baseline_plan.md`
+- `E_research_design/research_gap_validation.md`
+- `E_research_design/research_problem_and_architectural_comparison.md`
 - `E_research_design/architecture_candidates.md`
+- `E_research_design/architecture_decision_log.md`
+- `E_research_design/baseline_plan.md`
 - `E_research_design/experiment_matrix.md`
+- `E_research_design/experimental_protocol_draft.md`
 - `E_research_design/ablation_plan.md`
 - `E_research_design/deployment_plan.md`
 - `E_research_design/threats_to_validity.md`
 
 ### F — Literature, sources, and evidence
 - `F_literature_and_evidence/dataset_access_status.md`
+- `F_literature_and_evidence/dataset_feasibility.md`
+- `F_literature_and_evidence/research_claim_audit.md`
 - `F_literature_and_evidence/literature_review_protocol.md`
 - `F_literature_and_evidence/literature_review_template.md`
 - `F_literature_and_evidence/source_registry.md`
