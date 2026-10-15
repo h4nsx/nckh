@@ -16,9 +16,12 @@ Use this matrix to identify a defensible research gap from evidence across multi
 
 | Source ID | Year/status | Task/domain | Base detector | Mamba/SSM location | Fusion method | Lightweight strategy | Dataset | Metrics | Hardware benchmark | Author-stated limitations | Potential relevance |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| P001 | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD |
-| P002 | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD |
-| P003 | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD | TBD |
+| P001 | 2025 / Under review | Real-time object detection | Custom single-stage (YOLO style) | Backbone & MAFPN neck | ResGate (gated parallel projection + residual) | VCM space-to-depth downsampling; reparameterized neck | PASCAL VOC, DOTA v1.5 | AP50, AP, FLOPs, Params, FPS | Jetson Orin NX (31.9 FPS), Xavier NX (19.5 FPS), RTX 3090 (34.6 FPS) | Tested only on generic VOC/DOTA; no warehouse domain | Direct closest competitor; blueprints for block configuration and TensorRT benchmark |
+| P002 | 2024 / Published | Real-time underwater & generic detection | YOLO style | Early backbone stages | Lightweight Spatial Attention | Ghost-module inspired convolutions | MS COCO, DUO underwater | AP, AP50, AP_S/M/L, Params, FLOPs | Desktop GPU and embedded baseline | Marine and generic scenes only | Demonstrates early-stage backbone Mamba placement + spatial attention |
+| P003 | 2026 / Published | Small object detection in UAV imagery | Custom YOLO-like | CSPMB in backbone | Tiny-focused FPN (TFPN) flow | Pruned large-object head; depthwise convs | VisDrone2019, UAVDT, DroneVehicle | AP, AP_S, Params, GFLOPs, FPS | NVIDIA RTX 4090 (53 FPS) | Large head removed; edge embedded device not tested | Proof of CSP-Mamba synergy and small-object feature preservation |
+| P004 | 2026 / Published | Comprehensive YOLO survey (v5 to v27) | Ultralytics YOLOv5-v27 | Survey / taxonomy | PANet, BiFPN, scale-adaptive dual | NMS-free inference, DFL removal for compact models | MS COCO | mAP@0.5, mAP@0.5:0.95, TensorRT latency | NVIDIA A100, RTX 4090, Jetson Orin | Survey of community releases | Reference specifications for standard YOLOv8/v11 baselines |
+| P006 | 2024 / Published | Small object aerial detection | LEAF-YOLO & Nano | Pure CNN | LEAF (Aggregating Fusion) | Channel pruning, depthwise separable convs | VisDrone2019, TinyPerson | AP, AP50, Params, Latency, FPS | Jetson AGX Xavier (>30 FPS) | Purely local convolutions | Pure CNN lightweight benchmark (<5M parameters) |
+| P007 | 2023 / Published | Infrared edge detection | Edge-YOLO (YOLOv5m base) | Pure CNN | CAU-Lite upsampler | ShuffleBlock backbone + strip depthwise attention | FLIR infrared | mAP@0.5, FLOPs, Size, FPS | Rockchip RK3588 NPU | Single-channel infrared only | Hardware edge deployment benchmark on embedded NPU |
 
 ## Candidate gap categories to investigate
 

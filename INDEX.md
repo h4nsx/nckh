@@ -12,6 +12,13 @@
 - `F_literature_and_evidence/dataset_access_status.md`
 - `F_literature_and_evidence/literature_review_protocol.md`
 - `F_literature_and_evidence/literature_review_template.md`
+- `F_literature_and_evidence/paper_cards/P001_MambaNeXt-YOLO.md`
+- `F_literature_and_evidence/paper_cards/P002_Hybrid-YOLO.md`
+- `F_literature_and_evidence/paper_cards/P003_UAVDet.md`
+- `F_literature_and_evidence/paper_cards/P004_Ultralytics-YOLO-Evolution.md`
+- `F_literature_and_evidence/paper_cards/P005_Lightweight-Edge-Survey-Mittal.md`
+- `F_literature_and_evidence/paper_cards/P006_LEAF-YOLO.md`
+- `F_literature_and_evidence/paper_cards/P007_Edge-YOLO.md`
 - `F_literature_and_evidence/references_bib_guide.md`
 - `F_literature_and_evidence/reproducibility_manifest.md`
 - `F_literature_and_evidence/source_registry.md`
