@@ -1,0 +1,24 @@
+{
+    "query": "durian leaf disease detection deep learning plant disease",
+    "criteria": {
+        "required_relevance_criteria": [
+            {
+                "name": "Durian leaf disease detection",
+                "description": "The paper must focus on the detection or identification of diseases specifically affecting durian leaves.",
+                "weight": 0.6
+            },
+            {
+                "name": "Deep learning",
+                "description": "The paper must utilize deep learning techniques for the purpose of durian leaf disease detection.",
+                "weight": 0.4
+            }
+        ],
+        "nice_to_have_relevance_criteria": [
+            {
+                "name": "Plant disease",
+                "description": "The paper discusses the broader context of plant disease identification.",
+                "weight": 0.2
+            }
+        ]
+    }
+}

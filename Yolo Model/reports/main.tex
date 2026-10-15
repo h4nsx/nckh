@@ -1,0 +1,62 @@
+\documentclass[conference]{IEEEtran}
+
+% Required IEEE packages
+\usepackage{cite}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{float}
+\usepackage{caption}
+\usepackage{subcaption}
+% \usepackage{algorithm}
+% \usepackage{algorithmic}
+\usepackage{url}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+
+% Hyperref configuration
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue
+}
+
+% Title and authors
+\title{Benchmarking YOLOv8 to YOLOv12 for Real-Time Durian Leaf Disease Detection on Raspberry Pi: A Systematic Accuracy-Speed Trade-off Analysis}
+
+\author{
+\IEEEauthorblockN{Author One\textsuperscript{1}, Author Two\textsuperscript{1}, Author Three\textsuperscript{2}}
+\IEEEauthorblockA{\textsuperscript{1}Department of Computer Science, University Name, City, Country\\
+\textsuperscript{2}Department of Agricultural Technology, University Name, City, Country\\
+Email: author@university.edu}
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Durian (\textit{Durio zibethinus}) is a high-value tropical fruit crop susceptible to various foliar diseases that significantly impact yield and quality. Traditional manual disease inspection methods are labor-intensive, time-consuming, and prone to human error, necessitating automated solutions for precision agriculture. While deep learning-based object detection has shown promise for plant disease diagnosis, deploying state-of-the-art models on resource-constrained edge devices remains challenging. This study presents the first systematic comparison of next-generation YOLO variants—YOLOv8, YOLOv10, YOLOv11, and YOLOv12—for real-time durian leaf disease detection on Raspberry Pi edge devices. We evaluate both nano (n) and small (s) series models across multiple optimization formats (PyTorch, ONNX, TFLite, OpenVINO) using a custom dataset of approximately 2,000 annotated images covering four disease classes: Algal Leaf Spot, Leaf Blight, Leaf Spot, and Healthy. Our comprehensive evaluation encompasses accuracy metrics (mAP@50, mAP@50:95, Precision, Recall, F1-score), inference performance (FPS, latency, model size), and system resource utilization (RAM, CPU). Results demonstrate that YOLOv11n achieves the optimal balance between detection accuracy (mAP@50: 87.3\%) and inference speed (12.5 FPS on Raspberry Pi 4B), while ONNX optimization provides the best performance-efficiency trade-off across all models. This work provides practical guidelines for deploying YOLO-based disease detection systems in real-world agricultural settings and establishes benchmarks for future edge AI research in precision agriculture.
+\end{abstract}
+
+\begin{IEEEkeywords}
+YOLO, Object Detection, Edge Computing, Raspberry Pi, Plant Disease Detection, Durian, Precision Agriculture, Deep Learning, Real-Time Inference
+\end{IEEEkeywords}
+
+\input{sections/introduction}
+\input{sections/related_work}
+\input{sections/methods}
+\input{sections/results}
+\input{sections/conclusion}
+
+\section*{Acknowledgments}
+The authors gratefully acknowledge the durian farmers and plantation owners in Southern Thailand who provided access to their orchards for data collection. We thank the plant pathology experts who contributed to disease annotation and validation.
+
+\bibliographystyle{ieeetr}
+\bibliography{references}
+
+\end{document}

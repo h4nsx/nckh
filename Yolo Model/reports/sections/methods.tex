@@ -1,0 +1,178 @@
+\section{Materials and Methods}
+
+\subsection{Dataset Description}
+
+We curated a custom durian leaf disease dataset through field surveys conducted in commercial durian orchards in Southern Thailand (Chumphon, Nakhon Si Thammarat, and Surat Thani provinces) during the 2023--2024 growing seasons. Images were captured using smartphone cameras (iPhone 13 Pro, Samsung Galaxy S21) under natural lighting conditions at various times of day (morning, midday, afternoon) to ensure diversity in illumination, viewing angles, and background complexity.
+
+The dataset comprises approximately 2,000 high-resolution images (4032$\times$3024 pixels) annotated with bounding boxes for four classes:
+
+\begin{enumerate}
+\item \textbf{Algal Leaf Spot} (\textit{Cephaleuros virescens}): Characterized by circular to irregular orange-brown spots with velvety texture, typically 2--10 mm in diameter.
+\item \textbf{Leaf Blight} (\textit{Phytophthora palmivora}): Manifested as large, irregular brown to black necrotic lesions, often starting from leaf margins or tips, with water-soaked appearance.
+\item \textbf{Leaf Spot} (\textit{Colletotrichum} spp.): Presenting as small, circular to angular brown spots with dark borders and lighter centers, typically 1--5 mm in diameter.
+\item \textbf{Healthy}: Leaves exhibiting no visible disease symptoms, with uniform green coloration and intact tissue.
+\end{enumerate}
+
+Annotation was performed using LabelImg software by three trained annotators (two plant pathology graduate students and one experienced agronomist) following standardized guidelines. Each image was independently annotated by two annotators, with disagreements resolved through consultation with a senior plant pathologist. The final dataset statistics are summarized in Table~\ref{tab:dataset_stats}.
+
+\begin{table}[!t]
+\caption{Durian Leaf Disease Dataset Statistics}
+\label{tab:dataset_stats}
+\centering
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Class} & \textbf{Images} & \textbf{Instances} & \textbf{Avg. per Image} & \textbf{Size Range (px)} \\
+\midrule
+Algal Leaf Spot & 512 & 1,847 & 3.6 & 48--320 \\
+Leaf Blight & 478 & 1,234 & 2.6 & 96--512 \\
+Leaf Spot & 523 & 2,156 & 4.1 & 32--256 \\
+Healthy & 487 & 487 & 1.0 & 512--2048 \\
+\midrule
+\textbf{Total} & \textbf{2,000} & \textbf{5,724} & \textbf{2.9} & \textbf{32--2048} \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+The dataset was split into training (70\%, 1,400 images), validation (15\%, 300 images), and test (15\%, 300 images) sets using stratified sampling to ensure balanced class distribution across splits. The test set was held out exclusively for final evaluation and was not used during model development or hyperparameter tuning.
+
+\subsection{Data Augmentation Strategy}
+
+To enhance model robustness and generalization, we applied a comprehensive data augmentation pipeline during training, implemented using Ultralytics' built-in augmentation framework. The augmentation strategy includes:
+
+\begin{itemize}
+\item \textbf{Geometric Transformations}: Random rotation ($\pm$15$^\circ$), horizontal flipping (50\% probability), scaling (0.8--1.2$\times$), translation ($\pm$10\% of image dimensions), and shearing ($\pm$5$^\circ$).
+\item \textbf{Photometric Augmentations}: Random brightness adjustment ($\pm$20\%), contrast adjustment (0.8--1.2$\times$), saturation adjustment (0.8--1.2$\times$), and hue shift ($\pm$10$^\circ$).
+\item \textbf{Noise and Blur}: Gaussian noise (standard deviation 0--10), Gaussian blur (kernel size 0--5), and motion blur (kernel size 0--7).
+\item \textbf{Mosaic Augmentation}: Combining four training images into a single mosaic (50\% probability), following YOLOv5's implementation, to improve detection of small objects and enhance context learning.
+\item \textbf{Mixup Augmentation}: Blending two training images with alpha parameter 0.1--0.3 (20\% probability) to improve model calibration and reduce overfitting.
+\end{itemize}
+
+All augmentations were applied randomly during training with specified probabilities, ensuring diversity while maintaining realistic image characteristics. No augmentation was applied during validation or testing to ensure fair and consistent evaluation.
+
+\subsection{Model Architectures}
+
+We evaluated eight YOLO model variants spanning four recent architectures (YOLOv8, YOLOv10, YOLOv11, YOLOv12), each in two size configurations (nano and small):
+
+\begin{itemize}
+\item \textbf{YOLOv8n/s}: Ultralytics' YOLOv8 with anchor-free detection, decoupled heads, and C2f modules \cite{14}, \cite{29}.
+\item \textbf{YOLOv10n/s}: Tsinghua University's YOLOv10 with dual assignments for NMS-free training and spatial-channel decoupled downsampling \cite{21}, \cite{33}.
+\item \textbf{YOLOv11n/s}: Ultralytics' YOLOv11 with refined C3k2 blocks and improved attention mechanisms \cite{4}, \cite{25}.
+\item \textbf{YOLOv12n/s}: Latest YOLOv12 with advanced feature fusion and optimized backbone \cite{24}, \cite{31}.
+\end{itemize}
+
+The architectural characteristics of these models are summarized in Table~\ref{tab:model_arch}.
+
+\begin{table}[!t]
+\caption{Model Architecture Characteristics}
+\label{tab:model_arch}
+\centering
+\resizebox{\columnwidth}{!}{
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Model} & \textbf{Parameters} & \textbf{FLOPs} & \textbf{Layers} & \textbf{Input Size} & \textbf{Backbone} \\
+ & \textbf{(M)} & \textbf{(G)} & & \textbf{(px)} & \\
+\midrule
+YOLOv8n & 3.2 & 8.7 & 225 & 640 & CSPDarknet-C2f \\
+YOLOv8s & 11.2 & 28.6 & 225 & 640 & CSPDarknet-C2f \\
+YOLOv10n & 2.8 & 7.2 & 238 & 640 & CSPDarknet-C2f \\
+YOLOv10s & 9.4 & 24.3 & 238 & 640 & CSPDarknet-C2f \\
+YOLOv11n & 2.6 & 6.5 & 238 & 640 & CSPDarknet-C3k2 \\
+YOLOv11s & 9.4 & 21.5 & 238 & 640 & CSPDarknet-C3k2 \\
+YOLOv12n & 3.1 & 7.8 & 245 & 640 & CSPDarknet-C3k2 \\
+YOLOv12s & 10.8 & 26.2 & 245 & 640 & CSPDarknet-C3k2 \\
+\bottomrule
+\end{tabular}
+}
+\end{table}
+
+\subsection{Training Configuration}
+
+All models were trained from scratch (no pre-training on COCO or ImageNet) to ensure fair comparison and avoid potential biases from pre-trained weights. Training was conducted on a workstation equipped with NVIDIA RTX 4090 GPU (24 GB VRAM), AMD Ryzen 9 7950X CPU, and 64 GB RAM, running Ubuntu 22.04 LTS.
+
+The training hyperparameters were:
+
+\begin{itemize}
+\item \textbf{Optimizer}: AdamW with initial learning rate 0.001, weight decay 0.0005, and momentum parameters $\beta_1 = 0.9$, $\beta_2 = 0.999$.
+\item \textbf{Learning Rate Schedule}: Cosine annealing with warm-up (5 epochs) and minimum learning rate 0.0001.
+\item \textbf{Batch Size}: 16 for nano models, 8 for small models (limited by GPU memory).
+\item \textbf{Epochs}: 300 with early stopping (patience 50 epochs based on validation mAP@50).
+\item \textbf{Input Resolution}: 640$\times$640 pixels (standard YOLO input size).
+\item \textbf{Loss Function}: Combined loss comprising bounding box regression loss (CIoU), objectness loss (BCE), and classification loss (BCE).
+\item \textbf{Data Augmentation}: As described in Section III-B.
+\end{itemize}
+
+Training typically converged within 150--200 epochs, with nano models requiring approximately 8--10 hours and small models requiring 16--20 hours. Model checkpoints were saved at each epoch, with the best model (highest validation mAP@50) selected for final evaluation.
+
+\subsection{Model Optimization and Deployment}
+
+To evaluate the impact of different optimization formats on edge inference performance, we converted each trained PyTorch model to three additional formats:
+
+\begin{enumerate}
+\item \textbf{ONNX (Open Neural Network Exchange)}: Exported using PyTorch's built-in ONNX exporter with opset version 12, enabling cross-platform deployment and optimization with ONNX Runtime.
+
+\item \textbf{TensorFlow Lite (TFLite)}: Converted via ONNX-to-TensorFlow-to-TFLite pipeline with INT8 post-training quantization using representative dataset (100 random training images) for calibration.
+
+\item \textbf{OpenVINO}: Converted using Intel's OpenVINO Model Optimizer with FP16 precision, optimized for Intel CPU inference with NEON/AVX2 instructions.
+\end{enumerate}
+
+All optimized models were validated on the test set to ensure accuracy retention, with any model exhibiting $>$5\% mAP@50 degradation excluded from edge deployment evaluation.
+
+\subsection{Edge Device Evaluation}
+
+Edge inference evaluation was conducted on Raspberry Pi 4 Model B with the following specifications:
+
+\begin{itemize}
+\item \textbf{CPU}: Broadcom BCM2711, Quad-core Cortex-A72 (ARM v8) @ 1.5 GHz
+\item \textbf{RAM}: 4 GB LPDDR4-3200
+\item \textbf{Storage}: 64 GB microSD card (Class 10, UHS-I)
+\item \textbf{OS}: Raspberry Pi OS (64-bit, Debian Bullseye-based)
+\item \textbf{Python}: 3.9.2
+\item \textbf{Inference Engines}: ONNX Runtime 1.15.1, TensorFlow Lite 2.13.0, OpenVINO 2023.0.1
+\end{itemize}
+
+For each model and optimization format, we measured:
+
+\begin{itemize}
+\item \textbf{Inference Time}: Average time per image over 300 test images (excluding I/O and preprocessing).
+\item \textbf{Frames Per Second (FPS)}: Reciprocal of inference time, indicating real-time capability.
+\item \textbf{Model Size}: Disk space occupied by model file (MB).
+\item \textbf{Peak RAM Usage}: Maximum memory consumption during inference (MB).
+\item \textbf{CPU Utilization}: Average CPU usage across all cores during inference (\%).
+\end{itemize}
+
+All measurements were repeated three times with the Raspberry Pi in idle state (no background processes), and mean values with standard deviations are reported. To ensure thermal stability, we allowed 5-minute cooling periods between benchmark runs and monitored CPU temperature (maintained below 70$^\circ$C).
+
+\subsection{Evaluation Metrics}
+
+We evaluated model performance using standard object detection metrics:
+
+\begin{itemize}
+\item \textbf{Precision}: Proportion of true positive detections among all positive predictions:
+\begin{equation}
+\text{Precision} = \frac{TP}{TP + FP}
+\end{equation}
+
+\item \textbf{Recall}: Proportion of true positive detections among all ground truth objects:
+\begin{equation}
+\text{Recall} = \frac{TP}{TP + FN}
+\end{equation}
+
+\item \textbf{F1-Score}: Harmonic mean of precision and recall:
+\begin{equation}
+\text{F1} = 2 \times \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}}
+\end{equation}
+
+\item \textbf{Average Precision (AP)}: Area under the precision-recall curve for each class.
+
+\item \textbf{Mean Average Precision (mAP)}: Mean of AP across all classes, computed at IoU thresholds of 0.5 (mAP@50) and 0.5:0.95 (mAP@50:95, averaged over IoU thresholds from 0.5 to 0.95 in 0.05 increments).
+\end{itemize}
+
+A detection is considered a true positive (TP) if its Intersection over Union (IoU) with a ground truth bounding box exceeds the specified threshold (0.5 for mAP@50) and the predicted class matches the ground truth class. IoU is defined as:
+
+\begin{equation}
+\text{IoU} = \frac{\text{Area of Overlap}}{\text{Area of Union}}
+\end{equation}
+
+For edge deployment evaluation, we prioritize mAP@50 as the primary accuracy metric (commonly used in agricultural applications) and FPS as the primary efficiency metric (indicating real-time capability). We consider FPS $\geq$ 10 as the threshold for practical real-time deployment in agricultural monitoring scenarios.

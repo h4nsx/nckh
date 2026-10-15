@@ -1,0 +1,18 @@
+{
+    "query": "lightweight YOLO architecture object detection",
+    "criteria": {
+        "required_relevance_criteria": [
+            {
+                "name": "Lightweight YOLO Architecture",
+                "description": "The paper must discuss a YOLO architecture specifically designed to be lightweight (e.g., optimized for efficiency, reduced parameters, or deployment on edge devices).",
+                "weight": 0.6
+            },
+            {
+                "name": "Object Detection",
+                "description": "The paper must apply the lightweight YOLO architecture to the task of object detection.",
+                "weight": 0.4
+            }
+        ],
+        "nice_to_have_relevance_criteria": null
+    }
+}

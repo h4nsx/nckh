@@ -1,0 +1,59 @@
+\section{Related Work}
+
+\subsection{YOLO Evolution and Plant Disease Detection}
+
+The YOLO (You Only Look Once) family of object detectors has undergone continuous evolution since its introduction by Redmon et al. in 2015, establishing itself as the dominant paradigm for real-time object detection across diverse application domains \cite{17}, \cite{21}, \cite{29}. Unlike two-stage detectors (R-CNN, Faster R-CNN) that separate region proposal and classification, YOLO formulates object detection as a single regression problem, directly predicting bounding boxes and class probabilities from full images in one forward pass, enabling real-time inference speeds \cite{1}.
+
+Recent comprehensive surveys have documented the architectural evolution from YOLOv1 to YOLOv12, highlighting key innovations at each stage \cite{30}, \cite{31}, \cite{32}, \cite{33}, \cite{34}. YOLOv8, released by Ultralytics in 2023, introduced anchor-free detection, decoupled heads, and the C2f (Cross-Stage Partial with two convolutions) module, achieving significant improvements in both accuracy and efficiency over YOLOv5 \cite{14}, \cite{29}. YOLOv10 (2024) further advanced the architecture by introducing dual assignments for NMS-free training and spatial-channel decoupled downsampling, reducing computational redundancy while maintaining accuracy \cite{21}, \cite{33}. YOLOv11 (2024) refined the C2f module with C3k2 blocks and introduced improved attention mechanisms, demonstrating superior performance on small object detection tasks \cite{4}, \cite{25}. The latest YOLOv12 (2024) incorporates advanced feature fusion strategies and optimized backbone architectures, pushing the boundaries of real-time detection performance \cite{24}, \cite{31}.
+
+In agricultural applications, YOLO-based models have been extensively applied to plant disease detection across various crops. Pérez-Porras et al. \cite{26} demonstrated early detection of poppy in wheat fields using YOLOv4, achieving 92\% precision. Tannous et al. \cite{27} applied YOLOv5 for insect pest identification, reporting 89.3\% mAP@50. However, most agricultural studies focus on older YOLO versions (YOLOv3--YOLOv5) and GPU-based inference, with limited evaluation of recent architectures (YOLOv8--YOLOv12) on edge devices \cite{35}.
+
+\subsection{Lightweight YOLO Architectures}
+
+The deployment of YOLO models on resource-constrained edge devices has motivated extensive research on lightweight architectures that maintain detection accuracy while reducing computational complexity and memory footprint \cite{2}, \cite{3}, \cite{7}. Several strategies have been proposed to achieve this goal:
+
+\textbf{Model Compression Techniques}: Yu et al. \cite{2} investigated model pruning approaches for lightweight object detection, demonstrating that structured pruning can reduce FLOPs by 40--60\% with minimal accuracy loss. Li et al. \cite{10} proposed Micro-YOLOv8, incorporating depthwise separable convolutions and channel pruning to reduce parameters by 68\% while maintaining 95\% of baseline accuracy. Sun et al. \cite{11} introduced attention-enhanced lightweight YOLO with structure simplification, achieving 2.3$\times$ speedup on mobile devices.
+
+\textbf{Efficient Backbone Designs}: Zhu et al. \cite{8} developed MobileYOLO for autonomous driving, replacing standard convolutions with MobileNet-inspired inverted residuals, reducing model size to 3.2 MB while achieving 25 FPS on embedded platforms. Ming and Fan \cite{12} proposed YOLOv8-Lite with a redesigned backbone using Ghost convolutions, achieving 89.2\% mAP@50 with only 1.8M parameters. Li et al. \cite{9} introduced LCW-YOLO based on YOLOv11, incorporating lightweight convolutions and cross-scale feature fusion for complex natural scenes.
+
+\textbf{Attention Mechanisms}: Yue et al. \cite{16} developed a lightweight YOLOv8n variant for UAV aerial images, integrating coordinate attention and efficient channel attention modules, improving small object detection by 4.2\% mAP while reducing parameters by 22\%. Praveen and Jung \cite{15}, \cite{63} proposed CBAM-STN-TPS-YOLO, combining Convolutional Block Attention Module (CBAM) with Spatial Transformer Networks (STN) and Thin-Plate Splines (TPS) for agricultural object detection, achieving 12\% reduction in false positives on occlusion-heavy datasets.
+
+\textbf{Architecture Search and Optimization}: Recent work has explored Neural Architecture Search (NAS) for discovering efficient edge-optimized YOLO variants \cite{36}, \cite{37}, \cite{38}. Zhang et al. \cite{36} introduced OnceNAS for discovering efficient on-device inference networks, achieving Pareto-optimal accuracy-latency trade-offs. He et al. \cite{39} combined quantized MobileNet with hardware-aware NAS for edge AI processors, demonstrating 3.5$\times$ speedup on ARM-based devices.
+
+While these studies demonstrate the feasibility of lightweight YOLO deployment, most focus on custom architectures or older YOLO versions, lacking systematic comparisons of recent official releases (YOLOv8--YOLOv12) that already incorporate many lightweight design principles in their nano and small variants.
+
+\subsection{Edge Deployment and Raspberry Pi Studies}
+
+Edge computing has emerged as a critical paradigm for deploying deep learning models in resource-constrained environments, offering advantages in latency, bandwidth efficiency, privacy, and offline operation \cite{44}, \cite{47}, \cite{49}. The Raspberry Pi, as a representative low-cost edge platform, has been extensively studied for object detection applications.
+
+Ravi and El-Sharkawy \cite{22} implemented an improved object detector on Raspberry Pi 3B+, achieving 8.5 FPS with YOLOv3-tiny through INT8 quantization and NEON optimization. Padmasiri et al. \cite{42} developed an automated license plate recognition system for Raspberry Pi 4B, comparing TensorFlow Lite and OpenVINO optimizations, reporting 2.1$\times$ speedup with OpenVINO. Liang and Wu \cite{13}, \cite{61} proposed Edge YOLO for autonomous vehicles, implementing edge-cloud cooperation on Raspberry Pi to achieve 15 FPS with YOLOv5s.
+
+Several studies have investigated model optimization formats for edge deployment. Shuvo et al. \cite{47} surveyed efficient acceleration techniques for resource-constrained devices, highlighting the importance of quantization, pruning, and specialized inference engines. Surianarayanan et al. \cite{44} reviewed optimization techniques for edge AI, comparing TensorFlow Lite, ONNX Runtime, OpenVINO, and TensorRT across different hardware platforms. However, comprehensive comparisons of these optimization formats specifically for recent YOLO variants on Raspberry Pi remain limited.
+
+Recent work has also explored specialized hardware accelerators for edge AI. Pestana et al. \cite{20} developed a configurable FPGA accelerator for YOLO, achieving 30 FPS on Xilinx Zynq. Zhou et al. \cite{40} proposed HGNAS, a hardware-aware graph neural architecture search method for edge devices, demonstrating 2.8$\times$ speedup on ARM Mali GPUs. However, these specialized solutions require additional hardware investment beyond standard Raspberry Pi configurations.
+
+\subsection{Durian Disease Detection}
+
+Research on automated durian disease detection using deep learning remains relatively limited compared to other major crops (rice, wheat, tomato). Mat Daud et al. \cite{50} pioneered durian disease classification using transfer learning with ResNet50, achieving 94.2\% accuracy on a dataset of 1,200 images covering five disease classes. The same research group later applied Vision Transformer (ViT) for durian disease classification, reporting 96.8\% accuracy but with significantly higher computational requirements unsuitable for edge deployment \cite{52}.
+
+Sangsawad and Jintawatsakoon \cite{51} leveraged transfer learning with EfficientNetB3 for robust durian leaf disease classification, achieving 93.7\% accuracy on a dataset of 1,800 images. Janpuangtong and Rattanaopas \cite{53} explored multi-round learning with noisy labeled images from online sources for durian leaf disease and pest classification, demonstrating the potential of semi-supervised learning to leverage unlabeled data.
+
+However, all existing durian disease detection studies focus on image classification rather than object detection, limiting their applicability to real-world scenarios where multiple disease lesions may appear on a single leaf or image. Furthermore, none of these studies evaluate deployment on edge devices like Raspberry Pi, instead relying on GPU-accelerated cloud inference. Recent work on durian fruit detection (DurianEdge-YOLO) has demonstrated the feasibility of YOLO-based detection on edge devices \cite{19}, \cite{48}, \cite{67}, but this work focuses on fruit detection for harvesting rather than disease detection.
+
+\subsection{Research Gap}
+
+Despite extensive research on YOLO evolution, lightweight architectures, edge deployment, and plant disease detection, several critical gaps remain:
+
+\begin{enumerate}
+\item \textbf{Limited Evaluation of Recent YOLO Versions}: Most existing studies focus on YOLOv3--YOLOv5, lacking systematic comparisons of the latest architectures (YOLOv8--YOLOv12) that incorporate significant architectural innovations \cite{4}, \cite{14}, \cite{25}.
+
+\item \textbf{Insufficient Edge Device Benchmarking}: While numerous studies report GPU-based performance metrics, comprehensive evaluations on resource-constrained edge devices like Raspberry Pi remain scarce, particularly for agricultural applications \cite{22}, \cite{42}.
+
+\item \textbf{Incomplete Optimization Format Analysis}: The impact of different model optimization formats (PyTorch, ONNX, TFLite, OpenVINO) on edge inference performance is often overlooked, despite their critical importance for practical deployment \cite{47}.
+
+\item \textbf{Lack of Durian Disease Object Detection}: Existing durian disease detection research focuses exclusively on image classification, limiting applicability to real-world scenarios requiring localization of disease lesions \cite{50}, \cite{51}, \cite{52}, \cite{53}.
+
+\item \textbf{Absence of Systematic Accuracy-Speed Trade-off Analysis}: Few studies provide comprehensive analysis of accuracy-speed-resource trade-offs across multiple YOLO variants and optimization formats, which is essential for informed deployment decisions in resource-constrained agricultural settings.
+\end{enumerate}
+
+This study addresses these gaps by presenting the first systematic comparison of YOLOv8, YOLOv10, YOLOv11, and YOLOv12 for real-time durian leaf disease detection on Raspberry Pi, evaluating multiple optimization formats and providing actionable deployment guidelines for precision agriculture applications.
