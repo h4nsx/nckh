@@ -1,0 +1,47 @@
+\section{Experimental Setup}
+\label{sec:experimental_setup}
+
+% Follows G_paper_and_latex/paper_outline.md (Section 4) and
+% E_research_design/experiment_matrix.md.
+% All datasets, parameters, and baseline versions must be empirically verified.
+
+\subsection{Datasets and Annotation Protocols}
+\label{sec:exp_datasets}
+% TODO: Official dataset name, release version, image counts, class distribution,
+% split methodology (train/val/test) avoiding scene/camera leakage.
+% Reference: templates/dataset_card.md and E_research_design/threats_to_validity.md (Section 1)
+\noindent [TODO: Document official benchmark datasets (e.g., NVIDIA PhysicalAI-SmartSpaces and auxiliary candidate PhysicalAI-Spatial-Intelligence-Warehouse). Detail image resolutions, verified sample counts, object class definitions, annotation schemas, and train/val/test split protocols ensuring zero camera/scene leakage. See \texttt{E\_research\_design/threats\_to\_validity.md} and \texttt{templates/dataset\_card.md}].
+
+\subsection{Data Preprocessing and Augmentation}
+\label{sec:exp_preprocessing}
+% TODO: Input resizing (e.g., 640x640), normalization, augmentations (Mosaic, MixUp, HSV jitter),
+% and label format conversion.
+\noindent [TODO: Detail data preprocessing procedures, image normalization, resolution scaling, and data augmentation policies applied during training and evaluation].
+
+\subsection{Baseline Architectures and Selection Criteria}
+\label{sec:exp_baselines}
+% TODO: Specific YOLO models (e.g., YOLOv8n/s, YOLOv10n/s, YOLOv11n/s), exact repository
+% versions, commit hashes, pretrained weight provenance.
+% Reference: E_research_design/baseline_plan.md
+\noindent [TODO: Define the reference baseline detectors, including standard and lightweight YOLO variants (e.g., YOLOv8, YOLOv10, YOLOv11). Document framework versions, official weight checkpoints, and hyperparameter parity criteria. Reference \texttt{E\_research\_design/baseline\_plan.md}].
+
+\subsection{Implementation and Training Details}
+\label{sec:exp_implementation}
+% TODO: Framework versions (PyTorch, CUDA), optimizer (AdamW/SGD), initial lr,
+% cosine scheduler, weight decay, batch size, epoch budget, early stopping, random seeds.
+% Reference: F_literature_and_evidence/reproducibility_manifest.md
+\noindent [TODO: Specify complete software and hardware training environments: PyTorch version, CUDA runtime, GPU hardware, optimizer parameters, learning rate schedules, batch sizes, epoch limits, and fixed random seeds. See \texttt{F\_literature\_and\_evidence/reproducibility\_manifest.md}].
+
+\subsection{Evaluation Metrics}
+\label{sec:exp_metrics}
+% TODO: Detection accuracy: mAP@0.5, mAP@0.5:0.95, Precision, Recall, F1-score.
+% Efficiency metrics: Parameter count (M), FLOPs/MACs (G), Model size (MB), latency (ms), FPS, peak RAM (MB).
+\noindent [TODO: Provide mathematical definitions for all evaluation metrics: Precision, Recall, mean Average Precision ($\text{mAP}@0.5$ and $\text{mAP}@0.5:0.95$), parameter counts, computational complexity ($\text{GFLOPs}$), peak memory, and frame-rate ($\text{FPS}$)].
+
+\subsection{Edge Deployment and Benchmarking Protocol}
+\label{sec:exp_edge_protocol}
+% TODO: Edge hardware specifications (Jetson Orin Nano, Raspberry Pi 4B/5), runtime engines
+% (TensorRT, ONNX Runtime), precision modes (FP32, FP16, INT8), batch=1, warm-up iterations,
+% timing boundaries (end-to-end vs model-only).
+% Reference: E_research_design/deployment_plan.md
+\noindent [TODO: Describe the standardized edge hardware benchmarking protocol: target edge device(s), runtime backends (e.g., ONNX Runtime, TensorRT), precision formats, batch size ($=1$), warm-up iterations, repetition counts, synchronization rules, and explicit timing boundaries (model-only vs.\ end-to-end pipeline). Reference \texttt{E\_research\_design/deployment\_plan.md}].

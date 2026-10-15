@@ -1,0 +1,26 @@
+# File Index
+
+- `E_research_design/ablation_plan.md`
+- `E_research_design/architecture_candidates.md`
+- `E_research_design/baseline_plan.md`
+- `E_research_design/deployment_plan.md`
+- `E_research_design/experiment_matrix.md`
+- `E_research_design/research_gap_matrix.md`
+- `E_research_design/research_questions_and_hypotheses.md`
+- `E_research_design/threats_to_validity.md`
+- `F_literature_and_evidence/claim_evidence_matrix.md`
+- `F_literature_and_evidence/dataset_access_status.md`
+- `F_literature_and_evidence/literature_review_protocol.md`
+- `F_literature_and_evidence/literature_review_template.md`
+- `F_literature_and_evidence/references_bib_guide.md`
+- `F_literature_and_evidence/reproducibility_manifest.md`
+- `F_literature_and_evidence/source_registry.md`
+- `G_paper_and_latex/antigravity_agent_instructions.md`
+- `G_paper_and_latex/latex_project_spec.md`
+- `G_paper_and_latex/paper_outline.md`
+- `G_paper_and_latex/writing_and_citation_rules.md`
+- `README.md`
+- `Reports/LITERATURE_SYNTHESIS_REPORT.md`
+- `templates/dataset_card.md`
+- `templates/experiment_record.md`
+- `templates/paper_analysis_card.md`

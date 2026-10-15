@@ -1,0 +1,41 @@
+\section{Related Work}
+\label{sec:related_work}
+
+% Follow the thematic synthesis defined in F_literature_and_evidence/literature_review_template.md
+% and G_paper_and_latex/paper_outline.md (Section 2).
+
+\subsection{YOLO-Based Object Detection}
+\label{sec:rel_yolo}
+% TODO: Evolution of modern YOLO variants (e.g., YOLOv8, YOLOv10, YOLOv11, YOLOv12).
+% Selection justification for baseline architectures.
+\noindent [TODO: Review key architectural developments in single-stage YOLO detectors, discussing structural backbones, PAN/FPN necks, and anchor-free/NMS-free detection heads. Ground discussion in verified citations. See \texttt{E\_research\_design/baseline\_plan.md}].
+
+\subsection{Mamba and State-Space Models for Visual Perception}
+\label{sec:rel_mamba}
+% TODO: Fundamental SSM theory (S4, Mamba, selective scan) and visual adaptations (Vim, VMamba, etc.).
+% Focus on spatial scanning directions, sequence flattening, and computational complexity.
+\noindent [TODO: Detail selective state space models (SSMs) and their 2D visual adaptations. Contrast linear complexity scanning mechanisms with quadratic self-attention mechanisms in Vision Transformers. Reference \texttt{F\_literature\_and\_evidence/literature\_review\_template.md} (Section 3.2)].
+
+\subsection{Hybrid CNN--Mamba Detection Architectures}
+\label{sec:rel_hybrid}
+% TODO: Compare existing approaches combining CNNs and Mamba for detection tasks.
+% Focus on insertion points (backbone vs. neck), fusion strategies, and efficiency trade-offs.
+\noindent [TODO: Review prior hybrid CNN--Mamba architectures for dense prediction tasks. Detail closest competing methods, feature integration levels, and computational overhead. See \texttt{E\_research\_design/architecture_candidates.md}].
+
+\subsection{Lightweight Object Detection and Edge Deployment}
+\label{sec:rel_edge}
+% TODO: Model compression, quantization, structured pruning, and edge runtimes (ONNX Runtime, TensorRT).
+% Limitations of FLOPs as a sole efficiency proxy.
+\noindent [TODO: Discuss lightweight neural architectures, model compression techniques (PTQ, QAT, pruning), and edge deployment constraints on embedded accelerators. Emphasize why parameter counts/FLOPs do not directly guarantee reduced inference latency. Reference \texttt{E\_research\_design/deployment\_plan.md}].
+
+\subsection{Warehouse Perception and Industrial Benchmarks}
+\label{sec:rel_warehouse}
+% TODO: Industrial detection challenges, synthetic vs. real domain gap, public benchmarks.
+% Introduction of NVIDIA PhysicalAI datasets (SmartSpaces, Spatial-Intelligence-Warehouse).
+\noindent [TODO: Survey existing warehouse and industrial detection datasets, class taxonomies (e.g., pallets, forklifts, workers, cartons), and domain characteristics. Discuss official datasets including NVIDIA PhysicalAI-SmartSpaces and Spatial-Intelligence-Warehouse. See \texttt{F\_literature\_and\_evidence/source\_registry.md}].
+
+\subsection{Summary and Research Gap Synthesis}
+\label{sec:rel_gap}
+% TODO: Synthesize prior work to explicitly ground the research gap.
+% What prior work established vs. what remains unaddressed.
+\noindent [TODO: Conclude literature review with a comparative synthesis summarizing what prior work has established, key open challenges, and how this study addresses the identified gap. Reference \texttt{E\_research\_design/research\_gap\_matrix.md}].
