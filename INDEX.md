@@ -6,6 +6,7 @@
 - `E_research_design/deployment_plan.md`
 - `E_research_design/experiment_matrix.md`
 - `E_research_design/research_gap_matrix.md`
+- `E_research_design/research_problem_and_architectural_comparison.md`
 - `E_research_design/research_questions_and_hypotheses.md`
 - `E_research_design/threats_to_validity.md`
 - `F_literature_and_evidence/claim_evidence_matrix.md`
