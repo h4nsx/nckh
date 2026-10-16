@@ -2,17 +2,22 @@
 
 - `E_research_design/ablation_plan.md`
 - `E_research_design/architecture_candidates.md`
+- `E_research_design/architecture_decision_log.md`
 - `E_research_design/baseline_plan.md`
 - `E_research_design/deployment_plan.md`
 - `E_research_design/experiment_matrix.md`
+- `E_research_design/experimental_protocol_draft.md`
 - `E_research_design/research_gap_matrix.md`
+- `E_research_design/research_gap_validation.md`
 - `E_research_design/research_problem_and_architectural_comparison.md`
 - `E_research_design/research_questions_and_hypotheses.md`
 - `E_research_design/threats_to_validity.md`
 - `F_literature_and_evidence/claim_evidence_matrix.md`
 - `F_literature_and_evidence/dataset_access_status.md`
+- `F_literature_and_evidence/dataset_feasibility.md`
 - `F_literature_and_evidence/literature_review_protocol.md`
 - `F_literature_and_evidence/literature_review_template.md`
+- `F_literature_and_evidence/research_claim_audit.md`
 - `F_literature_and_evidence/paper_cards/P001_MambaNeXt-YOLO.md`
 - `F_literature_and_evidence/paper_cards/P002_Hybrid-YOLO.md`
 - `F_literature_and_evidence/paper_cards/P003_UAVDet.md`
