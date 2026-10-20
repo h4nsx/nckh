@@ -1,52 +1,60 @@
 # Architecture Decision Log & Component Audit
 
 **Document ID:** `E_research_design/architecture_decision_log.md`  
-**Date:** October 2026  
-**Status:** Canonical Architectural Audit & Component Specification  
+**Date:** October 2026 (Updated to v1.1 Alignment)  
+**Status:** Canonical Architectural Specification & Experimental Contract  
 **Associated Project:** *A Lightweight Hybrid YOLO-Mamba Architecture for Real-Time Multi-Class Warehouse Object Detection on Edge Devices*  
+**Core Baseline Reference:** YOLO11s (`yolo11s.pt` / `yolo11.yaml`)
 
 ---
 
 ## 1. Architectural Philosophy and Design Principles
 
-The design of the proposed hybrid detector is governed by three non-negotiable principles:
+The design of the proposed hybrid detector is governed by strict, non-negotiable principles:
 1. **Hypothesis Separation:** Architectural proposals are hypotheses to be tested, not established truths.
-2. **Hardware Realism:** Flops and parameter counts are secondary to physical Memory Access Cost (MAC), kernel fusion, and cache hierarchy on embedded edge SoCs.
-3. **Controlled Modularity:** Every proposed block must have a matched CNN-only control counterpart to enable rigorous ablation isolation.
+2. **Minimal & Reversible Modification:** Anchor to the standard YOLO11s baseline. Keep the original neck (FPN/PAN) and Detect head completely unchanged in initial phases.
+3. **Hardware & Memory Realism:** Flops and parameter counts are secondary to physical Memory Access Cost (MAC), kernel fusion, and cache hierarchy on embedded edge SoCs.
+4. **Controlled Modularity:** Every proposed block must have a matched CNN-only control counterpart to enable rigorous ablation isolation.
 
 ---
 
-## 2. Component-by-Component Independent Audit
+## 2. Component-by-Component Specification (YOLO11s-SS2D Contract)
 
 ```
 +----------------------------------------------------------------------------------------------------+
-|                                    PROPOSED SYSTEM TOPOLOGY                                        |
+|                                    PROPOSED SYSTEM TOPOLOGY (v1)                                   |
 +----------------------------------------------------------------------------------------------------+
 |                                                                                                    |
-|  [Input: 640x640x3]                                                                                |
+|  [Input: 640x640x3 RGB]                                                                            |
 |         |                                                                                          |
 |         v                                                                                          |
 |  +----------------------------------------------------------------------------------------------+  |
-|  | [Component 1: CNN High-Resolution Stages P1-P3]                                             |  |
-|  | - Focus: Preserves local edges, fine gradients, low MAC at large spatial resolutions       |  |
-|  +----------------------------------------------------------------------------------------------+  |
-|         |                                                                                          |
-|         v                                                                                          |
-|  +----------------------------------------------------------------------------------------------+  |
-|  | [Component 2: Hybrid Visual Mamba Blocks at Low-Resolution P4-P5]                            |  |
-|  | - Focus: Long-range global context, rack reasoning, linear O(N) sequence scaling            |  |
+|  | [Component 1: Pure CNN High-Resolution Stages P1-P3]                                         |  |
+|  | - Baseline: YOLO11s stem, P1 (stride 2), P2 (stride 4), P3 (stride 8: 80x80x128)             |  |
+|  | - Focus: Preserves local edges, fine gradients, low MAC at large spatial resolutions         |  |
 |  +----------------------------------------------------------------------------------------------+  |
 |         |                                                                                          |
 |         v                                                                                          |
 |  +----------------------------------------------------------------------------------------------+  |
-|  | [Component 3: Context-Gated Asymmetric Neck]                                                 |  |
-|  | - Focus: Modulates P3 fine features with P5 global context vector; avoids heavy P3 SSMs      |  |
+|  | [Component 2: Selective Deep-Stage SS2D Integration (P4-P5)]                                  |  |
+|  | - Primary Milestone (Case B): Replace deepest C2PSA block at P5 (stride 32: 20x20) with     |  |
+|  |   shape-compatible SS2D/Mamba block ([B, C, H, W] -> [B, C, H, W]).                           |  |
+|  | - Follow-up Milestone (Case C): SS2D at P4 (stride 16: 40x40) + P5.                          |  |
+|  | - Focus: Long-range global context, rack reasoning, linear O(N) sequence scaling              |  |
 |  +----------------------------------------------------------------------------------------------+  |
 |         |                                                                                          |
 |         v                                                                                          |
 |  +----------------------------------------------------------------------------------------------+  |
-|  | [Component 4 & 5: Anchor-Free Decoupled Head + TAL / Optional NMS-Free Training]            |  |
-|  | - Focus: Task-aligned assignment, DFL distribution, minimized edge post-processing latency   |  |
+|  | [Component 3: Feature Neck]                                                                  |  |
+|  | - v1 Baseline & Primary Experiment: Unchanged original YOLO11s FPN/PAN neck.                 |  |
+|  | - Optional Follow-up (Case E): Context-Gated Asymmetric Neck (only if justified by evidence)   |  |
+|  +----------------------------------------------------------------------------------------------+  |
+|         |                                                                                          |
+|         v                                                                                          |
+|  +----------------------------------------------------------------------------------------------+  |
+|  | [Component 4 & 5: Original YOLO11s Detect Head]                                              |  |
+|  | - Keep original decoupled anchor-free Detect head unchanged for v1.                          |  |
+|  | - Deferred: Dual-assignment / NMS-free head is out of scope for v1.                          |  |
 |  +----------------------------------------------------------------------------------------------+  |
 |                                                                                                    |
 +----------------------------------------------------------------------------------------------------+
@@ -158,8 +166,9 @@ The design of the proposed hybrid detector is governed by three non-negotiable p
 
 | Component ID | Current Decision | Classification | Priority for Implementation | Controlling Experiment ID |
 |:---|:---|:---|:---:|:---:|
-| **CMP-01** | CNN for $P_1\text{--}P_3$ | **Adopted as Baseline Baseline Design** | High | ABL-02A |
-| **CMP-02** | Hybrid Visual Mamba for $P_4\text{--}P_5$ | **Design Hypothesis under Investigation** | High | ABL-02B |
-| **CMP-03** | Context-Gated Asymmetric Neck | **Design Hypothesis under Investigation** | Medium | ABL-03 |
-| **CMP-04** | Decoupled Anchor-Free Head | **Adopted Standard Industry Baseline** | High | ABL-04 |
-| **CMP-05** | TAL + Evaluation of NMS-Free | **Conditional Strategy (Train-time only)** | Medium | ABL-05 |
+| **CMP-01** | Pure CNN for $P_1\text{--}P_3$ | **Adopted Baseline Design (YOLO11s)** | High | Case A / ABL-02A |
+| **CMP-02** | Deep-Stage SS2D at $P_5$ (Replacing C2PSA) | **Primary Research Hypothesis (Case B)** | Highest (First Milestone) | Case B (ABL-01) |
+| **CMP-02-Ext** | SS2D at $P_4 + P_5$ | **Follow-up Hypothesis (Case C)** | Medium (Pending Case B) | Case C (ABL-02) |
+| **CMP-03** | Context-Gated Asymmetric Neck | **Optional Secondary Hypothesis (Case E)** | Low / Conditional | Case E (ABL-03) |
+| **CMP-04** | Original YOLO11s Decoupled Head | **Adopted Unchanged (v1 Scope Freeze)** | Baseline | Case A |
+| **CMP-05** | Dual-label / NMS-Free Training | **Deferred (Explicitly Out of Scope for v1)** | Deferred | Out of scope |

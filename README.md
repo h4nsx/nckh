@@ -12,9 +12,9 @@ The title is provisional. The final title, research gap, architecture, and contr
 
 - **Stage:** Research preparation / literature review.
 - **Proposed task:** Multi-class 2D warehouse object detection.
-- **Dataset Access Status:** **BLOCKED — download/access issue** (See [`F_literature_and_evidence/dataset_access_status.md`](F_literature_and_evidence/dataset_access_status.md) for full blocker report, recovery criteria, and troubleshooting).
-- **Primary dataset candidate:** NVIDIA PhysicalAI-SmartSpaces (Blocked: extreme size / selective subset strategy required).
-- **Auxiliary dataset candidate:** NVIDIA PhysicalAI-Spatial-Intelligence-Warehouse (Blocked: download authentication / rate limit issue).
+- **Dataset Access Status:** **UNBLOCKED / IN PROGRESS** (Authenticated via Hugging Face OAuth; targeted subsetting active. See [`F_literature_and_evidence/dataset_access_status.md`](F_literature_and_evidence/dataset_access_status.md) for selective download protocol).
+- **Primary dataset candidate:** NVIDIA PhysicalAI-SmartSpaces (Unblocked: targeted scene extraction protocol omitting raw depth HDF5 maps).
+- **Auxiliary dataset candidate:** NVIDIA PhysicalAI-Spatial-Intelligence-Warehouse (Authentication resolved; on-demand access enabled).
 - **Optional extension:** NVIDIA PhysicalAI-SimReady-Warehouse-01.
 - **Core idea under investigation:** Efficiently combine local visual feature extraction (CNN) and long-range/contextual modeling (Mamba or another state-space approach), then evaluate the accuracy–efficiency trade-off.
 - **No results have been established yet.** Do not invent results, citations, dataset statistics, hardware performance, or novelty claims.

@@ -6,16 +6,14 @@ Plan a compact, interpretable experiment set. Add experiments only when they ans
 
 ## 1. Core experiment plan
 
-| ID | Question | Comparison | Controlled factors | Primary measurements | Status |
-|---|---|---|---|---|---|
-| E01 | Can the baseline pipeline be reproduced? | Baseline training/evaluation sanity run | Dataset split, metric code, config | mAP, precision/recall, logs | Planned |
-| E02 | Does the hybrid help? | CNN-only baseline vs hybrid | Data, input size, training budget, evaluation | mAP, Params, FLOPs/MACs, latency | Planned |
-| E03 | Where should Mamba be placed? | Selected placement candidates | Same data and training/evaluation protocol | Accuracy and efficiency | Planned |
-| E04 | Which fusion is useful? | Addition vs concatenation/projection or selected alternatives | Same block placement and data | Accuracy, cost, latency | Conditional |
-| E05 | Does auxiliary data help? | SmartSpaces-only vs auxiliary-data strategy | Target test set fixed; avoid leakage | mAP, per-class AP, robustness | Conditional |
-| E06 | Does compression help? | Original vs compressed model | Same device/runtime/input protocol | Accuracy, size, latency, memory | Conditional |
-| E07 | Does it deploy in real time? | Final model on named device | Fixed protocol and warm-up | p50/p95 latency, FPS, peak memory | Conditional |
-| E08 | Is performance robust? | Stratified evaluation subsets | Same checkpoint and metric protocol | Per-condition/per-size AP and recall | Conditional |
+| ID | Case | Question / Objective | Comparison | Controlled Factors | Primary Measurements | Priority / Status |
+|:---|:---|:---|:---|:---|:---|:---|
+| **E01** | **Case A** | Establish reference baseline | Unmodified YOLO11s | Input 640x640, data split, hyperparams | mAP50, mAP50-95, Params, GFLOPs, Edge Latency, FPS | **P0 (Prerequisite)** |
+| **E02** | **Case B** | Deep-stage SSM integration | Replace C2PSA at $P_5$ with shape-matched SS2D | Same data, neck, head, and training budget | $\Delta$ mAP, $\Delta$ GFLOPs, $\Delta$ Latency, peak VRAM | **P1 (First Milestone)** |
+| **E03** | **Case C** | Two-stage SSM integration | SS2D at both $P_4$ and $P_5$ vs Case B | Matched protocol, evaluate cost vs accuracy | AP gains on occluded targets vs edge latency budget | **P2 (Conditional on B)** |
+| **E04** | **Case D** | Supplementary vs replacement | Retain C2PSA + Add SS2D at $P_5$ vs Case B | Same backbone topology | Trade-off of dual attention vs single SSM | **P3 (Lower Priority)** |
+| **E05** | **Case E** | Multi-scale context gating | Original Neck vs Context-Gated Neck (Best backbone) | Same backbone (from B/C), same head | AP_S (small objects), neck latency overhead | **P3 (Secondary)** |
+| **E06** | **Edge** | Physical edge deployment | FP32 vs FP16 vs INT8 (TensorRT/ONNX) on Jetson | Batch=1, 100 warmups, 500 timed runs | p50/p95 latency, FPS, memory footprint | **P1 (Core Goal)** |
 
 ## 2. Experiment record fields
 
