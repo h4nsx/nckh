@@ -18,12 +18,17 @@
 % and label format conversion.
 \noindent [TODO: Detail data preprocessing procedures, image normalization, resolution scaling, and data augmentation policies applied during training and evaluation].
 
-\subsection{Baseline Architectures and Selection Criteria}
+\subsection{Baseline Architectures and Experimental Cases}
 \label{sec:exp_baselines}
-% TODO: Specific YOLO models (e.g., YOLOv8n/s, YOLOv10n/s, YOLOv11n/s), exact repository
-% versions, commit hashes, pretrained weight provenance.
-% Reference: E_research_design/baseline_plan.md
-\noindent [TODO: Define the reference baseline detectors, including standard and lightweight YOLO variants (e.g., YOLOv8, YOLOv10, YOLOv11). Document framework versions, official weight checkpoints, and hyperparameter parity criteria. Reference \texttt{E\_research\_design/baseline\_plan.md}].
+% Follows yolo_mamba_research_cases.md and E_research_design/experiment_matrix.md
+To establish rigorous, unconfounded comparisons, our evaluation is organized into phased experimental cases centered on \textbf{YOLO11s}:
+\begin{itemize}
+    \item \textbf{Case A (Reference Baseline):} Unmodified standard YOLO11s trained under identical hyperparameter and data configurations.
+    \item \textbf{Case B (Primary Novelty / First Milestone):} Direct replacement of the deepest \texttt{C2PSA} attention block at $P_5$ (stride 32: $20 \times 20$) with a shape-compatible \texttt{SS2D} block.
+    \item \textbf{Case C (Dual-Scale SSM):} Integration of \texttt{SS2D} blocks across both $P_4$ (stride 16: $40 \times 40$) and $P_5$ to test whether mid-level state-space modeling justifies additional latency.
+    \item \textbf{Case D (Supplemental SSM):} Co-existence of \texttt{C2PSA} and \texttt{SS2D} at $P_5$ to isolate whether attention and SSM features are complementary or redundant.
+    \item \textbf{Case E (Context-Gated Neck):} Evaluation of $P_5 \to P_3$ contextual gating against the original PAN/FPN neck on the best-performing backbone variant.
+\end{itemize}
 
 \subsection{Implementation and Training Details}
 \label{sec:exp_implementation}

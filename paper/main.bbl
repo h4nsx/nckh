@@ -1,0 +1,68 @@
+\begin{thebibliography}{10}
+
+\bibitem{redmon2016yolo}
+J.~Redmon, S.~K. Divvala, R.~B. Girshick, and A.~Farhadi, ``You only look once:
+  Unified, real-time object detection,'' in {\em IEEE Conference on Computer
+  Vision and Pattern Recognition (CVPR)}, pp.~779--788, 2016.
+
+\bibitem{sapkota2026ultralytics}
+R.~Sapkota and M.~Karkee, ``Ultralytics {YOLO} evolution: An overview of
+  {YOLO27}, {YOLO26}, {YOLO11}, {YOLOv8}, and {YOLOv5} object detectors for
+  computer vision and pattern recognition,'' {\em arXiv preprint
+  arXiv:2510.09653}, 2026.
+
+\bibitem{bao2026visionmamba}
+M.~Bao, S.~Lyu, Z.~Xu, H.~Zhou, J.~Ren, S.~Xiang, X.~Li, and G.~Cheng, ``Vision
+  {Mamba} in remote sensing: A comprehensive survey of techniques, applications
+  and outlook,'' {\em Remote Sensing}, vol.~18, no.~4, p.~594, 2026.
+
+\bibitem{xiang2025vss}
+Z.~Xiang, ``{VSS-SpatioNet}: A multi-scale feature fusion network for
+  multimodal image integrations,'' {\em Scientific Reports}, vol.~15, 2025.
+
+\bibitem{lei2025mambanext}
+X.~Lei, S.~Wu, W.~Wu, and Z.~Jiang, ``{MambaNeXt-YOLO}: A hybrid state space
+  model for real-time object detection,'' {\em Image and Vision Computing
+  (Under Review) / arXiv:2506.03654}, 2025.
+
+\bibitem{chen2024hybridyolo}
+J.~Chen and M.~J. Er, ``A hybrid architecture based on structured state space
+  sequence model and convolutional neural network for real-time object
+  detection,'' {\em Engineering Applications of Artificial Intelligence},
+  vol.~130, p.~107657, 2024.
+
+\bibitem{yang2026uavdet}
+Y.~Yang, F.~Guo, and P.~Niu, ``{UAVDet}: A {CNN}--{Mamba} hybrid network for
+  efficient small object detection in {UAV} imagery,'' {\em Computer Vision and
+  Image Understanding}, vol.~264, p.~104637, 2026.
+
+\bibitem{mittal2024lightweightsurvey}
+P.~Mittal, ``A comprehensive survey of deep learning-based lightweight object
+  detection models for edge devices,'' {\em Artificial Intelligence Review},
+  vol.~57, no.~9, p.~242, 2024.
+
+\bibitem{capra2022edgehardware}
+M.~Capra, R.~Peloso, G.~Masera, M.~R. Roch, and M.~Martina, ``Edge computing: A
+  survey on the hardware requirements in the internet of things world,'' {\em
+  Future Internet}, vol.~14, no.~4, p.~100, 2022.
+
+\bibitem{quang2024leafyolo}
+N.~V. Quang, N.~H. Hoang, and H.~M. Son, ``{LEAF-YOLO}: Lightweight
+  edge-real-time small object detection on aerial imagery,'' {\em Intelligent
+  Systems with Applications}, vol.~23, p.~200388, 2024.
+
+\bibitem{li2023edgeyolo}
+J.~Li and J.~Ye, ``{Edge-YOLO}: Lightweight infrared object detection method
+  deployed on edge devices,'' {\em Applied Sciences}, vol.~13, no.~7, p.~4402,
+  2023.
+
+\bibitem{li2023modelcompression}
+Z.~Li, H.~Li, and L.~Meng, ``Model compression for deep neural networks: A
+  survey,'' {\em Computers}, vol.~12, no.~3, p.~60, 2023.
+
+\bibitem{tan2024multiscale}
+S.~Tan, Z.~Duan, and L.~Pu, ``Multi-scale object detection in {UAV} images
+  based on adaptive feature fusion,'' {\em PLOS ONE}, vol.~19, no.~4,
+  p.~e0301245, 2024.
+
+\end{thebibliography}

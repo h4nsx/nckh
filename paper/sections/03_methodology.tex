@@ -13,16 +13,13 @@
 
 \subsection{Overall Architecture Overview}
 \label{sec:arch_overview}
-% TODO: High-level architectural pipeline, tensor flow, and multi-scale feature hierarchies.
-% Include reference to Figure (e.g., figures/architecture_overview.pdf).
-\noindent [TODO: Describe the complete hybrid architecture pipeline from input image to multi-scale predictions. Detail the role of the CNN backbone stages, the hybrid CNN--Mamba contextual block, the multi-scale feature neck (e.g., PAN/FPN), and the detection head. Reference \texttt{E\_research\_design/architecture\_candidates.md}].
-
-% \begin{figure}[!t]
-% \centering
-% \includegraphics[width=\columnwidth]{figures/architecture_overview.pdf}
-% \caption{Schematic overview of the proposed lightweight hybrid YOLO-Mamba architecture.}
-% \label{fig:arch_overview}
-% \end{figure}
+% Follows yolo11s_ss2d_architecture_implementation.md and yolo_mamba_research_cases.md
+The proposed hybrid architecture anchors on the verified lightweight \textbf{YOLO11s} detector. To achieve deployable long-range spatial context reasoning without suffering the quadratic memory scaling $\mathcal{O}(N^2)$ of vision transformers or excessive Memory Access Costs (MAC) at large resolutions, the model enforces a strict stage-wise separation:
+\begin{enumerate}
+    \item \textbf{High-Resolution Stages ($P_1$--$P_3$):} Retained as standard local convolutions to preserve edge gradients and fine details with optimal cache locality.
+    \item \textbf{Deep-Stage Context Modeling ($P_5$ / $P_4$):} Selectively replaces the deepest Pointwise Spatial Attention block (\texttt{C2PSA}) with an input/output shape-compatible 2D Selective Scan (\textbf{SS2D}) block accepting $[B, C, H, W]$.
+    \item \textbf{Feature Neck \& Head:} Preserves the original unmodified YOLO11s FPN/PAN neck and decoupled anchor-free \texttt{Detect} head to maintain baseline stability and enable clean, unconfounded ablation isolation.
+\end{enumerate}
 
 \subsection{CNN Local Feature Extraction}
 \label{sec:cnn_features}
@@ -34,13 +31,13 @@
 \label{sec:mamba_integration}
 % TODO: 2D-to-1D sequence flattening, scanning mechanisms (e.g., 2-way or 4-way selective scan),
 % state dimension, projection matrices, and computational implications.
-\noindent [TODO: Define the mathematical formulation of the Mamba state-space block, including sequence conversion from 2D feature maps, scanning directions, discretization parameters, and linear state updates. Detail exact tensor dimensions and channel projections. See \texttt{E\_research\_design/architecture\_candidates.md} (Section 5)].
+\noindent [TODO: Define the mathematical formulation of the Mamba state-space block, including sequence conversion from 2D feature maps, scanning directions, discretization parameters, and linear state updates. Detail exact tensor dimensions and channel projections; see architecture candidates documentation].
 
 \subsection{Multi-Scale Feature Fusion}
 \label{sec:fusion}
 % TODO: Mathematical definition of the feature fusion mechanism (e.g., residual addition,
 % concatenation with projection, or learned gating).
-\noindent [TODO: Present the formal equations for fusing local CNN representations and global Mamba contextual representations. Specify channel alignment and projection operations. Reference \texttt{E\_research\_design/architecture\_candidates.md} (Section 3)].
+\noindent [TODO: Present the formal equations for fusing local CNN representations and global Mamba contextual representations. Specify channel alignment and projection operations; reference architecture candidates documentation].
 
 \subsection{Detection Head and Loss Functions}
 \label{sec:head_loss}
