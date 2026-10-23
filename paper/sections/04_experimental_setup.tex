@@ -44,3 +44,12 @@ Performance is evaluated across both accuracy and edge efficiency dimensions:
     \item \textbf{Computational Footprint:} Parameter count (M), GFLOPs at $640 \times 640$, model checkpoint storage size (MB), and physical process memory consumption (peak RSS).
     \item \textbf{Inference Latency:} Per-image execution time broken down into preprocessing, neural forward pass, and postprocessing (NMS).
 \end{enumerate}
+
+\subsection{Edge Deployment and Export Verification Protocol}
+\label{sec:exp_export}
+To evaluate hardware deployability on resource-constrained embedded devices without relying on speculative simulation, we implement an explicit edge export protocol:
+\begin{enumerate}
+    \item \textbf{Native Graph Export:} Selected PyTorch checkpoints are converted to slimmed Open Neural Network Exchange (ONNX Opset 17) representations using standard operators, strictly avoiding uncompilable custom kernels.
+    \item \textbf{Inference Runtime Testing:} Models are verified using ONNX Runtime v1.31 across execution providers (\texttt{CPUExecutionProvider} and \texttt{TensorrtExecutionProvider}) under a strict batch size of $1$ and standard resolution ($640 \times 640$).
+    \item \textbf{Resource Profiling:} Physical process memory consumption (peak RSS in MB) is recorded via \texttt{psutil} alongside steady-state latency percentiles (Median, P90, P95) across 100 timed iterations preceded by 10 warmup iterations.
+\end{enumerate}

@@ -74,41 +74,52 @@
 \newlabel{sec:exp_implementation}{{4.4}{7}{Implementation and Training Details}{subsection.4.4}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {1}{\ignorespaces Architectural and Complexity Comparison on SmartSpaces Benchmark}}{8}{table.1}\protected@file@percent }
 \newlabel{tab:main_results}{{1}{8}{Architectural and Complexity Comparison on SmartSpaces Benchmark}{table.1}{}}
-\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Multi-Class Object Detection Accuracy on SmartSpaces Warehouse Benchmark}}{8}{table.2}\protected@file@percent }
-\newlabel{tab:accuracy_results}{{2}{8}{Multi-Class Object Detection Accuracy on SmartSpaces Warehouse Benchmark}{table.2}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.5}Evaluation Metrics}{8}{subsection.4.5}\protected@file@percent }
 \newlabel{sec:exp_metrics}{{4.5}{8}{Evaluation Metrics}{subsection.4.5}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {4.6}Edge Deployment and Export Verification Protocol}{8}{subsection.4.6}\protected@file@percent }
+\newlabel{sec:exp_export}{{4.6}{8}{Edge Deployment and Export Verification Protocol}{subsection.4.6}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {5}Results and Discussion}{8}{section.5}\protected@file@percent }
 \newlabel{sec:results}{{5}{8}{Results and Discussion}{section.5}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Architectural Efficiency and Complexity Comparison}{8}{subsection.5.1}\protected@file@percent }
 \newlabel{sec:res_main}{{5.1}{8}{Architectural Efficiency and Complexity Comparison}{subsection.5.1}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Detection Performance and Convergence Dynamics}{8}{subsection.5.2}\protected@file@percent }
 \newlabel{sec:res_detection}{{5.2}{8}{Detection Performance and Convergence Dynamics}{subsection.5.2}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Discussion: The ``Cold Block'' Insertion Phenomenon}{9}{subsection.5.3}\protected@file@percent }
-\newlabel{sec:res_discussion}{{5.3}{9}{Discussion: The ``Cold Block'' Insertion Phenomenon}{subsection.5.3}{}}
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.1}Observation of Cold Block Bottleneck}{9}{subsubsection.5.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.2}Rapid Optimization Trajectory}{9}{subsubsection.5.3.2}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Latency Analysis: Sequential Recurrence vs. Parallel Hardware Scans}{9}{subsection.5.4}\protected@file@percent }
-\newlabel{sec:res_latency}{{5.4}{9}{Latency Analysis: Sequential Recurrence vs. Parallel Hardware Scans}{subsection.5.4}{}}
-\@writefile{toc}{\contentsline {section}{\numberline {6}Conclusion and Future Work}{9}{section.6}\protected@file@percent }
-\newlabel{sec:conclusion}{{6}{9}{Conclusion and Future Work}{section.6}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Conclusion}{9}{subsection.6.1}\protected@file@percent }
-\newlabel{sec:concl_summary}{{6.1}{9}{Conclusion}{subsection.6.1}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Architectural footprint comparison between Baseline YOLO11s and the proposed YOLO11s-SS2D: (a) Overall and Layer 10 parameter footprint, demonstrating a $41.6\%$ parameter drop within the attention block; (b) Computational complexity (GFLOPs) and disk storage savings.}}{9}{figure.1}\protected@file@percent }
+\newlabel{fig:arch_comparison}{{1}{9}{Architectural footprint comparison between Baseline YOLO11s and the proposed YOLO11s-SS2D: (a) Overall and Layer 10 parameter footprint, demonstrating a $41.6\%$ parameter drop within the attention block; (b) Computational complexity (GFLOPs) and disk storage savings}{figure.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Multi-Class Object Detection Accuracy on SmartSpaces Warehouse Benchmark}}{9}{table.2}\protected@file@percent }
+\newlabel{tab:accuracy_results}{{2}{9}{Multi-Class Object Detection Accuracy on SmartSpaces Warehouse Benchmark}{table.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Discussion: Diagnostic Analysis and Full Warmstart Resolution}{9}{subsection.5.3}\protected@file@percent }
+\newlabel{sec:res_discussion}{{5.3}{9}{Discussion: Diagnostic Analysis and Full Warmstart Resolution}{subsection.5.3}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.1}Diagnostic Analysis of Detection Head Randomization}{9}{subsubsection.5.3.1}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.2}Resolution via Full Warmstart Transfer}{9}{subsubsection.5.3.2}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Inference process physical memory footprint (peak RSS) of the exported YOLO11s-SS2D model compared against the 1.0 GB memory ceiling of embedded edge computing gateways.}}{10}{figure.2}\protected@file@percent }
+\newlabel{fig:edge_memory}{{2}{10}{Inference process physical memory footprint (peak RSS) of the exported YOLO11s-SS2D model compared against the 1.0 GB memory ceiling of embedded edge computing gateways}{figure.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Edge Hardware Export and Runtime Profile ($640 \times 640$, Batch Size = 1)}}{10}{table.3}\protected@file@percent }
+\newlabel{tab:edge_runtime}{{3}{10}{Edge Hardware Export and Runtime Profile ($640 \times 640$, Batch Size = 1)}{table.3}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Edge Deployment and Hardware Verification}{10}{subsection.5.4}\protected@file@percent }
+\newlabel{sec:res_edge_deployment}{{5.4}{10}{Edge Deployment and Hardware Verification}{subsection.5.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {6}Conclusion and Future Work}{10}{section.6}\protected@file@percent }
+\newlabel{sec:conclusion}{{6}{10}{Conclusion and Future Work}{section.6}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.1}Conclusion}{10}{subsection.6.1}\protected@file@percent }
+\newlabel{sec:concl_summary}{{6.1}{10}{Conclusion}{subsection.6.1}{}}
 \bibstyle{ieeetr}
 \bibdata{references}
-\bibcite{redmon2016yolo}{1}
-\bibcite{sapkota2026ultralytics}{2}
-\bibcite{bao2026visionmamba}{3}
-\bibcite{xiang2025vss}{4}
-\bibcite{lei2025mambanext}{5}
-\bibcite{chen2024hybridyolo}{6}
-\bibcite{yang2026uavdet}{7}
-\bibcite{mittal2024lightweightsurvey}{8}
-\bibcite{capra2022edgehardware}{9}
-\bibcite{quang2024leafyolo}{10}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Future Research Directions}{10}{subsection.6.2}\protected@file@percent }
-\newlabel{sec:future_work}{{6.2}{10}{Future Research Directions}{subsection.6.2}{}}
-\bibcite{li2023edgeyolo}{11}
-\bibcite{li2023modelcompression}{12}
-\bibcite{tan2024multiscale}{13}
-\gdef \@abspage@last{11}
+\bibcite{ultralytics2024yolo11}{1}
+\bibcite{gu2023mamba}{2}
+\bibcite{liu2024vmamba}{3}
+\bibcite{redmon2016yolo}{4}
+\bibcite{sapkota2026ultralytics}{5}
+\bibcite{bao2026visionmamba}{6}
+\bibcite{xiang2025vss}{7}
+\bibcite{lei2025mambanext}{8}
+\bibcite{chen2024hybridyolo}{9}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Future Research Directions}{11}{subsection.6.2}\protected@file@percent }
+\newlabel{sec:future_work}{{6.2}{11}{Future Research Directions}{subsection.6.2}{}}
+\bibcite{yang2026uavdet}{10}
+\bibcite{mittal2024lightweightsurvey}{11}
+\bibcite{capra2022edgehardware}{12}
+\bibcite{quang2024leafyolo}{13}
+\bibcite{li2023edgeyolo}{14}
+\bibcite{li2023modelcompression}{15}
+\bibcite{tan2024multiscale}{16}
+\gdef \@abspage@last{12}

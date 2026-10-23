@@ -1,5 +1,19 @@
 \begin{thebibliography}{10}
 
+\bibitem{ultralytics2024yolo11}
+G.~Jocher and J.~Qiu, ``Ultralytics {YOLO11}.''
+  \url{https://github.com/ultralytics/ultralytics}, 2024.
+\newblock Version 8.3.
+
+\bibitem{gu2023mamba}
+A.~Gu and T.~Dao, ``Mamba: Linear-time sequence modeling with selective state
+  spaces,'' {\em arXiv preprint arXiv:2312.00752}, 2023.
+
+\bibitem{liu2024vmamba}
+Y.~Liu, Y.~Tian, Y.~Zhao, H.~Yu, L.~Xie, Y.~Wang, Q.~Ye, and J.~Jiao,
+  ``{VMamba}: Visual state space model,'' {\em arXiv preprint
+  arXiv:2401.10166}, 2024.
+
 \bibitem{redmon2016yolo}
 J.~Redmon, S.~K. Divvala, R.~B. Girshick, and A.~Farhadi, ``You only look once:
   Unified, real-time object detection,'' in {\em IEEE Conference on Computer
