@@ -20,6 +20,7 @@
 \citation{xiang2025vss,bao2026visionmamba}
 \citation{lei2025mambanext}
 \citation{chen2024hybridyolo}
+\citation{wang2025mambayolo}
 \citation{yang2026uavdet}
 \@writefile{toc}{\contentsline {subsection}{\numberline {1.5}Paper Organization}{3}{subsection.1.5}\protected@file@percent }
 \newlabel{sec:organization}{{1.5}{3}{Paper Organization}{subsection.1.5}{}}
@@ -31,12 +32,17 @@
 \newlabel{sec:rel_mamba}{{2.2}{3}{Mamba and State-Space Models for Visual Perception}{subsection.2.2}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.3}Hybrid CNN--Mamba Detection Architectures}{3}{subsection.2.3}\protected@file@percent }
 \newlabel{sec:rel_hybrid}{{2.3}{3}{Hybrid CNN--Mamba Detection Architectures}{subsection.2.3}{}}
+\citation{li2024xraymamba}
+\citation{vo2026selectivereview}
 \citation{mittal2024lightweightsurvey,capra2022edgehardware}
 \citation{mittal2024lightweightsurvey}
+\citation{ratul2024accelerating}
+\citation{szegedi2026jetson}
 \citation{quang2024leafyolo}
 \citation{li2023edgeyolo}
-\citation{li2023modelcompression}
 \citation{tan2024multiscale}
+\citation{yang2024freezerwarehouse}
+\citation{wang2026smartspaces}
 \citation{lei2025mambanext,chen2024hybridyolo,yang2026uavdet}
 \@writefile{toc}{\contentsline {subsection}{\numberline {2.4}Lightweight Object Detection and Edge Deployment}{4}{subsection.2.4}\protected@file@percent }
 \newlabel{sec:rel_edge}{{2.4}{4}{Lightweight Object Detection and Edge Deployment}{subsection.2.4}{}}
@@ -48,22 +54,22 @@
 \newlabel{sec:methodology}{{3}{4}{Proposed Method}{section.3}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.1}Problem Formulation}{4}{subsection.3.1}\protected@file@percent }
 \newlabel{sec:formulation}{{3.1}{4}{Problem Formulation}{subsection.3.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Overall Architecture Overview}{4}{subsection.3.2}\protected@file@percent }
-\newlabel{sec:arch_overview}{{3.2}{4}{Overall Architecture Overview}{subsection.3.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.2}Overall Architecture Overview}{5}{subsection.3.2}\protected@file@percent }
+\newlabel{sec:arch_overview}{{3.2}{5}{Overall Architecture Overview}{subsection.3.2}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.3}CNN Local Feature Extraction}{5}{subsection.3.3}\protected@file@percent }
 \newlabel{sec:cnn_features}{{3.3}{5}{CNN Local Feature Extraction}{subsection.3.3}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.4}Warehouse SS2D Contextual Block}{5}{subsection.3.4}\protected@file@percent }
 \newlabel{sec:mamba_integration}{{3.4}{5}{Warehouse SS2D Contextual Block}{subsection.3.4}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {3.4.1}Local Projection and Channel Expansion}{5}{subsubsection.3.4.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.4.2}Four-Way 2D Selective State Space Scan}{5}{subsubsection.3.4.2}\protected@file@percent }
-\citation{wang2026smartspaces}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {3.4.2}Four-Way 2D Selective State Space Scan}{6}{subsubsection.3.4.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {3.4.3}Projection and Residual Reconnection}{6}{subsubsection.3.4.3}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.5}Multi-Scale Feature Fusion and Detection Head}{6}{subsection.3.5}\protected@file@percent }
 \newlabel{sec:fusion}{{3.5}{6}{Multi-Scale Feature Fusion and Detection Head}{subsection.3.5}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {3.6}Analytical Complexity and Parameter Footprint}{6}{subsection.3.6}\protected@file@percent }
 \newlabel{sec:complexity}{{3.6}{6}{Analytical Complexity and Parameter Footprint}{subsection.3.6}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {3.7}Two-Stage Training Protocol}{6}{subsection.3.7}\protected@file@percent }
-\newlabel{sec:training_workflow}{{3.7}{6}{Two-Stage Training Protocol}{subsection.3.7}{}}
+\citation{wang2026smartspaces}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.7}Two-Stage Training Protocol}{7}{subsection.3.7}\protected@file@percent }
+\newlabel{sec:training_workflow}{{3.7}{7}{Two-Stage Training Protocol}{subsection.3.7}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {4}Experimental Setup}{7}{section.4}\protected@file@percent }
 \newlabel{sec:experimental_setup}{{4}{7}{Experimental Setup}{section.4}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {4.1}Benchmark Dataset and Leakage Prevention}{7}{subsection.4.1}\protected@file@percent }
@@ -84,20 +90,20 @@
 \newlabel{sec:results}{{5}{8}{Results and Discussion}{section.5}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.1}Architectural Efficiency and Complexity Comparison}{8}{subsection.5.1}\protected@file@percent }
 \newlabel{sec:res_main}{{5.1}{8}{Architectural Efficiency and Complexity Comparison}{subsection.5.1}{}}
-\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Detection Performance and Convergence Dynamics}{8}{subsection.5.2}\protected@file@percent }
-\newlabel{sec:res_detection}{{5.2}{8}{Detection Performance and Convergence Dynamics}{subsection.5.2}{}}
 \@writefile{lof}{\contentsline {figure}{\numberline {1}{\ignorespaces Architectural footprint comparison between Baseline YOLO11s and the proposed YOLO11s-SS2D: (a) Overall and Layer 10 parameter footprint, demonstrating a $41.6\%$ parameter drop within the attention block; (b) Computational complexity (GFLOPs) and disk storage savings.}}{9}{figure.1}\protected@file@percent }
 \newlabel{fig:arch_comparison}{{1}{9}{Architectural footprint comparison between Baseline YOLO11s and the proposed YOLO11s-SS2D: (a) Overall and Layer 10 parameter footprint, demonstrating a $41.6\%$ parameter drop within the attention block; (b) Computational complexity (GFLOPs) and disk storage savings}{figure.1}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {2}{\ignorespaces Multi-Class Object Detection Accuracy on SmartSpaces Warehouse Benchmark}}{9}{table.2}\protected@file@percent }
 \newlabel{tab:accuracy_results}{{2}{9}{Multi-Class Object Detection Accuracy on SmartSpaces Warehouse Benchmark}{table.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {5.2}Detection Performance and Convergence Dynamics}{9}{subsection.5.2}\protected@file@percent }
+\newlabel{sec:res_detection}{{5.2}{9}{Detection Performance and Convergence Dynamics}{subsection.5.2}{}}
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.3}Discussion: Diagnostic Analysis and Full Warmstart Resolution}{9}{subsection.5.3}\protected@file@percent }
 \newlabel{sec:res_discussion}{{5.3}{9}{Discussion: Diagnostic Analysis and Full Warmstart Resolution}{subsection.5.3}{}}
 \@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.1}Diagnostic Analysis of Detection Head Randomization}{9}{subsubsection.5.3.1}\protected@file@percent }
-\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.2}Resolution via Full Warmstart Transfer}{9}{subsubsection.5.3.2}\protected@file@percent }
 \@writefile{lof}{\contentsline {figure}{\numberline {2}{\ignorespaces Inference process physical memory footprint (peak RSS) of the exported YOLO11s-SS2D model compared against the 1.0 GB memory ceiling of embedded edge computing gateways.}}{10}{figure.2}\protected@file@percent }
 \newlabel{fig:edge_memory}{{2}{10}{Inference process physical memory footprint (peak RSS) of the exported YOLO11s-SS2D model compared against the 1.0 GB memory ceiling of embedded edge computing gateways}{figure.2}{}}
 \@writefile{lot}{\contentsline {table}{\numberline {3}{\ignorespaces Edge Hardware Export and Runtime Profile ($640 \times 640$, Batch Size = 1)}}{10}{table.3}\protected@file@percent }
 \newlabel{tab:edge_runtime}{{3}{10}{Edge Hardware Export and Runtime Profile ($640 \times 640$, Batch Size = 1)}{table.3}{}}
+\@writefile{toc}{\contentsline {subsubsection}{\numberline {5.3.2}Resolution via Full Warmstart Transfer}{10}{subsubsection.5.3.2}\protected@file@percent }
 \@writefile{toc}{\contentsline {subsection}{\numberline {5.4}Edge Deployment and Hardware Verification}{10}{subsection.5.4}\protected@file@percent }
 \newlabel{sec:res_edge_deployment}{{5.4}{10}{Edge Deployment and Hardware Verification}{subsection.5.4}{}}
 \@writefile{toc}{\contentsline {section}{\numberline {6}Conclusion and Future Work}{10}{section.6}\protected@file@percent }
@@ -112,18 +118,23 @@
 \bibcite{zhu2024visionmamba}{4}
 \bibcite{redmon2016yolo}{5}
 \bibcite{sapkota2026ultralytics}{6}
+\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Future Research Directions}{11}{subsection.6.2}\protected@file@percent }
+\newlabel{sec:future_work}{{6.2}{11}{Future Research Directions}{subsection.6.2}{}}
 \bibcite{bao2026visionmamba}{7}
 \bibcite{xiang2025vss}{8}
 \bibcite{lei2025mambanext}{9}
-\@writefile{toc}{\contentsline {subsection}{\numberline {6.2}Future Research Directions}{11}{subsection.6.2}\protected@file@percent }
-\newlabel{sec:future_work}{{6.2}{11}{Future Research Directions}{subsection.6.2}{}}
 \bibcite{chen2024hybridyolo}{10}
-\bibcite{yang2026uavdet}{11}
-\bibcite{mittal2024lightweightsurvey}{12}
-\bibcite{capra2022edgehardware}{13}
-\bibcite{quang2024leafyolo}{14}
-\bibcite{li2023edgeyolo}{15}
-\bibcite{li2023modelcompression}{16}
-\bibcite{tan2024multiscale}{17}
-\bibcite{wang2026smartspaces}{18}
+\bibcite{wang2025mambayolo}{11}
+\bibcite{yang2026uavdet}{12}
+\bibcite{li2024xraymamba}{13}
+\bibcite{vo2026selectivereview}{14}
+\bibcite{mittal2024lightweightsurvey}{15}
+\bibcite{capra2022edgehardware}{16}
+\bibcite{ratul2024accelerating}{17}
+\bibcite{szegedi2026jetson}{18}
+\bibcite{quang2024leafyolo}{19}
+\bibcite{li2023edgeyolo}{20}
+\bibcite{tan2024multiscale}{21}
+\bibcite{yang2024freezerwarehouse}{22}
+\bibcite{wang2026smartspaces}{23}
 \gdef \@abspage@last{12}
