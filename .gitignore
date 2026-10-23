@@ -36,3 +36,4 @@ paper/*.toc
 paper/*.synctex.gz
 texput.log
 gpu_training_package/*.tar.gz
+models/*.onnx
