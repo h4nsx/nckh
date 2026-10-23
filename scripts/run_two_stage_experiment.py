@@ -49,9 +49,7 @@ def run_arm2_case_b_single_stage(epochs: int = 2):
     print("\n" + "=" * 65)
     print(f"RUNNING ARM 2: Case B Single-Stage Direct Fine-Tuning ({epochs} Epochs, Unfrozen)")
     print("=" * 65)
-    model = YOLO("models/yolo11s_ss2d_p5.yaml")
-    ckpt = torch.load("models/yolo11s_ss2d_full_warmstart.pt", map_location="cpu", weights_only=False)
-    model.model.load_state_dict(ckpt["model"].state_dict())
+    model = YOLO("models/yolo11s_ss2d_full_warmstart.pt")
 
     model.train(
         data=DATASET_YAML,
@@ -76,9 +74,7 @@ def run_arm3_case_b_two_stage(warmup_epochs: int = 1, finetune_epochs: int = 1):
 
     # --- Stage 1: Warmup ---
     print("\n>>> STAGE 1: Freezing Backbone Layers 0..9 (Warming up SS2D + Head)...")
-    model_stage1 = YOLO("models/yolo11s_ss2d_p5.yaml")
-    ckpt = torch.load("models/yolo11s_ss2d_full_warmstart.pt", map_location="cpu", weights_only=False)
-    model_stage1.model.load_state_dict(ckpt["model"].state_dict())
+    model_stage1 = YOLO("models/yolo11s_ss2d_full_warmstart.pt")
 
     model_stage1.train(
         data=DATASET_YAML,
@@ -99,10 +95,7 @@ def run_arm3_case_b_two_stage(warmup_epochs: int = 1, finetune_epochs: int = 1):
 
     # --- Stage 2: Full Fine-Tuning ---
     print("\n>>> STAGE 2: Unfreezing All Layers for End-to-End Fine-Tuning...")
-    model_stage2 = YOLO("models/yolo11s_ss2d_p5.yaml")
-    # Load warmed-up weights
-    stage1_ckpt = torch.load(stage1_weights, map_location="cpu", weights_only=False)
-    model_stage2.model.load_state_dict(stage1_ckpt["model"].state_dict())
+    model_stage2 = YOLO(stage1_weights)
 
     model_stage2.train(
         data=DATASET_YAML,
