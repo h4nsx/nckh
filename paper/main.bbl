@@ -14,6 +14,12 @@ Y.~Liu, Y.~Tian, Y.~Zhao, H.~Yu, L.~Xie, Y.~Wang, Q.~Ye, and J.~Jiao,
   ``{VMamba}: Visual state space model,'' {\em arXiv preprint
   arXiv:2401.10166}, 2024.
 
+\bibitem{zhu2024visionmamba}
+L.~Zhu, B.~Liao, Q.~Zhang, X.~Wang, W.~Liu, and X.~Wang, ``Vision {Mamba}:
+  Efficient visual representation learning with bidirectional state space
+  model,'' in {\em Proceedings of the 41st International Conference on Machine
+  Learning (ICML)}, vol.~235, pp.~62429--62442, PMLR, 2024.
+
 \bibitem{redmon2016yolo}
 J.~Redmon, S.~K. Divvala, R.~B. Girshick, and A.~Farhadi, ``You only look once:
   Unified, real-time object detection,'' in {\em IEEE Conference on Computer
@@ -78,5 +84,13 @@ Z.~Li, H.~Li, and L.~Meng, ``Model compression for deep neural networks: A
 S.~Tan, Z.~Duan, and L.~Pu, ``Multi-scale object detection in {UAV} images
   based on adaptive feature fusion,'' {\em PLOS ONE}, vol.~19, no.~4,
   p.~e0301245, 2024.
+
+\bibitem{wang2026smartspaces}
+Y.~Wang, Y.~Wang, A.~Li, S.~Wang, S.~S. Pusegaonkar, H.~Liang, J.~Li, S.~Jiang,
+  J.~Yuan, S.~Li, T.~Dai, Z.~Chen, D.~C. Anastasiu, S.~Biswas, X.~Wu, and
+  Z.~Tang, ``Physical {AI} {Smart} {Spaces}: {A} large-scale benchmark for
+  multi-camera {3D} perception in smart spaces,'' in {\em Advances in Neural
+  Information Processing Systems (NeurIPS)}, 2026.
+\newblock arXiv:2610.02580.
 
 \end{thebibliography}

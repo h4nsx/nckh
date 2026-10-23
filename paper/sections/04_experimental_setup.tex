@@ -3,7 +3,7 @@
 
 \subsection{Benchmark Dataset and Leakage Prevention}
 \label{sec:exp_datasets}
-To evaluate warehouse object detection under realistic logistics conditions, we utilize the \textbf{NVIDIA PhysicalAI-SmartSpaces} benchmark (MTMC Tracking dataset). The raw repository comprises over 280 hours of multi-camera 1080p video across dozens of facility scenes. To maintain computational tractability on edge research hosts while preventing data leakage, we enforce a strict \textbf{Zero-Leakage Multi-Scene Partitioning Protocol}:
+To evaluate warehouse object detection under realistic logistics conditions, we utilize the \textbf{NVIDIA PhysicalAI-SmartSpaces} benchmark (MTMC Tracking dataset)~\cite{wang2026smartspaces}. The raw repository comprises over 280 hours of multi-camera 1080p video across dozens of facility scenes. To maintain computational tractability on edge research hosts while preventing data leakage, we enforce a strict \textbf{Zero-Leakage Multi-Scene Partitioning Protocol}:
 
 \begin{itemize}
     \item \textbf{Training Partition ($\texttt{Warehouse\_000}$):} Includes calibrated multi-camera streams (\texttt{Camera\_0000} and \texttt{Camera\_0001}), sampled at $0.5\text{ FPS}$ ($1$ frame per $60$ video frames) yielding $300$ high-diversity annotated frames and $12,959$ ground-truth bounding box instances.
