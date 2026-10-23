@@ -1,52 +1,46 @@
 \section{Experimental Setup}
 \label{sec:experimental_setup}
 
-% Follows G_paper_and_latex/paper_outline.md (Section 4) and
-% E_research_design/experiment_matrix.md.
-% All datasets, parameters, and baseline versions must be empirically verified.
-
-\subsection{Datasets and Annotation Protocols}
+\subsection{Benchmark Dataset and Leakage Prevention}
 \label{sec:exp_datasets}
-% TODO: Official dataset name, release version, image counts, class distribution,
-% split methodology (train/val/test) avoiding scene/camera leakage.
-% Reference: templates/dataset_card.md and E_research_design/threats_to_validity.md (Section 1)
-\noindent [TODO: Document official benchmark datasets (e.g., NVIDIA PhysicalAI-SmartSpaces and auxiliary candidate PhysicalAI-Spatial-Intelligence-Warehouse). Detail image resolutions, verified sample counts, object class definitions, annotation schemas, and train/val/test split protocols ensuring zero camera/scene leakage. See \texttt{E\_research\_design/threats\_to\_validity.md} and \texttt{templates/dataset\_card.md}].
+To evaluate warehouse object detection under realistic logistics conditions, we utilize the \textbf{NVIDIA PhysicalAI-SmartSpaces} benchmark (MTMC Tracking dataset). The raw repository comprises over 280 hours of multi-camera 1080p video across dozens of facility scenes. To maintain computational tractability on edge research hosts while preventing data leakage, we enforce a strict \textbf{Zero-Leakage Multi-Scene Partitioning Protocol}:
+
+\begin{itemize}
+    \item \textbf{Training Partition ($\texttt{Warehouse\_000}$):} Includes calibrated multi-camera streams (\texttt{Camera\_0000} and \texttt{Camera\_0001}), sampled at $0.5\text{ FPS}$ ($1$ frame per $60$ video frames) yielding $300$ high-diversity annotated frames and $12,959$ ground-truth bounding box instances.
+    \item \textbf{Validation Partition ($\texttt{Warehouse\_015}$):} Sourced from a geographically independent warehouse facility layout with disjoint camera trajectories (\texttt{Camera} and \texttt{Camera\_01}), sampled to $100$ evaluation frames and $3,696$ object instances.
+    \item \textbf{Strict Leakage Safeguard:} No camera stream, background facility texture, or video sequence in the training partition appears in the validation set, ensuring evaluated metrics measure generalizable domain representation rather than background memorization.
+\end{itemize}
+
+The verified dataset taxonomy comprises four primary logistics classes: \texttt{worker} ($11,399$ train / $3,488$ val instances), \texttt{forklift} ($600$ train / $150$ val instances), \texttt{amr} (NovaCarter, $724$ train / $45$ val instances), and \texttt{pallet\_truck} (Transporter, $236$ train / $13$ val instances).
 
 \subsection{Data Preprocessing and Augmentation}
 \label{sec:exp_preprocessing}
-% TODO: Input resizing (e.g., 640x640), normalization, augmentations (Mosaic, MixUp, HSV jitter),
-% and label format conversion.
-\noindent [TODO: Detail data preprocessing procedures, image normalization, resolution scaling, and data augmentation policies applied during training and evaluation].
+Raw 1080p frames ($1920 \times 1080$) are converted directly into normalized bounding box coordinates $(x_c, y_c, w_n, h_n)$. Degenerate boxes with dimensions $\le 4\text{ pixels}$ are filtered. Extracted frames are rescaled to standard detector resolution ($640 \times 640$). Augmentations during training include random horizontal flipping ($p=0.5$), HSV color space jitter ($h=0.015, s=0.7, v=0.4$), and spatial translation ($0.1$).
 
-\subsection{Baseline Architectures and Experimental Cases}
+\subsection{Experimental Baseline and Case Configurations}
 \label{sec:exp_baselines}
-% Follows yolo_mamba_research_cases.md and E_research_design/experiment_matrix.md
-To establish rigorous, unconfounded comparisons, our evaluation is organized into phased experimental cases centered on \textbf{YOLO11s}:
+Our evaluation is organized around direct, unconfounded comparisons:
 \begin{itemize}
-    \item \textbf{Case A (Reference Baseline):} Unmodified standard YOLO11s trained under identical hyperparameter and data configurations.
-    \item \textbf{Case B (Primary Novelty / First Milestone):} Direct replacement of the deepest \texttt{C2PSA} attention block at $P_5$ (stride 32: $20 \times 20$) with a shape-compatible \texttt{SS2D} block.
-    \item \textbf{Case C (Dual-Scale SSM):} Integration of \texttt{SS2D} blocks across both $P_4$ (stride 16: $40 \times 40$) and $P_5$ to test whether mid-level state-space modeling justifies additional latency.
-    \item \textbf{Case D (Supplemental SSM):} Co-existence of \texttt{C2PSA} and \texttt{SS2D} at $P_5$ to isolate whether attention and SSM features are complementary or redundant.
-    \item \textbf{Case E (Context-Gated Neck):} Evaluation of $P_5 \to P_3$ contextual gating against the original PAN/FPN neck on the best-performing backbone variant.
+    \item \textbf{Baseline (Control YOLO11s):} Standard unmodified YOLO11s containing the original \texttt{C2PSA} self-attention block at Layer 10 ($9.41\text{ M}$ parameters, $21.4\text{ GFLOPs}$).
+    \item \textbf{Case B (Proposed YOLO11s-SS2D):} Surgical replacement of Layer 10 with the 4-direction \texttt{WarehouseSS2DBlock} ($9.01\text{ M}$ parameters, $21.0\text{ GFLOPs}$).
 \end{itemize}
 
 \subsection{Implementation and Training Details}
 \label{sec:exp_implementation}
-% TODO: Framework versions (PyTorch, CUDA), optimizer (AdamW/SGD), initial lr,
-% cosine scheduler, weight decay, batch size, epoch budget, early stopping, random seeds.
-% Reference: F_literature_and_evidence/reproducibility_manifest.md
-\noindent [TODO: Specify complete software and hardware training environments: PyTorch version, CUDA runtime, GPU hardware, optimizer parameters, learning rate schedules, batch sizes, epoch limits, and fixed random seeds. See \texttt{F\_literature\_and\_evidence/reproducibility\_manifest.md}].
+All experiments are executed in a controlled, reproducible environment:
+\begin{itemize}
+    \item \textbf{Software Stack:} Python 3.14.8, PyTorch 2.14.1+cpu, Ultralytics 8.4.184, OpenCV 5.0.0.
+    \item \textbf{Optimizer:} AdamW with initial learning rate $\eta = 0.00125$, momentum $\beta_1 = 0.9$, and weight decay $\lambda = 0.0005$.
+    \item \textbf{Hyperparameters:} Batch size of $4$, input resolution $640 \times 640$, gradient clipping enabled.
+    \item \textbf{Hardware Profile:} Intel Core i7-7600U CPU @ 2.80GHz (2 cores, 4 threads), 7.6 GB RAM. Process peak memory RSS is actively constrained below $3.0\text{ GB}$ to guarantee host stability.
+\end{itemize}
 
 \subsection{Evaluation Metrics}
 \label{sec:exp_metrics}
-% TODO: Detection accuracy: mAP@0.5, mAP@0.5:0.95, Precision, Recall, F1-score.
-% Efficiency metrics: Parameter count (M), FLOPs/MACs (G), Model size (MB), latency (ms), FPS, peak RAM (MB).
-\noindent [TODO: Provide mathematical definitions for all evaluation metrics: Precision, Recall, mean Average Precision ($\text{mAP}@0.5$ and $\text{mAP}@0.5:0.95$), parameter counts, computational complexity ($\text{GFLOPs}$), peak memory, and frame-rate ($\text{FPS}$)].
-
-\subsection{Edge Deployment and Benchmarking Protocol}
-\label{sec:exp_edge_protocol}
-% TODO: Edge hardware specifications (Jetson Orin Nano, Raspberry Pi 4B/5), runtime engines
-% (TensorRT, ONNX Runtime), precision modes (FP32, FP16, INT8), batch=1, warm-up iterations,
-% timing boundaries (end-to-end vs model-only).
-% Reference: E_research_design/deployment_plan.md
-\noindent [TODO: Describe the standardized edge hardware benchmarking protocol: target edge device(s), runtime backends (e.g., ONNX Runtime, TensorRT), precision formats, batch size ($=1$), warm-up iterations, repetition counts, synchronization rules, and explicit timing boundaries (model-only vs.\ end-to-end pipeline). Reference \texttt{E\_research\_design/deployment\_plan.md}].
+Performance is evaluated across both accuracy and edge efficiency dimensions:
+\begin{enumerate}
+    \item \textbf{Detection Precision and Recall:} Precision ($P$), Recall ($R$), and F1-score across confidence thresholds.
+    \item \textbf{Mean Average Precision:} $\text{mAP}_{50}$ (IoU threshold $0.50$) and $\text{mAP}_{50-95}$ (COCO standard average across IoU $0.50$ to $0.95$ with step $0.05$).
+    \item \textbf{Computational Footprint:} Parameter count (M), GFLOPs at $640 \times 640$, model checkpoint storage size (MB), and physical process memory consumption (peak RSS).
+    \item \textbf{Inference Latency:} Per-image execution time broken down into preprocessing, neural forward pass, and postprocessing (NMS).
+\end{enumerate}
