@@ -115,10 +115,30 @@ def run_arm3_case_b_two_stage(warmup_epochs: int = 1, finetune_epochs: int = 1, 
     print("ARM 3 (TWO-STAGE PROTOCOL) COMPLETED SUCCESSFULLY!")
     print("=" * 65)
 
+def run_arm4_case_c_single_stage(epochs: int = 2, device: str = "cpu", batch: int = 4):
+    print("\n" + "=" * 65)
+    print(f"RUNNING ARM 4: Case C Dual-Scale SS2D (P4 + P5, {epochs} Epochs, Device: {device})")
+    print("=" * 65)
+    model = YOLO("models/yolo11s_ss2d_p4_p5_full_warmstart.pt")
+
+    model.train(
+        data=DATASET_YAML,
+        epochs=epochs,
+        freeze=0,
+        imgsz=640,
+        batch=batch,
+        workers=2 if device != "cpu" else 1,
+        device=device,
+        project="runs/two_stage_protocol_study",
+        name="arm4_case_c_dual_scale",
+        exist_ok=True,
+        verbose=True
+    )
+
 def main():
-    parser = argparse.ArgumentParser(description="3-Arm Training Protocol Comparative Study")
-    parser.add_argument("--arm", choices=["1", "2", "3", "all"], default="3",
-                        help="Select experimental arm: 1 (Baseline), 2 (Single-Stage Case B), 3 (Two-Stage Case B), or all")
+    parser = argparse.ArgumentParser(description="Multi-Arm Training Protocol Comparative Study")
+    parser.add_argument("--arm", choices=["1", "2", "3", "4", "all"], default="3",
+                        help="Select experimental arm: 1 (Baseline), 2 (Case B Single-Stage), 3 (Case B Two-Stage), 4 (Case C Dual-Scale), or all")
     parser.add_argument("--epochs", type=int, default=2, help="Total epoch budget (default: 2)")
     parser.add_argument("--device", type=str, default="cpu", help="Device to train on ('cpu', '0', etc.)")
     parser.add_argument("--batch", type=int, default=4, help="Batch size (default: 4, can use 8 or 16 on GPU)")
@@ -133,6 +153,8 @@ def main():
         w_ep = max(1, args.epochs // 4) if args.epochs >= 4 else 1
         ft_ep = max(1, args.epochs - w_ep)
         run_arm3_case_b_two_stage(warmup_epochs=w_ep, finetune_epochs=ft_ep, device=args.device, batch=args.batch)
+    if args.arm == "4" or args.arm == "all":
+        run_arm4_case_c_single_stage(epochs=args.epochs, device=args.device, batch=args.batch)
 
 if __name__ == "__main__":
     main()

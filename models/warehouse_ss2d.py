@@ -119,11 +119,19 @@ class WarehouseSS2DBlock(nn.Module):
     Drop-in replacement block for C2PSA at Layer 10 (P5 stage).
     Maintains [B, C, H, W] -> [B, C, H, W] exact contract.
     """
-    def __init__(self, d_state: int = 16, d_conv: int = 3, expand: float = 0.5, c1: int = 512, c2: int = 512):
+    def __init__(self, c1: int = 512, c2: int = 512, d_state: int = 16, d_conv: int = 3, expand: float = 0.5):
         super().__init__()
-        self.c1 = c1
-        self.c2 = c2
-        self.d_inner = int(expand * c2)
+        # If instantiated with 3 args from YAML: [d_state, d_conv, expand] without channels
+        if isinstance(c1, (int, float)) and c1 <= 32 and isinstance(c2, int) and c2 <= 7:
+            d_state = int(c1)
+            d_conv = int(c2)
+            expand = float(d_state) if isinstance(d_state, (int, float)) else 0.5
+            c1 = 512
+            c2 = 512
+
+        self.c1 = int(c1)
+        self.c2 = int(c2)
+        self.d_inner = max(1, int(expand * self.c2))
 
         # Input projection & Depthwise conv for local context
         self.in_proj = nn.Conv2d(c1, self.d_inner, kernel_size=1, bias=False)

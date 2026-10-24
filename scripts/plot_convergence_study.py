@@ -56,11 +56,14 @@ def plot_convergence():
     csv_arm3_s1 = find_arm_csv("arm3_stage1_warmup")
     csv_arm3_s2 = find_arm_csv("arm3_stage2_finetune")
 
+    csv_arm4 = find_arm_csv("arm4_case_c_dual_scale")
+
     # Combine arm 3 stages if both exist
     df_arm1 = load_clean_df(csv_arm1)
     df_arm2 = load_clean_df(csv_arm2)
     df_arm3_s1 = load_clean_df(csv_arm3_s1)
     df_arm3_s2 = load_clean_df(csv_arm3_s2)
+    df_arm4 = load_clean_df(csv_arm4)
 
     df_arm3 = None
     if df_arm3_s1 is not None and df_arm3_s2 is not None:
@@ -79,6 +82,7 @@ def plot_convergence():
     if df_arm1 is not None: available_data['Arm 1: Baseline YOLO11s'] = (df_arm1, '#2b5c8f', '-')
     if df_arm2 is not None: available_data['Arm 2: Case B (Single-Stage)'] = (df_arm2, '#d95f02', '--')
     if df_arm3 is not None: available_data['Arm 3: Case B (Two-Stage Protocol)'] = (df_arm3, '#1b9e77', '-.')
+    if df_arm4 is not None: available_data['Arm 4: Case C (Dual-Scale P4+P5)'] = (df_arm4, '#7570b3', ':')
 
     if not available_data:
         print(f"[!] No results.csv found under {BASE_DIR} yet.")
