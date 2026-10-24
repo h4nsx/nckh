@@ -11,7 +11,29 @@ To evaluate warehouse object detection under realistic logistics conditions, we 
     \item \textbf{Strict Leakage Safeguard:} No camera stream, background facility texture, or video sequence in the training partition appears in the validation set, ensuring evaluated metrics measure generalizable domain representation rather than background memorization.
 \end{itemize}
 
-The verified dataset taxonomy comprises four primary logistics classes: \texttt{worker} ($11,399$ train / $3,488$ val instances), \texttt{forklift} ($600$ train / $150$ val instances), \texttt{amr} (NovaCarter, $724$ train / $45$ val instances), and \texttt{pallet\_truck} (Transporter, $236$ train / $13$ val instances).
+The verified dataset taxonomy comprises four primary logistics classes: \texttt{worker} ($11,399$ train / $3,488$ val instances), \texttt{forklift} ($600$ train / $150$ val instances), \texttt{amr} (NovaCarter, $724$ train / $45$ val instances), and \texttt{pallet\_truck} (Transporter, $236$ train / $13$ val instances). Table~\ref{tab:dataset_distribution} details the partitioned instance distribution and role taxonomy.
+
+\begin{table}[!t]
+\caption{SmartSpaces Warehouse Benchmark Zero-Leakage Dataset Partitioning}
+\label{tab:dataset_distribution}
+\centering
+\small
+\resizebox{\columnwidth}{!}{%
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llccc}
+\toprule
+\textbf{Class Label} & \textbf{Physical Target Type} & \textbf{Train Instances} & \textbf{Val Instances} & \textbf{Operational Role} \\
+\midrule
+\texttt{worker} & Human logistics personnel & 11,399 & 3,488 & Collision avoidance, severe occlusion \\
+\texttt{forklift} & Motorized forklift truck & 600 & 150 & High-velocity heavy machinery \\
+\texttt{amr} & Autonomous mobile robot & 724 & 45 & Low-profile automated transport \\
+\texttt{pallet\_truck} & Manual/electric pallet jack & 236 & 13 & Floor-level moveable inventory \\
+\midrule
+\textbf{Total} & \textbf{Multi-Class Warehouse} & \textbf{12,959} & \textbf{3,696} & \textbf{Zero-Leakage Facility Split} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
 
 \subsection{Data Preprocessing and Augmentation}
 \label{sec:exp_preprocessing}

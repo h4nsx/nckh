@@ -53,9 +53,10 @@ To eliminate the 1D causal scanning bias of sequence models and handle 2D spatia
 \end{enumerate}
 
 For each direction $k \in \{1, 2, 3, 4\}$, continuous state-space parameters $(\mathbf{A}_k, \mathbf{B}_k, \mathbf{C}_k, \mathbf{\Delta}_k)$ are dynamically conditioned on the input tokens through linear projections:
-\begin{equation}
-    \mathbf{\Delta}_k = \text{softplus}(\mathbf{W}_{\Delta, k} \mathbf{u}_k), \quad \mathbf{B}_k = \mathbf{W}_{B, k} \mathbf{u}_k, \quad \mathbf{C}_k = \mathbf{W}_{C, k} \mathbf{u}_k.
-\end{equation}
+\begin{align}
+    \mathbf{\Delta}_k &= \text{softplus}(\mathbf{W}_{\Delta, k} \mathbf{u}_k), \\
+    \mathbf{B}_k &= \mathbf{W}_{B, k} \mathbf{u}_k, \quad \mathbf{C}_k = \mathbf{W}_{C, k} \mathbf{u}_k.
+\end{align}
 Discretization is performed via zero-order hold (ZOH):
 \begin{equation}
     \overline{\mathbf{A}}_k = \exp(\mathbf{\Delta}_k \mathbf{A}_k), \quad \overline{\mathbf{B}}_k = (\mathbf{\Delta}_k \mathbf{u}_k) \otimes \mathbf{B}_k.

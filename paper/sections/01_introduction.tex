@@ -32,8 +32,8 @@ To address this challenge, we investigate three fundamental research questions:
 \label{sec:contributions}
 This work delivers three primary contributions:
 \begin{itemize}
-    \item \textbf{Lightweight Hybrid Architecture (YOLO11s-SS2D):} We propose a hardware-aware hybrid detector that surgically substitutes the deepest self-attention block (\texttt{C2PSA} at stage $P_5$) with a shape-compatible 4-direction 2D Selective State Space block (\texttt{WarehouseSS2DBlock}), reducing total model parameters by **$4.35\%$** ($9.01\text{ M}$ vs. $9.41\text{ M}$) and computational complexity from $21.4$ to $21.0\text{ GFLOPs}$.
-    \item \textbf{Rigorous Zero-Leakage Logistics Benchmark:} We establish an unconfounded multi-class warehouse benchmark sourced from the **NVIDIA PhysicalAI-SmartSpaces** dataset, enforcing strict cross-facility scene and camera separation between training ($300$ frames, $12{,}959$ instances) and validation ($100$ frames, $3{,}696$ instances) to prevent spatial-temporal leakage.
+    \item \textbf{Lightweight Hybrid Architecture (YOLO11s-SS2D):} We propose a hardware-aware hybrid detector that surgically substitutes the deepest self-attention block (\texttt{C2PSA} at stage $P_5$) with a shape-compatible 4-direction 2D Selective State Space block (\texttt{WarehouseSS2DBlock}), reducing total model parameters by \textbf{$4.35\%$} ($9.01\text{ M}$ vs. $9.41\text{ M}$) and computational complexity from $21.4$ to $21.0\text{ GFLOPs}$.
+    \item \textbf{Rigorous Zero-Leakage Logistics Benchmark:} We establish an unconfounded multi-class warehouse benchmark sourced from the \textbf{NVIDIA PhysicalAI-SmartSpaces} dataset, enforcing strict cross-facility scene and camera separation between training ($300$ frames, $12{,}959$ instances) and validation ($100$ frames, $3{,}696$ instances) to prevent spatial-temporal leakage.
     \item \textbf{Empirical Analysis of Cold-Block Optimization Dynamics:} We identify the ``cold block insertion'' bottleneck in hybrid CNN-SSM architectures and empirically demonstrate that preserving pretrained box-regression anchors and applying a staged warmup protocol stabilizes convergence.
 \end{itemize}
 
