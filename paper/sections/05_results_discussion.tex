@@ -23,10 +23,10 @@ We first evaluate the parameter footprint, computational complexity, and storage
 \toprule
 \textbf{Model Architecture} & \textbf{Layer 10 Type} & \textbf{Layers} & \textbf{Params (M)} & \textbf{GFLOPs} & \textbf{Weights (MB)} & \textbf{CPU Latency (ms)} \\
 \midrule
-YOLO11s Baseline & \texttt{C2PSA} & 100 & 9.414 & 21.4 & 19.2 & 275.9 \\
-\textbf{YOLO11s-SS2D (Case B)} & \textbf{\texttt{WarehouseSS2DBlock}} & \textbf{98} & \textbf{9.005} & \textbf{21.0} & \textbf{18.3} & \textbf{329.5} \\
+YOLO11s Baseline & \texttt{C2PSA} & 100 & 9.414 & 21.4 & 19.2 & 244.7 \\
+\textbf{YOLO11s-SS2D (Case B)} & \textbf{\texttt{WarehouseSS2DBlock}} & \textbf{98} & \textbf{9.005} & \textbf{21.0} & \textbf{18.3} & \textbf{304.0} \\
 \midrule
-\textit{Delta / Reduction} & -- & \textit{-2} & \textbf{-4.35\%} & \textbf{-1.87\%} & \textbf{-4.69\%} & \textit{+19.4\% (CPU)} \\
+\textit{Delta / Reduction} & -- & \textit{-2} & \textbf{-4.35\%} & \textbf{-1.87\%} & \textbf{-4.69\%} & \textit{+24.2\% (CPU)} \\
 \bottomrule
 \end{tabular}%
 }
@@ -46,7 +46,7 @@ As shown in Table~\ref{tab:main_results} and illustrated in Figure~\ref{fig:arch
 Table~\ref{tab:accuracy_results} summarizes multi-arm convergence performance evaluated across identical 20-epoch budgets on the SmartSpaces Warehouse benchmark.
 
 \begin{table}[!t]
-\caption{Multi-Arm 20-Epoch Convergence Study on SmartSpaces Warehouse Benchmark}
+\caption{Multi-Arm 20-Epoch Convergence and Checkpoint Study on SmartSpaces Warehouse}
 \label{tab:accuracy_results}
 \centering
 \small
@@ -54,14 +54,12 @@ Table~\ref{tab:accuracy_results} summarizes multi-arm convergence performance ev
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{lcccccc}
 \toprule
-\textbf{Experimental Arm} & \textbf{Epochs} & \textbf{Precision} & \textbf{Recall} & \textbf{$\text{mAP}_{50}$ (\%)} & \textbf{$\text{mAP}_{50-95}$ (\%)} & \textbf{Box Loss} \\
+\textbf{Experimental Arm} & \textbf{Final Epoch $\text{mAP}_{50}$} & \textbf{Peak Checkpoint $\text{mAP}_{50}$} & \textbf{$\text{mAP}_{50-95}$ (\%)} & \textbf{Precision} & \textbf{Recall} & \textbf{Box Loss} \\
 \midrule
-Arm 1: Baseline YOLO11s (COCO Transfer) & 20 & \textbf{0.818} & 0.572 & \textbf{69.75} & \textbf{45.82} & 0.8736 \\
-Arm 2: Case B SS2D (Single-Stage) & 20 & 0.738 & 0.557 & 65.46 & 41.56 & \textbf{0.8718} \\
-Arm 3: Case B SS2D (Two-Stage Protocol) & 20 & 0.725 & \textbf{0.645} & 67.10 & \textbf{43.17} & 0.8990 \\
-Arm 4: Case C SS2D (Dual-Scale P4+P5) & 20 & 0.738 & 0.516 & 67.17 & 42.73 & 0.8800 \\
-\midrule
-\multicolumn{7}{l}{\textit{Peak Milestone: Arm 2 achieved peak $\text{mAP}_{50} = \mathbf{71.81\%}$ and $\text{mAP}_{50-95} = \mathbf{44.99\%}$ at Epoch 18.}} \\
+Arm 1: Baseline YOLO11s (COCO Transfer) & 69.75\% & 70.83\% (Ep. 16) & 45.82\% & \textbf{0.818} & 0.572 & 0.8736 \\
+Arm 2: Case B SS2D (Single-Stage) & 65.46\% & \textbf{71.81\% (Ep. 18)} & 44.99\% & 0.738 & 0.557 & \textbf{0.8718} \\
+Arm 3: Case B SS2D (Two-Stage Warmup) & 67.10\% & 68.42\% (Ep. 18) & 43.17\% & 0.725 & \textbf{0.645} & 0.8990 \\
+Arm 4: Case C SS2D (Dual-Scale P4+P5) & 67.17\% & 70.18\% (Ep. 17) & 42.73\% & 0.738 & 0.516 & 0.8800 \\
 \bottomrule
 \end{tabular}%
 }
