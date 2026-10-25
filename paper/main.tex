@@ -14,7 +14,14 @@
 \usepackage[caption=false,font=footnotesize,labelfont=sf,textfont=sf]{subfig}
 
 % --- Booktabs row padding for clean table readability ---
-\renewcommand{\arraystretch}{1.15}
+\renewcommand{\arraystretch}{1.12}
+
+% --- Standard IEEE Float & Bibliography Spacing Tightening ---
+\setlength{\textfloatsep}{8pt plus 1.0pt minus 2.0pt}
+\setlength{\floatsep}{8pt plus 1.0pt minus 2.0pt}
+\setlength{\intextsep}{8pt plus 1.0pt minus 2.0pt}
+\setlength{\dbltextfloatsep}{8pt plus 1.0pt minus 2.0pt}
+\setlength{\dblfloatsep}{8pt plus 1.0pt minus 2.0pt}
 
 % --- Professional Hyperref Setup (Subtle, Printable Colors) ---
 \usepackage{xcolor}
@@ -56,6 +63,9 @@ Object detection, YOLO, Mamba, State space models, Lightweight neural networks, 
 
 % --- References ---
 \bibliographystyle{ieeetr}
+{\small
+\setlength{\itemsep}{0.5pt plus 0.2pt}
 \bibliography{references}
+}
 
 \end{document}

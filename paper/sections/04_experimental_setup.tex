@@ -6,8 +6,8 @@
 To evaluate warehouse object detection under realistic logistics conditions, we utilize the \textbf{NVIDIA PhysicalAI-SmartSpaces} benchmark (MTMC Tracking dataset)~\cite{wang2026smartspaces}. The raw repository comprises over 280 hours of multi-camera 1080p video across dozens of facility scenes. To maintain computational tractability on edge research hosts while preventing data leakage, we enforce a strict \textbf{Zero-Leakage Multi-Scene Partitioning Protocol}:
 
 \begin{itemize}
-    \item \textbf{Training Partition ($\texttt{Warehouse\_000}$):} Includes calibrated multi-camera streams (\texttt{Camera\_0000} and \texttt{Camera\_0001}), sampled at $0.5\text{ FPS}$ ($1$ frame per $60$ video frames) yielding $300$ high-diversity annotated frames and $12,959$ ground-truth bounding box instances.
-    \item \textbf{Validation Partition ($\texttt{Warehouse\_015}$):} Sourced from a geographically independent warehouse facility layout with disjoint camera trajectories (\texttt{Camera} and \texttt{Camera\_01}), sampled to $100$ evaluation frames and $3,696$ object instances.
+    \item \textbf{Training Partition ($\texttt{Warehouse\_000}$):} Calibrated multi-camera video streams (\texttt{Camera\_0000} and \texttt{Camera\_0001}) sampled at $0.5\text{ FPS}$ ($1$ frame per $60$ video frames) yield $300$ high-diversity annotated frames and $12,959$ ground-truth bounding box instances.
+    \item \textbf{Validation Partition ($\texttt{Warehouse\_015}$):} Sourced from a geographically independent warehouse layout with disjoint camera trajectories (\texttt{Camera} and \texttt{Camera\_01}), sampled to $100$ evaluation frames and $3,696$ object instances.
     \item \textbf{Strict Leakage Safeguard:} No camera stream, background facility texture, or video sequence in the training partition appears in the validation set, ensuring evaluated metrics measure generalizable domain representation rather than background memorization.
 \end{itemize}
 
@@ -60,19 +60,19 @@ All experiments are executed in a controlled, reproducible environment:
 
 \subsection{Evaluation Metrics}
 \label{sec:exp_metrics}
-Performance is evaluated across both accuracy and edge efficiency dimensions:
+We assess model performance along both accuracy and edge efficiency dimensions:
 \begin{enumerate}
-    \item \textbf{Detection Precision and Recall:} Precision ($P$), Recall ($R$), and F1-score across confidence thresholds.
-    \item \textbf{Mean Average Precision:} $\text{mAP}_{50}$ (IoU threshold $0.50$) and $\text{mAP}_{50-95}$ (COCO standard average across IoU $0.50$ to $0.95$ with step $0.05$).
-    \item \textbf{Computational Footprint:} Parameter count (M), GFLOPs at $640 \times 640$, model checkpoint storage size (MB), and physical process memory consumption (peak RSS).
-    \item \textbf{Inference Latency:} Per-image execution time broken down into preprocessing, neural forward pass, and postprocessing (NMS).
+    \item \textbf{Precision and Recall:} Class-specific and overall Precision ($P$), Recall ($R$), and F1-score across operational confidence thresholds.
+    \item \textbf{Mean Average Precision:} Standard logistics $\text{mAP}_{50}$ (IoU threshold $0.50$) and strict $\text{mAP}_{50-95}$ (averaged across IoU thresholds from $0.50$ to $0.95$ at $0.05$ intervals).
+    \item \textbf{Computational Footprint:} Overall parameter count (M), GFLOPs at $640 \times 640$, model checkpoint disk size (MB), and physical process memory consumption (peak RSS).
+    \item \textbf{Inference Latency Breakdown:} Per-image execution time decomposed into image preprocessing, neural forward pass, and non-maximum suppression (NMS).
 \end{enumerate}
 
 \subsection{Edge Deployment and Export Verification Protocol}
 \label{sec:exp_export}
-To evaluate hardware deployability on resource-constrained embedded devices without relying on speculative simulation, we implement an explicit edge export protocol:
+To evaluate hardware deployability on resource-constrained embedded devices without relying on speculative simulation, we execute a practical edge verification protocol:
 \begin{enumerate}
-    \item \textbf{Native Graph Export:} Selected PyTorch checkpoints are converted to slimmed Open Neural Network Exchange (ONNX Opset 17) representations using standard operators, strictly avoiding uncompilable custom kernels.
-    \item \textbf{Inference Runtime Testing:} Models are verified using ONNX Runtime v1.31 across execution providers (\texttt{CPUExecutionProvider} and \texttt{TensorrtExecutionProvider}) under a strict batch size of $1$ and standard resolution ($640 \times 640$).
-    \item \textbf{Resource Profiling:} Physical process memory consumption (peak RSS in MB) is recorded via \texttt{psutil} alongside steady-state latency percentiles (Median, P90, P95) across 100 timed iterations preceded by 10 warmup iterations.
+    \item \textbf{Native Graph Export:} PyTorch checkpoints are compiled directly to optimized Open Neural Network Exchange (ONNX Opset 17) representations via standard operators, strictly avoiding proprietary uncompilable custom kernels.
+    \item \textbf{Inference Runtime Testing:} Models are verified using ONNX Runtime v1.31 across execution providers (both CPU and TensorRT engines) under a strict batch size of $1$ and standard $640 \times 640$ resolution.
+    \item \textbf{Resource Profiling:} Physical process memory consumption (peak RSS in MB) is tracked via \texttt{psutil} alongside steady-state latency percentiles (Median, P90, P95) across 100 timed iterations preceded by 10 warmup iterations.
 \end{enumerate}

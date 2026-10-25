@@ -72,12 +72,11 @@ The four scanned sequences are reversed back to original spatial orientation, fo
     \mathbf{F}_{\text{ssm}} = \sum_{k=1}^{4} \text{Unfold}_{2\text{D}}(\mathbf{y}_k).
 \end{equation}
 
-\subsubsection{Projection and Residual Reconnection}
-The merged contextual representation is projected back to $C_{\text{out}} = 512$ and recombined with an identity shortcut:
+The resulting feature representation is projected back to $C_{\text{out}} = 512$ channels and recombined via an identity shortcut:
 \begin{equation}
     \mathbf{Y} = \mathbf{F} + \text{BN}(\text{Conv}_{1 \times 1}(\mathbf{F}_{\text{ssm}})).
 \end{equation}
-The output tensor strictly satisfies $[B, 512, 20, 20] \to [B, 512, 20, 20]$, preserving seamless drop-in compatibility with the downstream YOLO11s neck.
+This projection preserves the spatial dimensions and channel depth $[B, 512, 20, 20]$, guaranteeing seamless drop-in integration with the downstream YOLO11s feature aggregation network.
 
 \subsection{Multi-Scale Feature Fusion and Detection Head}
 \label{sec:fusion}
