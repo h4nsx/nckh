@@ -23,21 +23,21 @@ We first evaluate the parameter footprint, computational complexity, and storage
 \toprule
 \textbf{Model Architecture} & \textbf{Layer 10 Type} & \textbf{Layers} & \textbf{Params (M)} & \textbf{GFLOPs} & \textbf{Weights (MB)} & \textbf{CPU Latency (ms)} \\
 \midrule
-YOLO11s Baseline & \texttt{C2PSA} & 100 & 9.414 & 21.4 & 19.2 & 244.7 \\
-\textbf{YOLO11s-SS2D (Case B)} & \textbf{\texttt{WarehouseSS2DBlock}} & \textbf{98} & \textbf{9.005} & \textbf{21.0} & \textbf{18.3} & \textbf{304.0} \\
+YOLO11s Baseline & \texttt{C2PSA} & 100 & 9.429 & 21.7 & 19.18 & 244.7 \\
+\textbf{YOLO11s-SS2D (Case B)} & \textbf{\texttt{WarehouseSS2DBlock}} & \textbf{98} & \textbf{8.796} & \textbf{21.2} & \textbf{17.89} & \textbf{304.0} \\
 \midrule
-\textit{Delta / Reduction} & -- & \textit{-2} & \textbf{-4.35\%} & \textbf{-1.87\%} & \textbf{-4.69\%} & \textit{+24.2\% (CPU)} \\
+\textit{Delta / Reduction} & -- & \textit{-2} & \textbf{-6.72\%} & \textbf{-2.30\%} & \textbf{-6.73\%} & \textit{+24.2\% (CPU)} \\
 \bottomrule
 \end{tabular}%
 }
 \end{table}
 
-As shown in Table~\ref{tab:main_results} and illustrated in Figure~\ref{fig:arch_comparison}, the proposed hybrid architecture achieves a \textbf{$4.35\%$ overall parameter reduction} ($409,344$ fewer parameters) and lowers computational complexity from $21.4$ to $21.0\text{ GFLOPs}$. Specifically at the component level, the \texttt{WarehouseSS2DBlock} contains $578,816$ parameters compared to $990,976$ parameters for the baseline \texttt{C2PSA} block---a \textbf{$41.6\%$ parameter reduction within the attention stage}. Checkpoint storage on disk is reduced from $19.2\text{ MB}$ to $18.3\text{ MB}$, benefiting memory-constrained embedded edge devices.
+As shown in Table~\ref{tab:main_results} and illustrated in Figure~\ref{fig:arch_comparison}, the proposed hybrid architecture achieves a \textbf{$6.72\%$ overall parameter reduction} ($633,344$ fewer parameters on warehouse detection) and lowers computational complexity from $21.7$ to $21.2\text{ GFLOPs}$. Specifically at the component level, the \texttt{WarehouseSS2DBlock} contains $357,632$ parameters compared to $990,976$ parameters for the baseline \texttt{C2PSA} block---a \textbf{$63.9\%$ parameter reduction within the attention stage}. Checkpoint storage on disk is reduced from $19.18\text{ MB}$ to $17.89\text{ MB}$, benefiting memory-constrained embedded edge devices.
 
 \begin{figure}[!t]
 \centering
 \includegraphics[width=\columnwidth]{figures/fig_architectural_comparison.pdf}
-\caption{Architectural footprint comparison between Baseline YOLO11s and the proposed YOLO11s-SS2D: (a) Overall and Layer 10 parameter footprint, demonstrating a $41.6\%$ parameter drop within the attention block; (b) Computational complexity (GFLOPs) and disk storage savings.}
+\caption{Architectural footprint comparison between Baseline YOLO11s and the proposed YOLO11s-SS2D: (a) Overall and Layer 10 parameter footprint, demonstrating a $63.9\%$ parameter drop within the attention block ($357,632$ vs. $990,976$); (b) Computational complexity (GFLOPs) and disk storage savings.}
 \label{fig:arch_comparison}
 \end{figure}
 
@@ -117,6 +117,7 @@ As summarized in Table~\ref{tab:per_class_results}, the category-level evaluatio
     \item \textbf{Forklift Perception (+6.2\% Gain):} Both Case B ($76.3\%\text{ mAP}_{50}$) and Case C ($75.3\%$) significantly outperform Baseline YOLO11s ($70.1\%$). In busy logistics corridors, motorized forklifts present severe collision hazards to personnel. The 4-direction state-space recurrence along warehouse aisles captures long-range structural dependencies, successfully resolving heavy machinery even under extensive rack occlusions.
     \item \textbf{Personnel Safety Precision ($96.6\%$):} Case C achieves the highest precision for the \texttt{worker} class ($96.6\%$), suppressing false-positive detections that trigger disruptive emergency stops.
     \item \textbf{Autonomous Mobile Robots (AMRs):} Case C achieves $85.0\%\text{ mAP}_{50}$ and $80.2\%$ recall on low-profile AMRs, confirming that intermediate $P_4$ state-space modeling successfully preserves small, floor-level robotic targets.
+    \item \textbf{Rare-Class Limitations and Imbalance:} We observe that all architectures exhibit lower precision and recall on \texttt{pallet\_truck} ($19.9\%$--$32.8\%\text{ mAP}_{50}$). Analysis of the dataset distribution reveals that manual pallet jacks represent only $13$ instances in the validation set ($0.35\%$ of total annotations), leading to higher empirical variance. This highlights the practical challenge of extreme tail-class representation in real-world logistics benchmarks.
 \end{enumerate}
 
 \subsubsection{Qualitative Visual Inference Comparison}

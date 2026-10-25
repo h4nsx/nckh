@@ -27,8 +27,8 @@ def generate_architectural_comparison_chart():
 
     # Subplot 1: Total Parameters & Layer 10 Parameters
     models = ['Baseline\nYOLO11s', 'Ours\nYOLO11s-SS2D']
-    total_params = [9.414, 9.005] # Millions
-    l10_params = [0.991, 0.579]    # Millions (990,976 vs 578,816)
+    total_params = [9.429, 8.796] # Millions
+    l10_params = [0.991, 0.358]    # Millions (990,976 vs 357,632)
 
     x = np.arange(len(models))
     width = 0.35
@@ -54,15 +54,15 @@ def generate_architectural_comparison_chart():
 
     for rect in rects2:
         height = rect.get_height()
-        pct_diff = "-41.6%" if height < 0.8 else "C2PSA"
+        pct_diff = "-63.9%" if height < 0.5 else "C2PSA"
         ax1.annotate(f'{height:.3f}M\n({pct_diff})',
                     xy=(rect.get_x() + rect.get_width() / 2, height),
                     xytext=(0, 4), textcoords="offset points",
                     ha='center', va='bottom', fontsize=9.5)
 
     # Subplot 2: Computational Complexity (GFLOPs) & Checkpoint Size (MB)
-    gflops = [21.4, 21.0]
-    weights_mb = [19.2, 18.3]
+    gflops = [21.7, 21.2]
+    weights_mb = [19.2, 17.9]
 
     rects3 = ax2.bar(x - width/2, gflops, width, label='Complexity (GFLOPs)', color='#7570b3', edgecolor='black', alpha=0.9)
     rects4 = ax2.bar(x + width/2, weights_mb, width, label='Weights Size (MB)', color='#1b9e77', edgecolor='black', alpha=0.9)

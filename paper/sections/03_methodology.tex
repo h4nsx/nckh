@@ -58,10 +58,11 @@ For each direction $k \in \{1, 2, 3, 4\}$, continuous state-space parameters $(\
     \mathbf{\Delta}_k &= \text{softplus}(\mathbf{W}_{\Delta, k} \mathbf{u}_k), \\
     \mathbf{B}_k &= \mathbf{W}_{B, k} \mathbf{u}_k, \quad \mathbf{C}_k = \mathbf{W}_{C, k} \mathbf{u}_k.
 \end{align}
-Discretization is performed via zero-order hold (ZOH):
+Discretization maps continuous parameters to discrete step operators:
 \begin{equation}
-    \overline{\mathbf{A}}_k = \exp(\mathbf{\Delta}_k \mathbf{A}_k), \quad \overline{\mathbf{B}}_k = (\mathbf{\Delta}_k \mathbf{u}_k) \otimes \mathbf{B}_k.
+    \overline{\mathbf{A}}_k = \exp(\mathbf{\Delta}_k \mathbf{A}_k), \quad \overline{\mathbf{B}}_k = (\mathbf{\Delta}_k \mathbf{u}_k) \otimes \mathbf{B}_k,
 \end{equation}
+where $\overline{\mathbf{A}}_k$ implements the exact matrix exponential of diagonal state matrix $\mathbf{A}_k = -\exp(\mathbf{A}_{\text{logs}, k})$ and $\overline{\mathbf{B}}_k$ adopts a lightweight first-order Euler-bilinear input modulation.
 The discrete recurrence updates the hidden state $\mathbf{h}_k(t) \in \mathbb{R}^{d_{\text{inner}} \times d_{\text{state}}}$ (with state dimension $d_{\text{state}} = 16$) in linear time:
 \begin{align}
     \mathbf{h}_k(t) &= \overline{\mathbf{A}}_k(t) \mathbf{h}_k(t-1) + \overline{\mathbf{B}}_k(t), \\
@@ -90,11 +91,11 @@ where $\mathcal{L}_{\text{box}}$ is Complete Intersection-over-Union (CIoU) loss
 
 \subsection{Analytical Complexity and Parameter Footprint}
 \label{sec:complexity}
-The surgical substitution of Layer 10 reduces both model parameters and computational complexity:
+The surgical substitution of Layer 10 significantly reduces both model parameters and computational complexity:
 \begin{itemize}
     \item \textbf{Standard \texttt{C2PSA} (Self-Attention):} Requires $990,976$ parameters.
-    \item \textbf{Proposed \texttt{WarehouseSS2DBlock}:} Requires $578,816$ parameters ($412,160$ fewer block parameters, a $41.6\%$ reduction in the attention stage).
-    \item \textbf{Global Model Impact:} Overall fused parameters decrease from $9,414,348$ ($9.41\text{ M}$) to $9,005,004$ ($9.01\text{ M}$, a $-4.35\%$ overall reduction). Computational FLOPs decrease from $21.4\text{ GFLOPs}$ to $21.0\text{ GFLOPs}$.
+    \item \textbf{Proposed \texttt{WarehouseSS2DBlock}:} Requires $357,632$ parameters ($633,344$ fewer block parameters, a $63.9\%$ parameter reduction in the attention stage).
+    \item \textbf{Global Model Impact:} Overall parameters decrease from $9,429,340$ ($9.43\text{ M}$) to $8,795,996$ ($8.80\text{ M}$, a $-6.72\%$ overall reduction on warehouse detection). Computational complexity is maintained at $21.2\text{ GFLOPs}$.
 \end{itemize}
 
 \subsection{Two-Stage Training Protocol}

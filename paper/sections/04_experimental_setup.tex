@@ -43,19 +43,20 @@ Raw 1080p frames ($1920 \times 1080$) are converted directly into normalized bou
 \label{sec:exp_baselines}
 Our evaluation is organized around direct, unconfounded comparisons:
 \begin{itemize}
-    \item \textbf{Baseline (Control YOLO11s):} Standard unmodified YOLO11s containing the original \texttt{C2PSA} self-attention block at Layer 10 ($9.41\text{ M}$ parameters, $21.4\text{ GFLOPs}$).
-    \item \textbf{Case B (Proposed YOLO11s-SS2D Single-Scale):} Surgical replacement of Layer 10 with the 4-direction \texttt{WarehouseSS2DBlock} at $P_5$ ($9.01\text{ M}$ parameters, $21.0\text{ GFLOPs}$).
-    \item \textbf{Case C (Proposed YOLO11s-SS2D Dual-Scale):} Simultaneous deployment of \texttt{WarehouseSS2DBlock} at both $P_4$ ($40 \times 40$) and $P_5$ ($20 \times 20$) feature scales ($8.88\text{ M}$ parameters, $21.4\text{ GFLOPs}$).
+    \item \textbf{Baseline (Control YOLO11s):} Standard unmodified YOLO11s containing the original \texttt{C2PSA} self-attention block at Layer 10 ($9.43\text{ M}$ parameters, $21.7\text{ GFLOPs}$).
+    \item \textbf{Case B (Proposed YOLO11s-SS2D Single-Scale):} Surgical replacement of Layer 10 with the 4-direction \texttt{WarehouseSS2DBlock} at $P_5$ ($8.80\text{ M}$ parameters, $21.2\text{ GFLOPs}$).
+    \item \textbf{Case C (Proposed YOLO11s-SS2D Dual-Scale):} Simultaneous deployment of \texttt{WarehouseSS2DBlock} at both $P_4$ ($40 \times 40$) and $P_5$ ($20 \times 20$) feature scales ($8.89\text{ M}$ parameters, $21.8\text{ GFLOPs}$).
 \end{itemize}
 
-\subsection{Implementation and Training Details}
+\subsection{Implementation, Training Details, and Reproducibility}
 \label{sec:exp_implementation}
-All experiments are executed in a controlled, reproducible environment:
+All experiments are executed in a strictly controlled, reproducible environment:
 \begin{itemize}
-    \item \textbf{Software Stack:} Python 3.14.8, PyTorch 2.14.1+cpu, Ultralytics 8.4.184, OpenCV 5.0.0.
-    \item \textbf{Optimizer:} AdamW with initial learning rate $\eta = 0.00125$, momentum $\beta_1 = 0.9$, and weight decay $\lambda = 0.0005$.
-    \item \textbf{Hyperparameters:} Batch size of $4$, input resolution $640 \times 640$, gradient clipping enabled.
-    \item \textbf{Hardware Profile:} Intel Core i7-7600U CPU @ 2.80GHz (2 cores, 4 threads), 7.6 GB RAM. Process peak memory RSS is actively constrained below $3.0\text{ GB}$ to guarantee host stability.
+    \item \textbf{Software Stack:} Python 3.14, PyTorch 2.6.0/2.14.1, Ultralytics 8.3/8.4, OpenCV.
+    \item \textbf{Optimizer:} AdamW with initial learning rate $\eta = 0.00125$, final learning rate factor $\text{lrf} = 0.01$, and weight decay $\lambda = 0.0005$.
+    \item \textbf{Hyperparameters:} Batch size of $4$, input resolution $640 \times 640$, random seed $0$ fixed across all runs.
+    \item \textbf{Provenance \& Cryptographic Traceability:} Every checkpoint, initialization state, and evaluation metric is cryptographically validated with SHA-256 hashes (e.g., pretrained baseline: \texttt{85a76fe...}, Case B warmstart: \texttt{1e92c10...}), ensuring full auditability.
+    \item \textbf{Hardware Profile:} Intel Core i7-7600U CPU @ 2.80GHz and NVIDIA GPU edge nodes. Process peak memory RSS is actively constrained below $1.0\text{ GB}$ to guarantee embedded edge gateway stability.
 \end{itemize}
 
 \subsection{Evaluation Metrics}

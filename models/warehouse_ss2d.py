@@ -119,19 +119,49 @@ class WarehouseSS2DBlock(nn.Module):
     Drop-in replacement block for C2PSA at Layer 10 (P5 stage).
     Maintains [B, C, H, W] -> [B, C, H, W] exact contract.
     """
-    def __init__(self, c1: int = 512, c2: int = 512, d_state: int = 16, d_conv: int = 3, expand: float = 0.5):
+    def __init__(self, *args, **kwargs):
         super().__init__()
-        # If instantiated with 3 args from YAML: [d_state, d_conv, expand] without channels
-        if isinstance(c1, (int, float)) and c1 <= 32 and isinstance(c2, int) and c2 <= 7:
-            d_state = int(c1)
-            d_conv = int(c2)
-            expand = float(d_state) if isinstance(d_state, (int, float)) else 0.5
-            c1 = 512
-            c2 = 512
+        # Robust constructor argument resolution:
+        # Case A: Explicit channels passed: (c1, c2, d_state=16, d_conv=3, expand=0.5)
+        # Case B: Legacy 3-arg YAML tuple: (d_state=16, d_conv=3, expand=0.5)
+        if len(args) == 5:
+            c1, c2, d_state, d_conv, expand = args
+        elif len(args) == 4:
+            c1, c2, d_state, d_conv = args
+            expand = kwargs.get("expand", 0.5)
+        elif len(args) == 3:
+            # Check if args are [c1, c2, d_state] or [d_state, d_conv, expand]
+            if args[0] > 64 and args[1] > 64:
+                c1, c2, d_state = args
+                d_conv = kwargs.get("d_conv", 3)
+                expand = kwargs.get("expand", 0.5)
+            else:
+                d_state, d_conv, expand = args
+                c1 = kwargs.get("c1", 512)
+                c2 = kwargs.get("c2", 512)
+        elif len(args) == 2:
+            c1, c2 = args
+            d_state = kwargs.get("d_state", 16)
+            d_conv = kwargs.get("d_conv", 3)
+            expand = kwargs.get("expand", 0.5)
+        elif len(args) == 1:
+            c1 = c2 = args[0]
+            d_state = kwargs.get("d_state", 16)
+            d_conv = kwargs.get("d_conv", 3)
+            expand = kwargs.get("expand", 0.5)
+        else:
+            c1 = kwargs.get("c1", 512)
+            c2 = kwargs.get("c2", 512)
+            d_state = kwargs.get("d_state", 16)
+            d_conv = kwargs.get("d_conv", 3)
+            expand = kwargs.get("expand", 0.5)
 
         self.c1 = int(c1)
         self.c2 = int(c2)
-        self.d_inner = max(1, int(expand * self.c2))
+        self.d_state = int(d_state)
+        self.d_conv = int(d_conv)
+        self.expand = float(expand)
+        self.d_inner = max(1, int(self.expand * self.c2))
 
         # Input projection & Depthwise conv for local context
         self.in_proj = nn.Conv2d(c1, self.d_inner, kernel_size=1, bias=False)
