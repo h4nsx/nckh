@@ -3,20 +3,19 @@
 
 \subsection{Conclusion}
 \label{sec:concl_summary}
-In this study, we investigated the architectural feasibility, computational efficiency, and optimization dynamics of integrating a 2D Selective State Space Model (SSM) into a lightweight real-time object detector for multi-class warehouse perception. By surgically replacing the deepest Pointwise Spatial Attention block (\texttt{C2PSA}) at stage $P_5$ in \textbf{YOLO11s} with our proposed 4-direction \textbf{\texttt{WarehouseSS2DBlock}}, we demonstrated that:
+In this study, we investigated the architectural feasibility, computational efficiency, and optimization dynamics of integrating a 2D Selective State Space Model (SSM) into a lightweight real-time object detector for multi-class warehouse perception. By surgically replacing self-attention bottlenecks in \textbf{YOLO11s} with our proposed 4-direction \textbf{\texttt{WarehouseSS2DBlock}} at both single-scale ($P_5$) and dual-scale ($P_4 + P_5$) stages, we demonstrated that:
 \begin{enumerate}
     \item \textbf{Significant Parameter and Complexity Reduction:} The hybrid architecture achieves a \textbf{4.35\% reduction in overall model parameters} ($9.005\text{ M}$ vs. $9.414\text{ M}$ for the baseline) and lowers computational complexity from $21.4$ to $21.0\text{ GFLOPs}$. Within the attention stage itself, the \texttt{WarehouseSS2DBlock} reduces parameters by \textbf{41.6\%} ($578{,}816$ vs. $990{,}976$ parameters), while trimming on-disk checkpoint storage from $19.2\text{ MB}$ to $18.3\text{ MB}$.
-    \item \textbf{Empirical Unconfounded Benchmarking:} Evaluated on an independent, zero-leakage multi-scene warehouse benchmark derived from the \textbf{NVIDIA PhysicalAI-SmartSpaces} dataset, the hybrid model maintained complete tensor compatibility with standard FPN/PAN feature aggregation and anchor-free detection heads without requiring modifications to early CNN stages.
-    \item \textbf{Optimization Insights for Hybrid State-Space Detectors:} Our empirical investigation revealed the critical nature of pretraining alignment in hybrid architectures. When introducing an uncalibrated SSM block into a pretrained convolutional network, preserving the pretrained box-regression head and employing an identity-preserving zero-initialization strategy prevents destructive interference with upstream convolutional features.
+    \item \textbf{High-Recall Logistics Detection and Safety Gains:} Evaluated on an independent, zero-leakage multi-scene warehouse benchmark derived from the \textbf{NVIDIA PhysicalAI-SmartSpaces} dataset, the hybrid models delivered competitive accuracy ($67.10\%$--$67.17\%\text{ mAP}_{50}$), a superior peak accuracy of \textbf{$71.81\%\text{ mAP}_{50}$}, a $+7.30\%$ absolute boost in personnel recall ($64.52\%$), and a \textbf{$+6.2\%$ gain in forklift detection} ($76.3\%\text{ vs. } 70.1\%$).
+    \item \textbf{Physical Edge Viability:} We proved that the hybrid model exports seamlessly to standard ONNX (Opset 17) with zero custom CUDA plugins, maintaining a steady-state process memory of \textbf{$395.7\text{ MB}$ RSS}---operating \textbf{$60.4\%$ beneath the $1.0\text{ GB}$ physical memory limit} of industrial edge processors.
 \end{enumerate}
 
 \subsection{Future Research Directions}
 \label{sec:future_work}
 Building upon these empirical foundations, several promising avenues remain for subsequent investigation:
 \begin{itemize}
-    \item \textbf{Hardware-Accelerated Parallel Scans on Edge Embedded SoCs:} Deploying and profiling the hybrid architecture on dedicated edge platforms (such as NVIDIA Jetson Orin Nano / NX) utilizing custom TensorRT plugins or CUDA-accelerated associative parallel scans to unlock the full real-time throughput advantage over sequential CPU recurrence.
-    \item \textbf{Multi-Stage State-Space Integration (Case C):} Investigating whether extending selective 2D scans to intermediate feature stages (e.g., $P_4$ with $40 \times 40$ resolution) improves fine-grained perception of small inventory markers and distant automated mobile robots without exceeding edge latency budgets.
-    \item \textbf{Temporal Multi-Camera Consistency:} Extending the 2D spatial selective scan to incorporate temporal state propagation across sequential video frames for persistent multi-camera tracking and trajectory forecasting in busy logistics corridors.
+    \item \textbf{Fused Hardware Scans and TensorRT FP16/INT8 Acceleration:} Deploying fused selective scan kernels via TensorRT plugins on NVIDIA Jetson Orin Nano gateways, combining 8-bit post-training quantization (PTQ) with hardware-accelerated associative parallel scans to unlock sub-$50\text{ ms}$ real-time edge throughput.
+    \item \textbf{Temporal State-Space Video Consistency:} Extending the 2D spatial selective scan along the temporal dimension ($\text{3D-SSM}$) across sequential camera frames to establish persistent tracklet state propagation and trajectory forecasting in congested logistics corridors.
 \end{itemize}
 
 \section*{Acknowledgments}

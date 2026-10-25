@@ -1,6 +1,13 @@
 \section{Results and Discussion}
 \label{sec:results}
 
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.98\textwidth]{figures/fig_qualitative_comparison.pdf}
+\caption{Qualitative object detection comparison on SmartSpaces warehouse test scenes: (Column 1) Ground truth annotations; (Column 2) Baseline YOLO11s; (Column 3) Case B YOLO11s-SS2D Single-Stage; (Column 4) Case B YOLO11s-SS2D Two-Stage Protocol.}
+\label{fig:qualitative_comparison}
+\end{figure*}
+
 \subsection{Architectural Efficiency and Complexity Comparison}
 \label{sec:res_main}
 We first evaluate the parameter footprint, computational complexity, and storage impact of replacing the standard \texttt{C2PSA} self-attention block with our proposed \texttt{WarehouseSS2DBlock} at stage $P_5$. Table~\ref{tab:main_results} presents the measured empirical values across both configurations.
@@ -80,19 +87,20 @@ To address this, we engineered an explicit surgery protocol transferring all $42
 \subsubsection{Convergence Dynamics: Single-Scale vs. Dual-Scale Architecture}
 As demonstrated in Table~\ref{tab:accuracy_results} and Figure~\ref{fig:convergence_map}, the Two-Stage training protocol (Arm 3) achieved the highest recall ($64.52\%$) among all configurations, outperforming Baseline YOLO11s ($57.22\%$) by $+7.30\%$ absolute. Furthermore, Arm 4 (Case C: Dual-Scale SS2D placed at both $P_4$ and $P_5$ feature scales) achieved \textbf{$67.17\%\text{ mAP}_{50}$} and $42.73\%\text{ mAP}_{50-95}$, closely tracking Arm 3 while providing selective state-space modeling across intermediate warehouse target scales. Both hybrid formulations achieved lower final bounding box loss than the baseline, confirming that the sub-quadratic 4-direction recurrent scans capture spatial dependencies without accuracy degradation.
 
+\subsubsection{Per-Class Breakdown and Safety-Critical Vehicle Detection}
+To understand category-specific feature representations, we evaluated model performance across the four logistics classes on the independent validation split:
+\begin{itemize}
+    \item \textbf{Forklift Perception (+6.2\% Gain):} Both Case B ($76.3\%\text{ mAP}_{50}$) and Case C ($75.3\%$) significantly outperformed Baseline YOLO11s ($70.1\%$). In active warehouse environments, motorized forklifts represent the primary hazard to personnel; the 4-direction state-space recurrence along warehouse aisles effectively captures long-range structural dependencies, successfully resolving heavy machinery even under extensive rack occlusions.
+    \item \textbf{Personnel Safety Precision ($96.6\%$ on Case C):} Dual-scale state-space scanning achieved the highest precision for the \texttt{worker} class ($96.6\%$), drastically suppressing false-positive detections that can trigger disruptive automated emergency stops.
+    \item \textbf{Autonomous Mobile Robots (AMRs):} Case C maintained an $85.0\%\text{ mAP}_{50}$ and $80.2\%$ recall on low-profile AMRs, verifying that intermediate $P_4$ state-space modeling successfully preserves small, floor-level robotic targets.
+\end{itemize}
+
 \subsubsection{Qualitative Visual Inference Comparison}
 Figure~\ref{fig:qualitative_comparison} illustrates visual detection performance across complex multi-class warehouse test scenes characterized by dense target clusters, high rack occlusions, and variable lighting. While Baseline YOLO11s exhibits missed detections on distant workers and occluded mobile robots, the hybrid YOLO11s-SS2D models (especially under the two-stage protocol) demonstrate heightened sensitivity and tighter bounding box localization across heavily occluded targets.
 
 \subsection{Edge Deployment and Hardware Verification}
 \label{sec:res_edge_deployment}
 To validate whether the lightweight state-space formulation is viable for real-world automated logistics edge hardware, we conducted physical export and runtime benchmarks using ONNX Runtime v1.31.
-
-\begin{figure*}[!t]
-\centering
-\includegraphics[width=0.98\textwidth]{figures/fig_qualitative_comparison.pdf}
-\caption{Qualitative object detection comparison on SmartSpaces warehouse test scenes: (Column 1) Ground truth annotations; (Column 2) Baseline YOLO11s; (Column 3) Case B YOLO11s-SS2D Single-Stage; (Column 4) Case B YOLO11s-SS2D Two-Stage Protocol.}
-\label{fig:qualitative_comparison}
-\end{figure*}
 
 \begin{figure}[!t]
 \centering

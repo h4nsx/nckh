@@ -15,7 +15,8 @@ The target class taxonomy is derived from logistics-critical warehouse categorie
 The proposed hybrid architecture anchors on the verified lightweight \textbf{YOLO11s} detector. To achieve deployable long-range spatial context reasoning without suffering the quadratic memory scaling $\mathcal{O}(N^2)$ of vision transformers or excessive Memory Access Costs (MAC) at large resolutions, the model enforces a strict stage-wise separation:
 \begin{enumerate}
     \item \textbf{High-Resolution Stages ($P_1$--$P_3$):} Retained as standard local convolutions to preserve edge gradients and fine details with optimal cache locality.
-    \item \textbf{Deep-Stage Context Modeling ($P_5$):} Selectively replaces the deepest Pointwise Spatial Attention block (\texttt{C2PSA}) at Layer 10 with an input/output shape-compatible 2D Selective Scan (\textbf{SS2D}) block accepting $[B, C, H, W] \to [B, C, H, W]$.
+    \item \textbf{Single-Scale Stage Context Modeling (Case B, $P_5$):} Selectively replaces the deepest Pointwise Spatial Attention block (\texttt{C2PSA}) at Layer 10 with an input/output shape-compatible 2D Selective Scan (\textbf{SS2D}) block accepting $[B, 512, 20, 20] \to [B, 512, 20, 20]$.
+    \item \textbf{Dual-Scale Context Modeling (Case C, $P_4 + P_5$):} Extends selective state-space processing to intermediate feature resolution $P_4$ ($[B, 256, 40, 40]$ at Layer 7) alongside $P_5$ ($[B, 512, 20, 20]$ at Layer 11) to capture multi-scale warehouse context across both distant small entities and large industrial vehicles.
     \item \textbf{Feature Neck \& Head:} Preserves the original unmodified YOLO11s FPN/PAN neck and decoupled anchor-free \texttt{Detect} head to maintain baseline stability and enable clean, unconfounded ablation isolation.
 \end{enumerate}
 

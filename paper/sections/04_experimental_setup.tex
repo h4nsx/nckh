@@ -44,7 +44,8 @@ Raw 1080p frames ($1920 \times 1080$) are converted directly into normalized bou
 Our evaluation is organized around direct, unconfounded comparisons:
 \begin{itemize}
     \item \textbf{Baseline (Control YOLO11s):} Standard unmodified YOLO11s containing the original \texttt{C2PSA} self-attention block at Layer 10 ($9.41\text{ M}$ parameters, $21.4\text{ GFLOPs}$).
-    \item \textbf{Case B (Proposed YOLO11s-SS2D):} Surgical replacement of Layer 10 with the 4-direction \texttt{WarehouseSS2DBlock} ($9.01\text{ M}$ parameters, $21.0\text{ GFLOPs}$).
+    \item \textbf{Case B (Proposed YOLO11s-SS2D Single-Scale):} Surgical replacement of Layer 10 with the 4-direction \texttt{WarehouseSS2DBlock} at $P_5$ ($9.01\text{ M}$ parameters, $21.0\text{ GFLOPs}$).
+    \item \textbf{Case C (Proposed YOLO11s-SS2D Dual-Scale):} Simultaneous deployment of \texttt{WarehouseSS2DBlock} at both $P_4$ ($40 \times 40$) and $P_5$ ($20 \times 20$) feature scales ($8.88\text{ M}$ parameters, $21.4\text{ GFLOPs}$).
 \end{itemize}
 
 \subsection{Implementation and Training Details}
