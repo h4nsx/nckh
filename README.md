@@ -131,8 +131,9 @@ A critical research contribution of this work is investigating the wall-clock ex
 
 ## 📄 Academic Paper
 
-- **Author:** Vo Tuan Hung ([votuanhung1205.work@gmail.com](mailto:votuanhung1205.work@gmail.com))
-- **ORCID:** [0009-0005-8730-7930](https://orcid.org/0009-0005-8730-7930)
+- **Authors:** 
+  - **Vo Tuan Hung** (College of Technology II, [votuanhung1205.work@gmail.com](mailto:votuanhung1205.work@gmail.com), ORCID: [0009-0005-8730-7930](https://orcid.org/0009-0005-8730-7930))
+  - **Huynh Tan Phat** (Instructor / Advisor)
 - **Manuscript Source:** [`paper/main.tex`](paper/main.tex)
 - **Compiled PDF:** [`paper/main.pdf`](paper/main.pdf)
 
@@ -140,7 +141,7 @@ A critical research contribution of this work is investigating the wall-clock ex
 ```bibtex
 @article{yolo11s_ss2d_2026,
   title={A Lightweight Hybrid YOLO-Mamba Architecture for Real-Time Multi-Class Warehouse Object Detection on Edge Devices},
-  author={Vo, Tuan Hung},
+  author={Vo, Tuan Hung and Huynh, Tan Phat},
   journal={IEEE Transactions on Automation Science and Engineering},
   year={2026}
 }
