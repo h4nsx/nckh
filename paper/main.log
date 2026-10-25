@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Arch Linux) (preloaded format=pdflatex 2026.10.14)  25 OCT 2026 10:13
+This is pdfTeX, Version 3.141592653-2.6-1.40.29 (TeX Live 2026/Arch Linux) (preloaded format=pdflatex 2026.10.14)  25 OCT 2026 10:25
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -584,15 +584,9 @@ Package hyperref Info: Link coloring ON on input line 43.
 \@outlinefile=\write3
 \openout3 = `main.out'.
 
-
-Underfull \hbox (badness 3168) in paragraph at lines 46--46
-\T1/ptm/m/n/8 (+20) Au-toma-tion En-gi-neer-ing, Col-lege of Tech-nol-ogy II (e
--mail: [][]vo-tu-an-
- []
-
 LaTeX Font Info:    Trying to load font information for T1+pcr on input line 48
 .
-(/usr/share/texmf-dist/tex/latex/psnfss/t1pcr.fd
+ (/usr/share/texmf-dist/tex/latex/psnfss/t1pcr.fd
 File: t1pcr.fd 2001/06/04 font definitions for T1/pcr.
 )
 Package microtype Info: Loading generic protrusion settings for font family
@@ -641,7 +635,7 @@ Underfull \hbox (badness 7722) in paragraph at lines 9--10
  []
 
 [5]) (./sections/05_results_discussion.tex
-<figures/fig_qualitative_comparison.pdf, id=312, 1175.23184pt x 571.14612pt>
+<figures/fig_qualitative_comparison.pdf, id=311, 1175.23184pt x 571.14612pt>
 File: figures/fig_qualitative_comparison.pdf Graphic file (type pdf)
 <use figures/fig_qualitative_comparison.pdf>
 Package pdftex.def Info: figures/fig_qualitative_comparison.pdf  used on input 
@@ -659,13 +653,13 @@ Underfull \hbox (badness 1472) in paragraph at lines 13--14
 he
  []
 
-<figures/fig_architectural_comparison.pdf, id=316, 727.28084pt x 293.61154pt>
+<figures/fig_architectural_comparison.pdf, id=315, 727.28084pt x 293.61154pt>
 File: figures/fig_architectural_comparison.pdf Graphic file (type pdf)
 <use figures/fig_architectural_comparison.pdf>
 Package pdftex.def Info: figures/fig_architectural_comparison.pdf  used on inpu
 t line 39.
 (pdftex.def)             Requested size: 252.0pt x 101.73514pt.
-<figures/fig_convergence_map.pdf, id=318, 748.96187pt x 293.69922pt>
+<figures/fig_convergence_map.pdf, id=317, 748.96187pt x 293.69922pt>
 File: figures/fig_convergence_map.pdf Graphic file (type pdf)
 <use figures/fig_convergence_map.pdf>
 Package pdftex.def Info: figures/fig_convergence_map.pdf  used on input line 70
@@ -676,7 +670,7 @@ Underfull \vbox (badness 3657) has occurred while \output is active []
 
  [7 <./figures/fig_qualitative_comparison.pdf> <./figures/fig_architectural_com
 parison.pdf> <./figures/fig_convergence_map.pdf>]
-<figures/fig_edge_memory_footprint.pdf, id=553, 478.08667pt x 279.24522pt>
+<figures/fig_edge_memory_footprint.pdf, id=552, 478.08667pt x 279.24522pt>
 File: figures/fig_edge_memory_footprint.pdf Graphic file (type pdf)
 <use figures/fig_edge_memory_footprint.pdf>
 Package pdftex.def Info: figures/fig_edge_memory_footprint.pdf  used on input l
@@ -696,11 +690,11 @@ Package rerunfilecheck Info: File `main.out' has not changed.
 (rerunfilecheck)             Checksum: AB95D2985A15A90EC706393652FBA653;10952.
  ) 
 Here is how much of TeX's memory you used:
- 15467 strings out of 468995
- 244032 string characters out of 5460434
- 713705 words of memory out of 5000000
- 43452 multiletter control sequences out of 15000+600000
- 786363 words of font info for 476 fonts, out of 8000000 for 9000
+ 15457 strings out of 468995
+ 243922 string characters out of 5460434
+ 713653 words of memory out of 5000000
+ 43451 multiletter control sequences out of 15000+600000
+ 784777 words of font info for 471 fonts, out of 8000000 for 9000
  264 hyphenation exceptions out of 8191
  75i,13n,79p,2442b,552s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </usr/share/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/share/
@@ -722,10 +716,10 @@ pe1/urw/courier/ucrr8a.pfb></usr/share/texmf-dist/fonts/type1/urw/times/utmb8a.
 pfb></usr/share/texmf-dist/fonts/type1/urw/times/utmbi8a.pfb></usr/share/texmf-
 dist/fonts/type1/urw/times/utmr8a.pfb></usr/share/texmf-dist/fonts/type1/urw/ti
 mes/utmri8a.pfb>
-Output written on main.pdf (9 pages, 8852661 bytes).
+Output written on main.pdf (9 pages, 8852523 bytes).
 PDF statistics:
- 788 PDF objects out of 1000 (max. 8388607)
- 476 compressed objects within 5 object streams
+ 787 PDF objects out of 1000 (max. 8388607)
+ 475 compressed objects within 5 object streams
  130 named destinations out of 1000 (max. 500000)
- 86397 words of extra memory for PDF output out of 89155 (max. 10000000)
+ 82301 words of extra memory for PDF output out of 89155 (max. 10000000)
 
