@@ -23,7 +23,7 @@ plt.rcParams.update({
 })
 
 def generate_architectural_comparison_chart():
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9.5, 4.0))
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10.2, 4.2))
 
     # Subplot 1: Total Parameters & Layer 10 Parameters
     models = ['Baseline\nYOLO11s', 'Ours\nYOLO11s-SS2D']
@@ -40,8 +40,8 @@ def generate_architectural_comparison_chart():
     ax1.set_title('(a) Parameter Footprint Comparison')
     ax1.set_xticks(x)
     ax1.set_xticklabels(models)
-    ax1.set_ylim(0, 11)
-    ax1.legend(loc='upper right')
+    ax1.set_ylim(0, 12.8)
+    ax1.legend(loc='upper right', framealpha=0.95)
     ax1.grid(axis='y', linestyle='--', alpha=0.5)
 
     # Add labels on top of bars
@@ -49,16 +49,16 @@ def generate_architectural_comparison_chart():
         height = rect.get_height()
         ax1.annotate(f'{height:.3f}M',
                     xy=(rect.get_x() + rect.get_width() / 2, height),
-                    xytext=(0, 3), textcoords="offset points",
-                    ha='center', va='bottom', fontweight='bold')
+                    xytext=(0, 4), textcoords="offset points",
+                    ha='center', va='bottom', fontweight='bold', fontsize=11)
 
     for rect in rects2:
         height = rect.get_height()
         pct_diff = "-41.6%" if height < 0.8 else "C2PSA"
         ax1.annotate(f'{height:.3f}M\n({pct_diff})',
                     xy=(rect.get_x() + rect.get_width() / 2, height),
-                    xytext=(0, 3), textcoords="offset points",
-                    ha='center', va='bottom', fontsize=9)
+                    xytext=(0, 4), textcoords="offset points",
+                    ha='center', va='bottom', fontsize=9.5)
 
     # Subplot 2: Computational Complexity (GFLOPs) & Checkpoint Size (MB)
     gflops = [21.4, 21.0]
@@ -71,23 +71,23 @@ def generate_architectural_comparison_chart():
     ax2.set_title('(b) Complexity and Storage Size')
     ax2.set_xticks(x)
     ax2.set_xticklabels(models)
-    ax2.set_ylim(0, 26)
-    ax2.legend(loc='upper right')
+    ax2.set_ylim(0, 28.5)
+    ax2.legend(loc='upper right', framealpha=0.95)
     ax2.grid(axis='y', linestyle='--', alpha=0.5)
 
     for rect in rects3:
         height = rect.get_height()
         ax2.annotate(f'{height:.1f}G',
                     xy=(rect.get_x() + rect.get_width() / 2, height),
-                    xytext=(0, 3), textcoords="offset points",
-                    ha='center', va='bottom', fontweight='bold')
+                    xytext=(0, 4), textcoords="offset points",
+                    ha='center', va='bottom', fontweight='bold', fontsize=11)
 
     for rect in rects4:
         height = rect.get_height()
         ax2.annotate(f'{height:.1f}MB',
                     xy=(rect.get_x() + rect.get_width() / 2, height),
-                    xytext=(0, 3), textcoords="offset points",
-                    ha='center', va='bottom', fontweight='bold')
+                    xytext=(0, 4), textcoords="offset points",
+                    ha='center', va='bottom', fontweight='bold', fontsize=11)
 
     plt.tight_layout()
     output_path = "paper/figures/fig_architectural_comparison.pdf"
