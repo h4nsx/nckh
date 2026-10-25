@@ -25,7 +25,7 @@ This audit evaluates the feasibility of the candidate datasets:
 | Evaluation Dimension | PhysicalAI-SmartSpaces (Primary) | PhysicalAI-Spatial-Intelligence-Warehouse (Auxiliary) | Contingency: Open-Source Warehouse Datasets |
 |:---|:---|:---|:---|
 | **Target Role in Study** | Primary benchmark for multi-class 2D object detection. | Auxiliary pretraining / spatial representation transfer. | Contingency fallback if Hugging Face blockers persist. |
-| **Current Operational Status** | **BLOCKED (Storage volume & download method)** | **BLOCKED (Unauthenticated LFS batch access)** | **AVAILABLE (Open-source public repositories)** |
+| **Current Operational Status** | **UNBLOCKED / SELECTIVE SUBSET (Active)** | **UNBLOCKED (Authenticated)** | **AVAILABLE (Open-source public repositories)** |
 | **Data Modality** | Multi-camera 1080p 30 FPS video streams (MP4) + calibration. | Multi-modal: RGB, depth, camera extrinsics/intrinsics, point clouds. | Static RGB 2D images (JPEG/PNG) with YOLO/COCO annotations. |
 | **Target Class Taxonomy** | Humans/Workers, Forklifts, Pallet Trucks, AMRs, Pallets, Packages/Totes. | Warehouse racks, pallets, bins, forklift paths, obstacles. | Forklifts, pallets, boxes, workers, safety gear. |
 | **Annotation Format** | JSON / MOTChallenge format (bounding boxes with tracking IDs). | JSON spatial layout, 3D bounding boxes, mesh representations. | Standard YOLO format (`.txt` normalized xywh) or COCO JSON. |

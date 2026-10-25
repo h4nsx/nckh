@@ -1,0 +1,39 @@
+# Python Virtual Environment
+.venv/
+venv/
+ENV/
+env/
+
+# Python cache & artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+
+# Datasets and heavy binary files
+data/
+datasets/
+*.h5
+*.hdf5
+*.mp4
+*.tar.gz
+*.zip
+
+# Ultralytics runs & weights
+runs/
+*.pt
+*.onnx
+*.engine
+
+# LaTeX compilation temporaries
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.log
+paper/*.out
+paper/*.toc
+paper/*.synctex.gz
+texput.log
+gpu_training_package/*.tar.gz
+models/*.onnx

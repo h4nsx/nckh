@@ -1,47 +1,79 @@
 \section{Experimental Setup}
 \label{sec:experimental_setup}
 
-% Follows G_paper_and_latex/paper_outline.md (Section 4) and
-% E_research_design/experiment_matrix.md.
-% All datasets, parameters, and baseline versions must be empirically verified.
-
-\subsection{Datasets and Annotation Protocols}
+\subsection{Benchmark Dataset and Leakage Prevention}
 \label{sec:exp_datasets}
-% TODO: Official dataset name, release version, image counts, class distribution,
-% split methodology (train/val/test) avoiding scene/camera leakage.
-% Reference: templates/dataset_card.md and E_research_design/threats_to_validity.md (Section 1)
-\noindent [TODO: Document official benchmark datasets (e.g., NVIDIA PhysicalAI-SmartSpaces and auxiliary candidate PhysicalAI-Spatial-Intelligence-Warehouse). Detail image resolutions, verified sample counts, object class definitions, annotation schemas, and train/val/test split protocols ensuring zero camera/scene leakage. See \texttt{E\_research\_design/threats\_to\_validity.md} and \texttt{templates/dataset\_card.md}].
+To evaluate warehouse object detection under realistic logistics conditions, we utilize the \textbf{NVIDIA PhysicalAI-SmartSpaces} benchmark (MTMC Tracking dataset)~\cite{wang2026smartspaces}. The raw repository comprises over 280 hours of multi-camera 1080p video across dozens of facility scenes. To maintain computational tractability on edge research hosts while preventing data leakage, we enforce a strict \textbf{Zero-Leakage Multi-Scene Partitioning Protocol}:
+
+\begin{itemize}
+    \item \textbf{Training Partition ($\texttt{Warehouse\_000}$):} Calibrated multi-camera video streams (\texttt{Camera\_0000} and \texttt{Camera\_0001}) sampled at $0.5\text{ FPS}$ ($1$ frame per $60$ video frames) yield $300$ high-diversity annotated frames and $12,959$ ground-truth bounding box instances.
+    \item \textbf{Validation Partition ($\texttt{Warehouse\_015}$):} Sourced from a geographically independent warehouse layout with disjoint camera trajectories (\texttt{Camera} and \texttt{Camera\_01}), sampled to $100$ evaluation frames and $3,696$ object instances.
+    \item \textbf{Strict Leakage Safeguard:} No camera stream, background facility texture, or video sequence in the training partition appears in the validation set, ensuring evaluated metrics measure generalizable domain representation rather than background memorization.
+\end{itemize}
+
+The verified dataset taxonomy comprises four primary logistics classes: \texttt{worker} ($11,399$ train / $3,488$ val instances), \texttt{forklift} ($600$ train / $150$ val instances), \texttt{amr} (NovaCarter, $724$ train / $45$ val instances), and \texttt{pallet\_truck} (Transporter, $236$ train / $13$ val instances). Table~\ref{tab:dataset_distribution} details the partitioned instance distribution and role taxonomy.
+
+\begin{table}[!t]
+\caption{SmartSpaces Warehouse Benchmark Zero-Leakage Dataset Partitioning}
+\label{tab:dataset_distribution}
+\centering
+\small
+\resizebox{\columnwidth}{!}{%
+\setlength{\tabcolsep}{3pt}
+\begin{tabular}{llccc}
+\toprule
+\textbf{Class Label} & \textbf{Physical Target Type} & \textbf{Train Instances} & \textbf{Val Instances} & \textbf{Operational Role} \\
+\midrule
+\texttt{worker} & Human logistics personnel & 11,399 & 3,488 & Collision avoidance, severe occlusion \\
+\texttt{forklift} & Motorized forklift truck & 600 & 150 & High-velocity heavy machinery \\
+\texttt{amr} & Autonomous mobile robot & 724 & 45 & Low-profile automated transport \\
+\texttt{pallet\_truck} & Manual/electric pallet jack & 236 & 13 & Floor-level moveable inventory \\
+\midrule
+\textbf{Total} & \textbf{Multi-Class Warehouse} & \textbf{12,959} & \textbf{3,696} & \textbf{Zero-Leakage Facility Split} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
 
 \subsection{Data Preprocessing and Augmentation}
 \label{sec:exp_preprocessing}
-% TODO: Input resizing (e.g., 640x640), normalization, augmentations (Mosaic, MixUp, HSV jitter),
-% and label format conversion.
-\noindent [TODO: Detail data preprocessing procedures, image normalization, resolution scaling, and data augmentation policies applied during training and evaluation].
+Raw 1080p frames ($1920 \times 1080$) are converted directly into normalized bounding box coordinates $(x_c, y_c, w_n, h_n)$. Degenerate boxes with dimensions $\le 4\text{ pixels}$ are filtered. Extracted frames are rescaled to standard detector resolution ($640 \times 640$). Augmentations during training include random horizontal flipping ($p=0.5$), HSV color space jitter ($h=0.015, s=0.7, v=0.4$), and spatial translation ($0.1$).
 
-\subsection{Baseline Architectures and Selection Criteria}
+\subsection{Experimental Baseline and Case Configurations}
 \label{sec:exp_baselines}
-% TODO: Specific YOLO models (e.g., YOLOv8n/s, YOLOv10n/s, YOLOv11n/s), exact repository
-% versions, commit hashes, pretrained weight provenance.
-% Reference: E_research_design/baseline_plan.md
-\noindent [TODO: Define the reference baseline detectors, including standard and lightweight YOLO variants (e.g., YOLOv8, YOLOv10, YOLOv11). Document framework versions, official weight checkpoints, and hyperparameter parity criteria. Reference \texttt{E\_research\_design/baseline\_plan.md}].
+Our evaluation is organized around direct, unconfounded comparisons:
+\begin{itemize}
+    \item \textbf{Baseline (Control YOLO11s):} Standard unmodified YOLO11s containing the original \texttt{C2PSA} self-attention block at Layer 10 ($9.43\text{ M}$ parameters, $21.7\text{ GFLOPs}$).
+    \item \textbf{Case B (Proposed YOLO11s-SS2D Single-Scale):} Surgical replacement of Layer 10 with the 4-direction \texttt{WarehouseSS2DBlock} at $P_5$ ($8.80\text{ M}$ parameters, $21.2\text{ GFLOPs}$).
+    \item \textbf{Case C (Proposed YOLO11s-SS2D Dual-Scale):} Simultaneous deployment of \texttt{WarehouseSS2DBlock} at both $P_4$ ($40 \times 40$) and $P_5$ ($20 \times 20$) feature scales ($8.89\text{ M}$ parameters, $21.8\text{ GFLOPs}$).
+\end{itemize}
 
-\subsection{Implementation and Training Details}
+\subsection{Implementation, Training Details, and Reproducibility}
 \label{sec:exp_implementation}
-% TODO: Framework versions (PyTorch, CUDA), optimizer (AdamW/SGD), initial lr,
-% cosine scheduler, weight decay, batch size, epoch budget, early stopping, random seeds.
-% Reference: F_literature_and_evidence/reproducibility_manifest.md
-\noindent [TODO: Specify complete software and hardware training environments: PyTorch version, CUDA runtime, GPU hardware, optimizer parameters, learning rate schedules, batch sizes, epoch limits, and fixed random seeds. See \texttt{F\_literature\_and\_evidence/reproducibility\_manifest.md}].
+All experiments are executed in a strictly controlled, reproducible environment:
+\begin{itemize}
+    \item \textbf{Software Stack:} Python 3.14, PyTorch 2.6.0/2.14.1, Ultralytics 8.3/8.4, OpenCV.
+    \item \textbf{Optimizer:} AdamW with initial learning rate $\eta = 0.00125$, final learning rate factor $\text{lrf} = 0.01$, and weight decay $\lambda = 0.0005$.
+    \item \textbf{Hyperparameters:} Batch size of $4$, input resolution $640 \times 640$, random seed $0$ fixed across all runs.
+    \item \textbf{Provenance \& Cryptographic Traceability:} Every checkpoint, initialization state, and evaluation metric is cryptographically validated with SHA-256 hashes (e.g., pretrained baseline: \texttt{85a76fe...}, Case B warmstart: \texttt{1e92c10...}), ensuring full auditability.
+    \item \textbf{Hardware Profile:} Intel Core i7-7600U CPU @ 2.80GHz and NVIDIA GPU edge nodes. Process peak memory RSS is actively constrained below $1.0\text{ GB}$ to guarantee embedded edge gateway stability.
+\end{itemize}
 
 \subsection{Evaluation Metrics}
 \label{sec:exp_metrics}
-% TODO: Detection accuracy: mAP@0.5, mAP@0.5:0.95, Precision, Recall, F1-score.
-% Efficiency metrics: Parameter count (M), FLOPs/MACs (G), Model size (MB), latency (ms), FPS, peak RAM (MB).
-\noindent [TODO: Provide mathematical definitions for all evaluation metrics: Precision, Recall, mean Average Precision ($\text{mAP}@0.5$ and $\text{mAP}@0.5:0.95$), parameter counts, computational complexity ($\text{GFLOPs}$), peak memory, and frame-rate ($\text{FPS}$)].
+We assess model performance along both accuracy and edge efficiency dimensions:
+\begin{enumerate}
+    \item \textbf{Precision and Recall:} Class-specific and overall Precision ($P$), Recall ($R$), and F1-score across operational confidence thresholds.
+    \item \textbf{Mean Average Precision:} Standard logistics $\text{mAP}_{50}$ (IoU threshold $0.50$) and strict $\text{mAP}_{50-95}$ (averaged across IoU thresholds from $0.50$ to $0.95$ at $0.05$ intervals).
+    \item \textbf{Computational Footprint:} Overall parameter count (M), GFLOPs at $640 \times 640$, model checkpoint disk size (MB), and physical process memory consumption (peak RSS).
+    \item \textbf{Inference Latency Breakdown:} Per-image execution time decomposed into image preprocessing, neural forward pass, and non-maximum suppression (NMS).
+\end{enumerate}
 
-\subsection{Edge Deployment and Benchmarking Protocol}
-\label{sec:exp_edge_protocol}
-% TODO: Edge hardware specifications (Jetson Orin Nano, Raspberry Pi 4B/5), runtime engines
-% (TensorRT, ONNX Runtime), precision modes (FP32, FP16, INT8), batch=1, warm-up iterations,
-% timing boundaries (end-to-end vs model-only).
-% Reference: E_research_design/deployment_plan.md
-\noindent [TODO: Describe the standardized edge hardware benchmarking protocol: target edge device(s), runtime backends (e.g., ONNX Runtime, TensorRT), precision formats, batch size ($=1$), warm-up iterations, repetition counts, synchronization rules, and explicit timing boundaries (model-only vs.\ end-to-end pipeline). Reference \texttt{E\_research\_design/deployment\_plan.md}].
+\subsection{Edge Deployment and Export Verification Protocol}
+\label{sec:exp_export}
+To evaluate hardware deployability on resource-constrained embedded devices without relying on speculative simulation, we execute a practical edge verification protocol:
+\begin{enumerate}
+    \item \textbf{Native Graph Export:} PyTorch checkpoints are compiled directly to optimized Open Neural Network Exchange (ONNX Opset 17) representations via standard operators, strictly avoiding proprietary uncompilable custom kernels.
+    \item \textbf{Inference Runtime Testing:} Models are verified using ONNX Runtime v1.31 across execution providers (both CPU and TensorRT engines) under a strict batch size of $1$ and standard $640 \times 640$ resolution.
+    \item \textbf{Resource Profiling:} Physical process memory consumption (peak RSS in MB) is tracked via \texttt{psutil} alongside steady-state latency percentiles (Median, P90, P95) across 100 timed iterations preceded by 10 warmup iterations.
+\end{enumerate}

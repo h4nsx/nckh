@@ -6,15 +6,13 @@ Ablation experiments estimate the contribution of individual design choices. The
 
 ## 1. Core ablations
 
-| ID | Ablation | Comparison | What it tests |
-|---|---|---|---|
-| ABL-01 | Remove Mamba | Hybrid vs otherwise matched CNN-only model | Whether Mamba contributes |
-| ABL-02 | Change Mamba placement | Backbone vs neck vs low-resolution stage, if feasible | Where contextual modeling is useful |
-| ABL-03 | Change fusion | Selected fusion alternatives | Whether the fusion mechanism matters |
-| ABL-04 | Remove auxiliary data | SmartSpaces-only vs auxiliary strategy | Whether auxiliary data contributes |
-| ABL-05 | Remove compression | Original vs compressed model | Compression impact |
-| ABL-06 | Input resolution | Two or more justified resolutions | Accuracy/latency trade-off |
-| ABL-07 | Model scale | Small set of sizes if architecture supports it | Scaling behavior |
+| ID | Matching Case | Ablation Question | Comparison | What It Isolates |
+|:---|:---|:---|:---|:---|
+| **ABL-01** | **Case B vs Case A** | Effect of replacing C2PSA with SS2D at $P_5$ | Unmodified YOLO11s (C2PSA) vs YOLO11s-SS2D ($P_5$) | True contribution of $P_5$ selective scan context |
+| **ABL-02** | **Case C vs Case B** | Single vs dual SSM feature stages | SS2D at $P_5$ only vs SS2D at $P_4 + P_5$ | Trade-off of adding Mamba at stride 16 |
+| **ABL-03** | **Case D vs Case B** | Replace vs supplement attention | SS2D alone at $P_5$ vs C2PSA + SS2D combined | Whether attention and SSM are complementary |
+| **ABL-04** | **Case E vs Case B/C** | Feature neck modulation | Standard FPN/PAN neck vs Context-Gated Neck | Impact of $P_5 \to P_3$ context gating on small objects |
+| **ABL-05** | **Edge Quant** | Precision and engine optimization | FP32 PyTorch vs FP16/INT8 TensorRT | Edge acceleration and quantization degradation |
 
 Only run ablations relevant to the final architecture. If a component is not included in the final method, its ablation is not needed.
 

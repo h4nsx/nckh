@@ -1,61 +1,107 @@
 \section{Proposed Method}
 \label{sec:methodology}
 
-% Follows G_paper_and_latex/paper_outline.md (Section 3) and
-% E_research_design/architecture_candidates.md.
-% All formulations, dimensions, and blocks must represent the actual implemented system.
-
 \subsection{Problem Formulation}
 \label{sec:formulation}
-% TODO: Define input image space X \in R^{H x W x 3}, bounding box parameters (x, y, w, h),
-% class label set C, and optimization objective.
-\noindent [TODO: Formally define the 2D multi-class object detection task in warehouse scenes: input resolution $H \times W \times 3$, ground truth bounding box format, class set $\mathcal{C}$ derived from the validated dataset taxonomy, and overall optimization objectives. Reference \texttt{E\_research\_design/research\_questions\_and\_hypotheses.md}].
+Warehouse logistics perception presents severe scale disparities, visual clutter, and pervasive occlusion between moving machinery and personnel. We formulate the multi-class warehouse perception task as real-time 2D bounding box detection. Given an input RGB frame $\mathbf{X} \in \mathbb{R}^{H \times W \times 3}$ captured from stationary or automated mobile robot (AMR) camera views, the objective is to predict a set of bounding boxes $\mathcal{B} = \{(\mathbf{b}_i, c_i, s_i)\}_{i=1}^{M}$, where $\mathbf{b}_i = (x_c, y_c, w, h) \in [0, 1]^4$ specifies the normalized center coordinates and bounding box dimensions, $c_i \in \mathcal{C}$ denotes the object category, and $s_i \in [0, 1]$ represents the classification confidence score.
+
+The target class taxonomy is derived from logistics-critical warehouse categories:
+\begin{equation}
+    \mathcal{C} = \{\texttt{worker}, \texttt{forklift}, \texttt{pallet\_truck}, \texttt{amr}\}.
+\end{equation}
 
 \subsection{Overall Architecture Overview}
 \label{sec:arch_overview}
-% TODO: High-level architectural pipeline, tensor flow, and multi-scale feature hierarchies.
-% Include reference to Figure (e.g., figures/architecture_overview.pdf).
-\noindent [TODO: Describe the complete hybrid architecture pipeline from input image to multi-scale predictions. Detail the role of the CNN backbone stages, the hybrid CNN--Mamba contextual block, the multi-scale feature neck (e.g., PAN/FPN), and the detection head. Reference \texttt{E\_research\_design/architecture\_candidates.md}].
-
-% \begin{figure}[!t]
-% \centering
-% \includegraphics[width=\columnwidth]{figures/architecture_overview.pdf}
-% \caption{Schematic overview of the proposed lightweight hybrid YOLO-Mamba architecture.}
-% \label{fig:arch_overview}
-% \end{figure}
+The proposed hybrid architecture anchors on the verified lightweight \textbf{YOLO11s} detector. To achieve deployable long-range spatial context reasoning without suffering the quadratic memory scaling $\mathcal{O}(N^2)$ of vision transformers or excessive Memory Access Costs (MAC) at large resolutions, the model enforces a strict stage-wise separation:
+\begin{enumerate}
+    \item \textbf{High-Resolution Stages ($P_1$--$P_3$):} Retained as standard local convolutions to preserve edge gradients and fine details with optimal cache locality.
+    \item \textbf{Single-Scale Stage Context Modeling (Case B, $P_5$):} Selectively replaces the deepest Pointwise Spatial Attention block (\texttt{C2PSA}) at Layer 10 with an input/output shape-compatible 2D Selective Scan (\textbf{SS2D}) block accepting $[B, 512, 20, 20] \to [B, 512, 20, 20]$.
+    \item \textbf{Dual-Scale Context Modeling (Case C, $P_4 + P_5$):} Extends selective state-space processing to intermediate feature resolution $P_4$ ($[B, 256, 40, 40]$ at Layer 7) alongside $P_5$ ($[B, 512, 20, 20]$ at Layer 11) to capture multi-scale warehouse context across both distant small entities and large industrial vehicles.
+    \item \textbf{Feature Neck \& Head:} Preserves the original unmodified YOLO11s FPN/PAN neck and decoupled anchor-free \texttt{Detect} head to maintain baseline stability and enable clean, unconfounded ablation isolation.
+\end{enumerate}
 
 \subsection{CNN Local Feature Extraction}
 \label{sec:cnn_features}
-% TODO: Specify the exact CNN backbone blocks used (e.g., CSP/C2f/C3k2 blocks),
-% layer channels, strides, and receptive field characteristics.
-\noindent [TODO: Specify the exact CNN backbone architecture, layer dimensions, feature strides ($P_3, P_4, P_5$), and inductive bias for local feature extraction].
+The backbone progressively downsamples the input image through convolutional strides of 2, generating a multi-scale feature pyramid:
+\begin{itemize}
+    \item Stage $P_3$ ($80 \times 80$, stride 8, 128 channels): Captures fine spatial details and small objects (e.g., distant AMRs or tags).
+    \item Stage $P_4$ ($40 \times 40$, stride 16, 256 channels): Encodes medium-scale object features and localized structural cues.
+    \item Stage $P_5$ ($20 \times 20$, stride 32, 512 channels): Represents low-resolution semantic abstractions across long warehouse aisles.
+\end{itemize}
+Local feature aggregation is governed by Cross-Stage Partial blocks (\texttt{C3k2}) and Spatial Pyramid Pooling Fast (\texttt{SPPF}) at Layer 9, producing a dense $512$-channel feature map at $P_5$.
 
-\subsection{Mamba/State-Space Contextual Block}
+\subsection{Warehouse SS2D Contextual Block}
 \label{sec:mamba_integration}
-% TODO: 2D-to-1D sequence flattening, scanning mechanisms (e.g., 2-way or 4-way selective scan),
-% state dimension, projection matrices, and computational implications.
-\noindent [TODO: Define the mathematical formulation of the Mamba state-space block, including sequence conversion from 2D feature maps, scanning directions, discretization parameters, and linear state updates. Detail exact tensor dimensions and channel projections. See \texttt{E\_research\_design/architecture\_candidates.md} (Section 5)].
+To capture global aisle-level context without quadratic self-attention costs, we introduce the \textbf{WarehouseSS2DBlock} at Layer 10. The block accepts the $P_5$ feature tensor $\mathbf{F} \in \mathbb{R}^{B \times 512 \times 20 \times 20}$ and processes it as follows:
 
-\subsection{Multi-Scale Feature Fusion}
+\subsubsection{Local Projection and Channel Expansion}
+An initial $1 \times 1$ convolution projects input channels $C_{\text{in}} = 512$ to inner state dimension $d_{\text{inner}} = \lfloor \text{expand} \times C_{\text{in}} \rfloor = 256$ (with expansion ratio $\text{expand} = 0.5$):
+\begin{equation}
+    \mathbf{F}_0 = \text{SiLU}(\text{BN}(\text{Conv}_{1 \times 1}(\mathbf{F}))).
+\end{equation}
+A depthwise $3 \times 3$ convolution then aggregates immediate localized spatial context:
+\begin{equation}
+    \mathbf{F}_{\text{dw}} = \text{SiLU}(\text{BN}(\text{DWConv}_{3 \times 3}(\mathbf{F}_0))).
+\end{equation}
+
+\subsubsection{Four-Way 2D Selective State Space Scan}
+To eliminate the 1D causal scanning bias of sequence models and handle 2D spatial layouts, $\mathbf{F}_{\text{dw}}$ is unfolded along four traversal directions across the spatial grid $L = H \times W = 400$:
+\begin{enumerate}
+    \item Top-down, left-to-right (standard row-major scan): $\mathbf{u}_1$
+    \item Bottom-up, right-to-left (reversed row-major scan): $\mathbf{u}_2$
+    \item Left-to-right, top-down (column-major scan): $\mathbf{u}_3$
+    \item Right-to-left, bottom-up (reversed column-major scan): $\mathbf{u}_4$
+\end{enumerate}
+
+For each direction $k \in \{1, 2, 3, 4\}$, continuous state-space parameters $(\mathbf{A}_k, \mathbf{B}_k, \mathbf{C}_k, \mathbf{\Delta}_k)$ are dynamically conditioned on the input tokens through linear projections:
+\begin{align}
+    \mathbf{\Delta}_k &= \text{softplus}(\mathbf{W}_{\Delta, k} \mathbf{u}_k), \\
+    \mathbf{B}_k &= \mathbf{W}_{B, k} \mathbf{u}_k, \quad \mathbf{C}_k = \mathbf{W}_{C, k} \mathbf{u}_k.
+\end{align}
+Discretization maps continuous parameters to discrete step operators:
+\begin{equation}
+    \overline{\mathbf{A}}_k = \exp(\mathbf{\Delta}_k \mathbf{A}_k), \quad \overline{\mathbf{B}}_k = (\mathbf{\Delta}_k \mathbf{u}_k) \otimes \mathbf{B}_k,
+\end{equation}
+where $\overline{\mathbf{A}}_k$ implements the exact matrix exponential of diagonal state matrix $\mathbf{A}_k = -\exp(\mathbf{A}_{\text{logs}, k})$ and $\overline{\mathbf{B}}_k$ adopts a lightweight first-order Euler-bilinear input modulation.
+The discrete recurrence updates the hidden state $\mathbf{h}_k(t) \in \mathbb{R}^{d_{\text{inner}} \times d_{\text{state}}}$ (with state dimension $d_{\text{state}} = 16$) in linear time:
+\begin{align}
+    \mathbf{h}_k(t) &= \overline{\mathbf{A}}_k(t) \mathbf{h}_k(t-1) + \overline{\mathbf{B}}_k(t), \\
+    \mathbf{y}_k(t) &= \sum_{n=1}^{d_{\text{state}}} \mathbf{h}_{k, n}(t) \mathbf{C}_{k, n}(t) + \mathbf{D}_k \mathbf{u}_k(t).
+\end{align}
+The four scanned sequences are reversed back to original spatial orientation, folded into 2D tensors, and summed:
+\begin{equation}
+    \mathbf{F}_{\text{ssm}} = \sum_{k=1}^{4} \text{Unfold}_{2\text{D}}(\mathbf{y}_k).
+\end{equation}
+
+The resulting feature representation is projected back to $C_{\text{out}} = 512$ channels and recombined via an identity shortcut:
+\begin{equation}
+    \mathbf{Y} = \mathbf{F} + \text{BN}(\text{Conv}_{1 \times 1}(\mathbf{F}_{\text{ssm}})).
+\end{equation}
+This projection preserves the spatial dimensions and channel depth $[B, 512, 20, 20]$, guaranteeing seamless drop-in integration with the downstream YOLO11s feature aggregation network.
+
+\subsection{Multi-Scale Feature Fusion and Detection Head}
 \label{sec:fusion}
-% TODO: Mathematical definition of the feature fusion mechanism (e.g., residual addition,
-% concatenation with projection, or learned gating).
-\noindent [TODO: Present the formal equations for fusing local CNN representations and global Mamba contextual representations. Specify channel alignment and projection operations. Reference \texttt{E\_research\_design/architecture\_candidates.md} (Section 3)].
+The output $\mathbf{Y}$ feeds into the standard YOLO11s Path Aggregation Network (PANet). Multi-scale contextual information propagates top-down ($P_5 \to P_4 \to P_3$) via upsampling and concatenation, followed by bottom-up refinement ($P_3 \to P_4 \to P_5$).
 
-\subsection{Detection Head and Loss Functions}
-\label{sec:head_loss}
-% TODO: Anchor-free / anchor-based head formulation, classification loss (BCE/Focal),
-% bounding-box regression loss (CIoU/GIoU/DFL).
-\noindent [TODO: Detail the detection head architecture and multi-task loss formulation (classification loss, box regression loss, and distribution focal loss). Specify hyperparameters and loss weighting coefficients].
+The decoupled anchor-free \texttt{Detect} head computes task-specific predictions across scales. Training minimizes a composite loss function:
+\begin{equation}
+    \mathcal{L} = \lambda_{\text{box}} \mathcal{L}_{\text{box}} + \lambda_{\text{cls}} \mathcal{L}_{\text{cls}} + \lambda_{\text{dfl}} \mathcal{L}_{\text{dfl}},
+\end{equation}
+where $\mathcal{L}_{\text{box}}$ is Complete Intersection-over-Union (CIoU) loss, $\mathcal{L}_{\text{cls}}$ is Binary Cross-Entropy (BCE) classification loss, and $\mathcal{L}_{\text{dfl}}$ is Distribution Focal Loss (DFL).
 
-\subsection{Computational Complexity Analysis}
+\subsection{Analytical Complexity and Parameter Footprint}
 \label{sec:complexity}
-% TODO: Analytical parameter count, FLOPs/MACs calculation, and comparison of asymptotic
-% complexity: O(N) for SSM vs O(N^2) for Multi-Head Self-Attention.
-\noindent [TODO: Provide analytical complexity formulas comparing the hybrid block with standard self-attention mechanisms, detailing parameter footprint, FLOPs/MACs at standard input resolution ($640 \times 640$), and theoretical memory bounds. See \texttt{E\_research\_design/architecture\_candidates.md} (Section 4)].
+The surgical substitution of Layer 10 significantly reduces both model parameters and computational complexity:
+\begin{itemize}
+    \item \textbf{Standard \texttt{C2PSA} (Self-Attention):} Requires $990,976$ parameters.
+    \item \textbf{Proposed \texttt{WarehouseSS2DBlock}:} Requires $357,632$ parameters ($633,344$ fewer block parameters, a $63.9\%$ parameter reduction in the attention stage).
+    \item \textbf{Global Model Impact:} Overall parameters decrease from $9,429,340$ ($9.43\text{ M}$) to $8,795,996$ ($8.80\text{ M}$, a $-6.72\%$ overall reduction on warehouse detection). Computational complexity is maintained at $21.2\text{ GFLOPs}$.
+\end{itemize}
 
-\subsection{Training and Inference Workflow}
+\subsection{Two-Stage Training Protocol}
 \label{sec:training_workflow}
-% TODO: End-to-end training pipeline, optimization schedule, checkpoint selection,
-% and deployment conversion steps (e.g., export to ONNX/TensorRT).
-\noindent [TODO: Document the step-by-step training pipeline, convergence criteria, and export workflow for edge inference runtimes. Reference \texttt{E\_research\_design/baseline\_plan.md}].
+Empirical evidence reveals a ``cold block'' perturbation phenomenon when inserting a newly initialized SSM block into a pretrained CNN backbone. We establish a structured two-stage optimization strategy:
+\begin{enumerate}
+    \item \textbf{Stage 1 (SSM Warmup):} The pretrained CNN backbone stages ($P_1$--$P_4$) are frozen. The learning rate is applied strictly to the \texttt{WarehouseSS2DBlock} and detection head for $5$ warm-up epochs to align the continuous state-space matrices without destabilizing early visual filters.
+    \item \textbf{Stage 2 (End-to-End Fine-Tuning):} All parameters are unfrozen for fine-tuning using AdamW with cosine learning rate decay.
+\end{enumerate}
