@@ -1,0 +1,11 @@
+# NVIDIA PhysicalAI-SmartSpaces Micro-Benchmark Dataset
+path: data/smartspaces_micro
+train: images/train
+val: images/val
+
+# Class Taxonomy
+names:
+  0: worker
+  1: forklift
+  2: pallet_truck
+  3: amr
