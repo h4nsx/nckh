@@ -1,0 +1,49 @@
+# Training and Experiment Configuration Matrix
+# Study: YOLO11s vs. YOLO11s-SS2D Two-Stage Optimization Study
+# Dataset: NVIDIA PhysicalAI-SmartSpaces Zero-Leakage Logistics Split
+
+experiment:
+  name: two_stage_protocol_study
+  project: runs/detect/runs
+  seed: 0
+  device: 0 # or 'cpu'
+
+dataset:
+  config: configs/smartspaces_micro.yaml
+  imgsz: 640
+  batch: 4
+  workers: 2
+
+optimizer:
+  type: AdamW
+  lr0: 0.00125
+  lrf: 0.01
+  momentum: 0.9
+  weight_decay: 0.0005
+
+arms:
+  arm1_baseline:
+    description: "Baseline YOLO11s (COCO Transfer)"
+    model: yolo11s.pt
+    epochs: 20
+    warmup_epochs: 0
+
+  arm2_case_b_single:
+    description: "Case B YOLO11s-SS2D (Single-Scale P5, Single-Stage Transfer)"
+    yaml: models/yolo11s_ss2d_p5.yaml
+    warmstart_weights: models/yolo11s_ss2d_full_warmstart.pt
+    epochs: 20
+    warmup_epochs: 0
+
+  arm3_case_b_two_stage:
+    description: "Case B YOLO11s-SS2D (Two-Stage Warmup Protocol)"
+    yaml: models/yolo11s_ss2d_p5.yaml
+    warmstart_weights: models/yolo11s_ss2d_full_warmstart.pt
+    stage1_epochs: 5 # CNN backbone frozen (P1-P4)
+    stage2_epochs: 15 # Full end-to-end unfreeze
+
+  arm4_case_c_dual:
+    description: "Case C YOLO11s-SS2D (Dual-Scale P4+P5 Selective Scan)"
+    yaml: models/yolo11s_ss2d_p4_p5.yaml
+    warmstart_weights: models/yolo11s_ss2d_p4_p5_full_warmstart.pt
+    epochs: 20
