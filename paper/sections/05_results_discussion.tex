@@ -114,15 +114,15 @@ To evaluate category-specific representations, Table~\ref{tab:per_class_results}
 }
 \end{table}
 
-As detailed in Table~\ref{tab:per_class_results}, two prominent trends emerge:
-\begin{itemize}
-    \item \textbf{Forklift Perception (+6.2\% Gain):} Both Case B ($76.3\%\text{ mAP}_{50}$) and Case C ($75.3\%$) significantly outperform Baseline YOLO11s ($70.1\%$). In busy logistics corridors, motorized forklifts present severe collision hazards to personnel. The 4-direction state-space recurrence along warehouse aisles effectively captures long-range structural dependencies, successfully resolving heavy machinery even under extensive rack occlusions.
-    \item \textbf{Personnel Safety Precision ($96.6\%$ on Case C):} Dual-scale state-space scanning achieves the highest precision for the \texttt{worker} class ($96.6\%$), suppressing false-positive detections that can trigger disruptive automated emergency stops.
+As summarized in Table~\ref{tab:per_class_results}, the category-level evaluation highlights key empirical gains:
+\begin{enumerate}
+    \item \textbf{Forklift Perception (+6.2\% Gain):} Both Case B ($76.3\%\text{ mAP}_{50}$) and Case C ($75.3\%$) significantly outperform Baseline YOLO11s ($70.1\%$). In busy logistics corridors, motorized forklifts present severe collision hazards to personnel. The 4-direction state-space recurrence along warehouse aisles captures long-range structural dependencies, successfully resolving heavy machinery even under extensive rack occlusions.
+    \item \textbf{Personnel Safety Precision ($96.6\%$):} Case C achieves the highest precision for the \texttt{worker} class ($96.6\%$), suppressing false-positive detections that trigger disruptive emergency stops.
     \item \textbf{Autonomous Mobile Robots (AMRs):} Case C achieves $85.0\%\text{ mAP}_{50}$ and $80.2\%$ recall on low-profile AMRs, confirming that intermediate $P_4$ state-space modeling successfully preserves small, floor-level robotic targets.
-\end{itemize}
+\end{enumerate}
 
 \subsubsection{Qualitative Visual Inference Comparison}
-Figure~\ref{fig:qualitative_comparison} illustrates visual detection performance across complex multi-class warehouse test scenes characterized by dense target clusters, high rack occlusions, and variable lighting. While Baseline YOLO11s exhibits missed detections on distant workers and occluded mobile robots, the hybrid YOLO11s-SS2D models (especially under the two-stage protocol) demonstrate heightened sensitivity and tighter bounding box localization across heavily occluded targets.
+Figure~\ref{fig:qualitative_comparison} illustrates detection performance across complex warehouse scenes with dense clusters, rack occlusions, and variable lighting. While Baseline YOLO11s exhibits missed detections on distant workers and occluded mobile robots, the hybrid YOLO11s-SS2D models demonstrate heightened sensitivity and tighter bounding box localization across heavily occluded targets.
 
 \subsection{Edge Deployment and Hardware Verification}
 \label{sec:res_edge_deployment}
