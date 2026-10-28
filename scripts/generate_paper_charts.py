@@ -96,25 +96,30 @@ def generate_architectural_comparison_chart():
     print(f"Generated: {output_path}")
 
 def generate_edge_deployment_chart():
-    fig, ax = plt.subplots(figsize=(6.5, 4.0))
+    fig, ax = plt.subplots(figsize=(7.2, 4.2))
 
-    categories = ['Host CPU\n(PyTorch)', 'Host CPU\n(ONNX Runtime)', 'Edge Budget Limit\n(1.0 GB Target)']
-    rss_values = [420.0, 405.2, 1024.0] # Peak RSS in MB
-    colors = ['#4575b4', '#74add1', '#d73027']
+    categories = [
+        'Pi 4 Baseline Control\n(BCM2711 ARM Cortex-A72)',
+        'Pi 4 YOLO11s-SS2D\n(BCM2711 ARM Cortex-A72)',
+        'Host x86 CPU\n(YOLO11s-SS2D Case B)',
+        'Edge Embedded Budget\n(1.0 GB Envelope Limit)'
+    ]
+    rss_values = [231.5, 371.9, 395.7, 1024.0] # Peak RSS in MB
+    colors = ['#4575b4', '#313695', '#74add1', '#d73027']
 
     y_pos = np.arange(len(categories))
-    bars = ax.barh(y_pos, rss_values, align='center', color=colors, edgecolor='black', height=0.5, alpha=0.9)
+    bars = ax.barh(y_pos, rss_values, align='center', color=colors, edgecolor='black', height=0.55, alpha=0.9)
 
     ax.set_yticks(y_pos)
-    ax.set_yticklabels(categories)
+    ax.set_yticklabels(categories, fontsize=9.5)
     ax.invert_yaxis()  # labels read top-to-bottom
-    ax.set_xlabel('Peak Physical Process Memory RSS (MB)')
-    ax.set_title('Inference Memory RSS vs. Constrained Edge Budget')
-    ax.set_xlim(0, 1150)
+    ax.set_xlabel('Peak Physical Process Memory RSS (MB)', fontsize=10.5, fontweight='bold')
+    ax.set_title('Physical Edge Memory Footprint vs. Embedded Hardware Ceiling', fontsize=11, fontweight='bold')
+    ax.set_xlim(0, 1200)
     ax.grid(axis='x', linestyle='--', alpha=0.5)
 
     # Add vertical line for 1GB boundary
-    ax.axvline(1024, color='#d73027', linestyle='--', linewidth=1.5, alpha=0.7)
+    ax.axvline(1024, color='#d73027', linestyle='--', linewidth=1.8, alpha=0.8)
 
     # Value annotations
     for bar in bars:
@@ -122,17 +127,21 @@ def generate_edge_deployment_chart():
         label = f"{width:.1f} MB"
         if width == 1024.0:
             label += " (Target Ceiling)"
-        elif width == 405.2:
-            label += " (-60.4% under ceiling)"
+        elif width == 371.9:
+            label += " (-62.8% below 1GB limit)"
+        elif width == 231.5:
+            label += " (-77.4% below limit)"
+        elif width == 395.7:
+            label += " (-61.4% below limit)"
         ax.annotate(label,
                     xy=(width, bar.get_y() + bar.get_height() / 2),
-                    xytext=(5, 0), textcoords="offset points",
+                    xytext=(6, 0), textcoords="offset points",
                     ha='left', va='center', fontweight='bold', fontsize=9.5)
 
     plt.tight_layout()
     output_path = "paper/figures/fig_edge_memory_footprint.pdf"
     plt.savefig(output_path, format="pdf", bbox_inches="tight")
-    plt.savefig("paper/figures/fig_edge_memory_footprint.png", format="png", bbox_inches="tight")
+    plt.savefig("paper/figures/fig_edge_memory_footprint.png", format="png", bbox_inches="tight", dpi=300)
     print(f"Generated: {output_path}")
 
 if __name__ == '__main__':

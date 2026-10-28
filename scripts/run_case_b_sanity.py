@@ -11,7 +11,6 @@ import time
 import psutil
 from pathlib import Path
 
-# Setup paths and Ultralytics registry injection
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 import ultralytics.nn.tasks as tasks
@@ -31,14 +30,12 @@ def run_case_b_sanity():
     start_time = time.time()
     process = psutil.Process(os.getpid())
 
-    # Load custom Case B model
     model_cfg = "models/yolo11s_ss2d_p5.yaml"
     model = YOLO(model_cfg)
     
     total_params = sum(p.numel() for p in model.model.parameters())
     print(f"Loaded YOLO11s-SS2D (Case B) successfully. Total parameters: {total_params:,}")
 
-    # Train for 1 sanity epoch under identical hyperparameters as baseline
     results = model.train(
         data="data/smartspaces_micro/smartspaces_micro.yaml",
         epochs=1,
