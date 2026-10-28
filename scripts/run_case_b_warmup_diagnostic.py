@@ -38,13 +38,7 @@ def run_diagnostic():
     ckpt = torch.load(ckpt_path, map_location="cpu", weights_only=False)
     model.model.load_state_dict(ckpt["model"].state_dict())
 
-    # In Ultralytics, freeze parameter freezes the first N layers in model.model (0 to N-1)
-    # Layers 0 to 9 are the backbone CNN stages (Conv, C3k2, SPPF)
-    # Layer 10 is WarehouseSS2DBlock!
-    # By setting freeze=10, layers 0..9 are FROZEN, while Layer 10 (SS2D) and neck/head remain TRAINABLE.
-    print("[3/3] Freezing Backbone Layers 0..9 (Preserving pretrained visual representations)...")
-    print("      Only Layer 10 (WarehouseSS2DBlock) and downstream neck/head will be updated.")
-
+    print("[3/3] Freezing Backbone Layers 0..9...")
     model.train(
         data="data/smartspaces_micro/smartspaces_micro.yaml",
         epochs=2,

@@ -26,7 +26,6 @@ def train_pretrained_baseline():
     print("=" * 60)
     print("STEP 1: PRETRAINED BASELINE YOLO11s (2 Epochs)")
     print("=" * 60)
-    # yolo11s.pt will fine-tune on smartspaces_micro
     model = YOLO("yolo11s.pt")
     model.train(
         data="data/smartspaces_micro/smartspaces_micro.yaml",

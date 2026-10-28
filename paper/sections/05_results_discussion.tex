@@ -143,26 +143,34 @@ To validate whether the lightweight state-space formulation is viable for real-w
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{lcccccc}
 \toprule
-\textbf{Model Architecture} & \textbf{Format} & \textbf{Artifact Size} & \textbf{Peak RSS (MB)} & \textbf{Median (ms)} & \textbf{Mean Latency (ms)} & \textbf{Throughput (FPS)} \\
+\textbf{Model Architecture} & \textbf{Platform / Device} & \textbf{Artifact} & \textbf{Peak RSS} & \textbf{Median (ms)} & \textbf{Mean (ms)} & \textbf{Throughput} \\
 \midrule
-YOLO11s (Baseline Control) & ONNX (Opset 17) & 36.2 MB & 285.1 & 228.95 & 244.72 $\pm$ 33.5 & 4.37 \\
-\textbf{YOLO11s-SS2D (Case B, P5)} & \textbf{ONNX (Opset 17)} & \textbf{38.5 MB} & \textbf{395.7} & \textbf{301.26} & \textbf{304.01 $\pm$ 8.5} & \textbf{3.32} \\
-YOLO11s-SS2D (Case C, P4+P5) & PyTorch / ONNX & 17.3 MB & 401.3 & 699.33 & 694.58 $\pm$ 12.1 & 1.44 \\
+\multicolumn{7}{l}{\textit{Host Development Environment (x86\_64 Core i7 / ONNX Runtime v1.31)}} \\
+YOLO11s (Baseline Control) & Host CPU & 36.2 MB & 285.1 MB & 228.95 & 244.72 $\pm$ 33.5 & 4.37 FPS \\
+\textbf{YOLO11s-SS2D (Case B, P5)} & \textbf{Host CPU} & \textbf{38.5 MB} & \textbf{395.7 MB} & \textbf{301.26} & \textbf{304.01 $\pm$ 8.5} & \textbf{3.32 FPS} \\
+YOLO11s-SS2D (Case C, P4+P5) & Host CPU & 47.1 MB & 401.3 MB & 699.33 & 694.58 $\pm$ 12.1 & 1.44 FPS \\
+\midrule
+\multicolumn{7}{l}{\textit{Physical Embedded Edge Silicon (Raspberry Pi 4 Model B Rev 1.2, Quad-Core Cortex-A72 @ 1.5 GHz, aarch64)}} \\
+YOLO11s (Baseline Control) & Pi 4 ARM & 36.2 MB & 231.5 MB & 1166.70 & 1169.73 $\pm$ 24.7 & 0.86 FPS \\
+\textbf{YOLO11s-SS2D (Case B, P5)} & \textbf{Pi 4 ARM} & \textbf{38.5 MB} & \textbf{371.9 MB} & \textbf{1392.43} & \textbf{1398.19 $\pm$ 28.0} & \textbf{0.72 FPS} \\
+YOLO11s-SS2D (Case C, P4+P5) & Pi 4 ARM & 47.1 MB & 714.9 MB & 1954.21 & 1965.07 $\pm$ 29.7 & 0.51 FPS \\
 \bottomrule
 \end{tabular}%
 }
 \end{table}
 
-As summarized in Table~\ref{tab:edge_runtime} and Figure~\ref{fig:edge_memory}, the proposed YOLO11s-SS2D exports seamlessly into native ONNX with graph slimming (\texttt{onnxslim}). Because our 2D selective scan is formulated via vectorized PyTorch recurrence rather than proprietary C++/CUDA extensions, it requires zero custom plugins on target hardware. During steady-state inference, total process memory consumption of the trained model remained at \textbf{$395.7\text{ MB}$}, operating \textbf{$60.4\%$ beneath the $1.0\text{ GB}$ memory ceiling} of common industrial edge hardware (such as the NVIDIA Jetson Nano and Raspberry Pi 4/5). 
+As summarized in Table~\ref{tab:edge_runtime} and Figure~\ref{fig:edge_memory}, the proposed YOLO11s-SS2D exports seamlessly into native ONNX with graph slimming (\texttt{onnxslim}). Because our 2D selective scan is formulated via vectorized PyTorch recurrence rather than proprietary C++/CUDA extensions, it requires zero custom plugins on target hardware. 
+
+To validate edge viability on physical silicon, we deployed both the baseline and state-space architectures onto a \textbf{Raspberry Pi 4 Model B Rev 1.2} (Quad-Core Broadcom BCM2711 ARM Cortex-A72 @ 1.5\,GHz, aarch64). During physical on-device inference, total process physical memory consumption of YOLO11s-SS2D (Case B) remained at \textbf{$371.9\text{ MB}$}, operating \textbf{$62.8\%$ beneath the $1.0\text{ GB}$ memory ceiling} of embedded edge gateways. Even the multi-scale Case C model maintained a modest memory footprint of $714.9\text{ MB}$, well within standard 2\,GB--4\,GB edge SBC limits.
 
 \subsubsection{Scientific Investigation of the Accuracy--Efficiency Trade-off}
-A critical empirical finding in Table~\ref{tab:edge_runtime} is that despite possessing fewer parameters ($9.005\text{ M}$ vs. $9.414\text{ M}$) and lower theoretical complexity ($21.0\text{ GFLOPs}$ vs. $21.4\text{ GFLOPs}$), the steady-state CPU latency of Case B ($304.01\text{ ms}$) is $59.3\text{ ms}$ ($+24.2\%$) higher than Baseline YOLO11s ($244.72\text{ ms}$). Profiling the component-level operations reveals the root cause:
+A critical empirical finding confirmed consistently across both x86\_64 host and physical ARM64 hardware in Table~\ref{tab:edge_runtime} is that despite possessing fewer parameters ($8.796\text{ M}$ vs. $9.429\text{ M}$) and lower theoretical complexity ($21.2\text{ GFLOPs}$ vs. $21.7\text{ GFLOPs}$), the steady-state CPU latency of Case B is slightly higher than Baseline YOLO11s ($+24.2\%$ on x86, $+19.5\%$ on ARM Cortex-A72: $1398.19\text{ ms}$ vs. $1169.73\text{ ms}$). Furthermore, adding a second selective scan block at Stage P4 (Case C) increases latency to $1965.07\text{ ms}$ on physical silicon. Profiling the component-level operations reveals the root cause:
 \begin{enumerate}
     \item \textbf{Sequential Recurrence vs. Parallel Matrix Multiplication:} Modern CPU math runtimes (OpenMP, oneDNN, BLAS) achieve near-theoretical peak hardware throughput on 2D convolutions and self-attention projections due to dense parallel gemm operations. Conversely, the selective state-space scan requires updating an internal hidden state across a $L = 400$ sequence length for 4 directional passes:
     \begin{equation}
         \mathbf{h}(t) = \overline{\mathbf{A}}(t) \mathbf{h}(t-1) + \overline{\mathbf{B}}(t).
     \end{equation}
-    On general-purpose CPUs lacking specialized SSM hardware accelerators, this continuous state update runs sequentially in a recurrence loop, incurring repeated cache lookups and instruction-level serialization overhead. Standalone component profiling confirms that \texttt{WarehouseSS2DBlock} consumes $137.8\text{ ms}$ median execution time on CPU, compared to $17.1\text{ ms}$ for the highly optimized BLAS-parallelized \texttt{C2PSA} block.
+    On general-purpose CPUs lacking specialized SSM hardware accelerators, this continuous state update runs sequentially in a recurrence loop, incurring repeated cache lookups and instruction-level serialization overhead. In Case C, extending selective recurrence to the $40 \times 40 = 1600$ token grid at P4 inflates the serialized loop count fourfold, explaining the jump to $1965\text{ ms}$ on the Pi 4 CPU.
     \item \textbf{Linear Token Scaling Advantage at Higher Resolutions:} While sequential recurrence introduces a constant overhead on small $20 \times 20$ feature grids on CPU, its theoretical linear complexity $\mathcal{O}(N)$ scales far more gracefully than quadratic self-attention $\mathcal{O}(N^2)$ as spatial token resolution increases.
-    \item \textbf{Edge Hardware Acceleration Path:} On edge platforms equipped with integrated GPU or NPU accelerators (such as the NVIDIA Jetson Orin Nano), the 4-direction scan is executed via parallel associative prefix scans (Blelloch scan), eliminating the sequential loop and unlocking high-throughput real-time deployment while preserving the $+6.2\%$ forklift detection boost and $60\%$ RAM headroom.
+    \item \textbf{Edge Hardware Acceleration Path:} On edge platforms equipped with integrated GPU or NPU accelerators (such as the NVIDIA Jetson Orin Nano), the 4-direction scan is executed via parallel associative prefix scans (Blelloch scan), eliminating the sequential loop and unlocking high-throughput real-time deployment while preserving the $+6.2\%$ forklift detection boost and $62.8\%$ RAM headroom.
 \end{enumerate}

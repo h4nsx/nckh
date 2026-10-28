@@ -14,9 +14,9 @@ Our YOLO11s-SS2D architecture replaces the deep multi-head self-attention block 
 Because our v2 implementation is written in vectorized pure-PyTorch recurrence using standard tensor operations (linear projections, cumulative sums, depthwise convolutions, gating, and residuals), **it exports directly to native ONNX without requiring any proprietary C++/CUDA plugins**.
 
 ### Verified Model Artifacts:
-* **PyTorch Checkpoint:** `models/yolo11s_ss2d_full_warmstart.pt` (34.0 MB, 8.81M params, 21.1 GFLOPs)
-* **Optimized ONNX Artifact:** `models/yolo11s_ss2d_full_warmstart.onnx` (38.6 MB, graph-slimmed)
-* **Tensor Dimensions:** Input `[1, 3, 640, 640]`, Output `[1, 84, 8400]`
+* **Canonical Finetuned Checkpoint:** `runs/detect/runs/two_stage_protocol_study/arm3_stage2_finetune/weights/best.pt` (34.0 MB, 8.80M params, 21.2 GFLOPs)
+* **Canonical 4-Class ONNX Artifact:** `runs/detect/runs/two_stage_protocol_study/arm3_stage2_finetune/weights/best.onnx` (38.5 MB, graph-slimmed)
+* **Tensor Dimensions:** Input `[1, 3, 640, 640]`, Output `[1, 8, 8400]` (4 box coordinates + 4 class probabilities: `worker`, `forklift`, `pallet_truck`, `amr`)
 
 ---
 

@@ -84,16 +84,17 @@ All models were evaluated under identical experimental conditions on the **NVIDI
 - **Heavy Machinery Sensitivity:** Forklifts benefit the most from continuous 2D state-space modeling ($+6.1\%$ to $+9.6\%$ $\text{mAP}_{50}$ boost). The multi-directional scan resolves elongated masts and roll cages through multi-tier pallet racking.
 - **Worker Safety & False Alarm Suppression:** Case C achieves **$96.6\%$ precision on warehouse personnel**, preventing false triggers of automatic emergency-stop systems.
 - **Optimization Dynamics:** Single-stage training reaches high peak accuracy quickly ($71.95\%$), whereas the Two-Stage Warmup protocol (freezing the CNN backbone for 5 epochs) produces the most balanced per-class representations and the highest overall safety recall ($65.06\%$).
-- **Edge Deployment Headroom:** The model operates at **$395.7\text{ MB}$ peak RSS**, running **$60.4\%$ beneath the 1.0 GB physical memory ceiling** of common industrial edge gateways.
+- **Edge Deployment Headroom:** On physical embedded silicon (**Raspberry Pi 4 Model B Rev 1.2, Quad-Core Cortex-A72 @ 1.5 GHz**), the model operates at **$371.9\text{ MB}$ peak RSS**, running **$62.8\%$ beneath the 1.0 GB physical memory ceiling** of common industrial edge gateways.
+- **Physical Edge Latency Profile:** Steady-state on-device CPU latency measures **$1169.73\text{ ms}$ (Baseline, 0.86 FPS)** vs. **$1398.19\text{ ms}$ (Case B SS2D, 0.72 FPS)**, matching theoretical predictions ($\approx 1.20\times$ factor).
 
 ---
 
 ## 🔬 Scientific Honesty: Accuracy–Efficiency Trade-off
 
-A critical research contribution of this work is investigating the wall-clock execution profile of visual state space models on edge hardware:
-- While theoretical FLOPs ($21.2\text{ G}$ vs. $21.7\text{ G}$) and parameters ($8.796\text{ M}$ vs. $9.429\text{ M}$) are lower, **steady-state ONNX CPU latency is higher** ($304.01\text{ ms}$ vs. $244.72\text{ ms}$).
-- **The Bottleneck:** Convolutions and standard attention map efficiently to BLAS matrix multiplication (`gemm`) on CPU SIMD units. In contrast, selective state-space scans require sequential recurrence updates across $L=400$ steps for 4 passes, which is memory-bandwidth bound on CPUs.
-- **Hardware Acceleration Path:** On edge devices equipped with GPU/NPU acceleration (e.g., NVIDIA Jetson Orin), parallel associative prefix scans (Blelloch scan) bypass sequential loops, unlocking high-throughput inference while retaining parameter savings and occlusion sensitivity.
+A critical research contribution of this work is investigating the wall-clock execution profile of visual state space models on embedded edge hardware:
+- While theoretical FLOPs ($21.2\text{ G}$ vs. $21.7\text{ G}$) and parameters ($8.796\text{ M}$ vs. $9.429\text{ M}$) are lower, **steady-state ONNX CPU latency is higher** ($304.01\text{ ms}$ vs. $244.72\text{ ms}$ on x86 host; $1398.19\text{ ms}$ vs. $1169.73\text{ ms}$ on Raspberry Pi 4 ARM).
+- **The Bottleneck:** Convolutions and standard attention map efficiently to BLAS matrix multiplication (`gemm`) on CPU SIMD units. In contrast, selective state-space scans require sequential recurrence updates across $L=400$ steps for 4 passes, which is memory-bandwidth bound on single-threaded CPU loops.
+- **Hardware Acceleration Path:** On edge devices equipped with GPU/NPU acceleration (e.g., NVIDIA Jetson Orin Nano), parallel associative prefix scans (Blelloch scan) bypass sequential loops, unlocking high-throughput inference while retaining parameter savings and occlusion sensitivity.
 
 ---
 
