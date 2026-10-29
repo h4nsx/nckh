@@ -39,24 +39,25 @@ The verified dataset taxonomy comprises four primary logistics classes: \texttt{
 \label{sec:exp_preprocessing}
 Raw 1080p frames ($1920 \times 1080$) are converted directly into normalized bounding box coordinates $(x_c, y_c, w_n, h_n)$. Degenerate boxes with dimensions $\le 4\text{ pixels}$ are filtered. Extracted frames are rescaled to standard detector resolution ($640 \times 640$). Augmentations during training include random horizontal flipping ($p=0.5$), HSV color space jitter ($h=0.015, s=0.7, v=0.4$), and spatial translation ($0.1$).
 
-\subsection{Experimental Baseline and Case Configurations}
+\subsection{Experimental Arms and Architectural Configurations}
 \label{sec:exp_baselines}
-Our evaluation is organized around direct, unconfounded comparisons:
+Our evaluation is organized around four strictly controlled experimental arms to isolate architectural and optimization effects:
 \begin{itemize}
-    \item \textbf{Baseline (Control YOLO11s):} Standard unmodified YOLO11s containing the original \texttt{C2PSA} self-attention block at Layer 10 ($9.43\text{ M}$ parameters, $21.7\text{ GFLOPs}$).
-    \item \textbf{Case B (Proposed YOLO11s-SS2D Single-Scale):} Surgical replacement of Layer 10 with the 4-direction \texttt{WarehouseSS2DBlock} at $P_5$ ($8.80\text{ M}$ parameters, $21.2\text{ GFLOPs}$).
-    \item \textbf{Case C (Proposed YOLO11s-SS2D Dual-Scale):} Simultaneous deployment of \texttt{WarehouseSS2DBlock} at both $P_4$ ($40 \times 40$) and $P_5$ ($20 \times 20$) feature scales ($8.89\text{ M}$ parameters, $21.8\text{ GFLOPs}$).
+    \item \textbf{Arm 1 (Baseline YOLO11s Control):} Standard unmodified YOLO11s containing the original \texttt{C2PSA} self-attention block at Layer 10 ($9.43\text{ M}$ parameters, $21.7\text{ GFLOPs}$), fine-tuned end-to-end from COCO weights.
+    \item \textbf{Arm 2 (SS2D Single-Scale, Single-Stage):} Architectural Case B replacing Layer 10 with the 4-direction \texttt{WarehouseSS2DBlock} at $P_5$ ($8.80\text{ M}$ parameters, $21.2\text{ GFLOPs}$), trained in a single 20-epoch stage.
+    \item \textbf{Arm 3 (SS2D Single-Scale, Two-Stage Warmup):} Architectural Case B ($P_5$, $8.80\text{ M}$ parameters, $21.2\text{ GFLOPs}$) trained via a staged protocol: 5 warmup epochs freezing the backbone followed by 15 epochs of end-to-end fine-tuning.
+    \item \textbf{Arm 4 (SS2D Dual-Scale, Case C):} Architectural Case C inserting \texttt{WarehouseSS2DBlock} at both $P_4$ ($40 \times 40$) and $P_5$ ($20 \times 20$) feature scales ($8.89\text{ M}$ parameters, $21.8\text{ GFLOPs}$), trained across the standard 20-epoch budget.
 \end{itemize}
 
 \subsection{Implementation, Training Details, and Reproducibility}
 \label{sec:exp_implementation}
 All experiments are executed in a strictly controlled, reproducible environment:
 \begin{itemize}
-    \item \textbf{Software Stack:} Python 3.14.8, PyTorch 2.14.1+cpu (with training verified under PyTorch 2.6.0/2.14.1 runtime), Ultralytics 8.4.185, OpenCV, and ONNX Runtime v1.31.0. Checkpoint metadata confirms training execution under Ultralytics version 8.4.185.
+    \item \textbf{Software Stack \& Execution Environments:} Training and host evaluations were executed on a Linux x86\_64 environment (Python 3.14.8, PyTorch 2.14.1+cpu, Ultralytics 8.4.185, and OpenCV). Checkpoint metadata verifies execution under Ultralytics version 8.4.185. Embedded inference benchmarking was conducted on the physical Raspberry Pi 4 using an isolated Python 3.11 virtual environment with ONNX Runtime v1.31.0 and \texttt{psutil} for memory RSS logging.
     \item \textbf{Optimizer:} AdamW with initial learning rate $\eta = 0.00125$, final learning rate factor $\text{lrf} = 0.01$, momentum $0.937$, and weight decay $\lambda = 0.0005$.
     \item \textbf{Hyperparameters:} Batch size of $4$, input resolution $640 \times 640$, random seed $0$ fixed across all runs.
     \item \textbf{Provenance \& Cryptographic Traceability:} Every checkpoint, initialization state, and evaluation metric is cryptographically validated with SHA-256 hashes (e.g., pretrained baseline: \texttt{85a76fe...}, Case B warmstart: \texttt{1e92c10...}), ensuring full auditability.
-    \item \textbf{Hardware Profile:} Intel Core i7-7600U CPU @ 2.80GHz host and Raspberry Pi 4 Model B (Quad-Core Cortex-A72 @ 1.5\,GHz). Process peak memory RSS is actively monitored to guarantee embedded gateway stability under $1.0\text{ GB}$.
+    \item \textbf{Hardware Profile:} Intel Core i7-7600U CPU @ 2.80GHz host workstation and a physical Raspberry Pi 4 Model B (Quad-Core Cortex-A72 @ 1.5\,GHz). Process peak memory RSS is actively monitored to guarantee embedded gateway stability under $1.0\text{ GB}$.
 \end{itemize}
 
 \subsection{Evaluation Metrics}

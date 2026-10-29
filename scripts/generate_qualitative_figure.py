@@ -106,6 +106,40 @@ def render_scene(ax, img_rgb, boxes, title, is_gt=False):
                 bbox=dict(boxstyle="round,pad=0.2", facecolor=color, alpha=0.9, edgecolor="none")
             )
 
+def compute_metrics(preds, gts, iou_thresh=0.5):
+    matched_gt = set()
+    tp = 0
+    sorted_preds = sorted(preds, key=lambda x: x[5], reverse=True)
+    for p in sorted_preds:
+        p_cls, px1, py1, px2, py2, _ = p
+        best_iou = 0.0
+        best_gt_idx = -1
+        for g_idx, g in enumerate(gts):
+            if g_idx in matched_gt:
+                continue
+            g_cls, gx1, gy1, gx2, gy2, _ = g
+            if p_cls != g_cls:
+                continue
+            ix1 = max(px1, gx1)
+            iy1 = max(py1, gy1)
+            ix2 = min(px2, gx2)
+            iy2 = min(py2, gy2)
+            iw = max(0.0, ix2 - ix1)
+            ih = max(0.0, iy2 - iy1)
+            inter = iw * ih
+            area_p = (px2 - px1) * (py2 - py1)
+            area_g = (gx2 - gx1) * (gy2 - gy1)
+            union = area_p + area_g - inter
+            iou = inter / union if union > 0 else 0
+            if iou > best_iou:
+                best_iou = iou
+                best_gt_idx = g_idx
+        if best_iou >= iou_thresh and best_gt_idx >= 0:
+            tp += 1
+            matched_gt.add(best_gt_idx)
+    rec = tp / len(gts) if len(gts) > 0 else 0.0
+    return tp, rec
+
 def generate_comparison_figure():
     print("[1/3] Loading trained models...")
     m1 = YOLO(ARM1_PATH)
@@ -115,7 +149,7 @@ def generate_comparison_figure():
     os.makedirs("paper/figures", exist_ok=True)
     num_scenes = len(SELECTED_IMAGES)
     
-    # 2 scenes x 4 columns (Ground Truth, Baseline YOLO11s, Case B Single-Stage, Case B Two-Stage)
+    # 2 scenes x 4 columns (Ground Truth, Baseline YOLO11s, Arm 2 Single-Stage, Arm 3 Two-Stage)
     fig, axes = plt.subplots(num_scenes, 4, figsize=(16, 4.2 * num_scenes), dpi=300)
 
     print("[2/3] Running inference on benchmark test scenes...")
@@ -129,6 +163,10 @@ def generate_comparison_figure():
         p2_boxes = get_predictions(m2, img_p)
         p3_boxes = get_predictions(m3, img_p)
 
+        tp1, rec1 = compute_metrics(p1_boxes, gt_boxes)
+        tp2, rec2 = compute_metrics(p2_boxes, gt_boxes)
+        tp3, rec3 = compute_metrics(p3_boxes, gt_boxes)
+
         scene_name = Path(img_p).stem
 
         # Column 1: Ground Truth
@@ -141,19 +179,19 @@ def generate_comparison_figure():
         # Column 2: Arm 1 (Baseline YOLO11s)
         render_scene(
             axes[row_idx, 1], img_rgb, p1_boxes,
-            f"(a) Baseline YOLO11s Control\nDetected: {len(p1_boxes)} | Recall: {len(p1_boxes)/max(1, len(gt_boxes))*100:.1f}%"
+            f"(a) Arm 1: Baseline YOLO11s Control\nPreds: {len(p1_boxes)} | TP: {tp1} | Recall: {rec1*100:.1f}%"
         )
 
-        # Column 3: Arm 2 (Case B Single-Stage)
+        # Column 3: Arm 2 (SS2D Single-Stage)
         render_scene(
             axes[row_idx, 2], img_rgb, p2_boxes,
-            f"(b) Case B SS2D (Single-Stage)\nDetected: {len(p2_boxes)} | Recall: {len(p2_boxes)/max(1, len(gt_boxes))*100:.1f}%"
+            f"(b) Arm 2: SS2D P5 (Single-Stage)\nPreds: {len(p2_boxes)} | TP: {tp2} | Recall: {rec2*100:.1f}%"
         )
 
-        # Column 4: Arm 3 (Case B Two-Stage)
+        # Column 4: Arm 3 (SS2D Two-Stage)
         render_scene(
             axes[row_idx, 3], img_rgb, p3_boxes,
-            f"(c) Case B SS2D (Two-Stage Protocol)\nDetected: {len(p3_boxes)} | Recall: {len(p3_boxes)/max(1, len(gt_boxes))*100:.1f}%"
+            f"(c) Arm 3: SS2D P5 (Two-Stage Warmup)\nPreds: {len(p3_boxes)} | TP: {tp3} | Recall: {rec3*100:.1f}%"
         )
 
     plt.tight_layout()
