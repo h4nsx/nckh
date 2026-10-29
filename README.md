@@ -1,12 +1,12 @@
-# YOLO11s-SS2D: A Lightweight Hybrid YOLO-Mamba Architecture for Real-Time Multi-Class Warehouse Object Detection
+# YOLO11s-SS2D: A Lightweight Hybrid YOLO-Mamba Architecture for Multi-Class Warehouse Object Detection: An Edge-Feasibility Study
 
 [![Paper PDF](https://img.shields.io/badge/Paper-IEEEtran-blue.svg)](paper/main.pdf)
 [![Architecture](https://img.shields.io/badge/Architecture-YOLO11s--SS2D-orange.svg)](#architecture-overview)
 [![Benchmark](https://img.shields.io/badge/Benchmark-NVIDIA_SmartSpaces-green.svg)](#benchmark--evaluation)
-[![Status](https://img.shields.io/badge/Status-Audited_%26_Verified-success.svg)](docs/RESULTS_INTEGRITY_GATE.md)
+[![Status](https://img.shields.io/badge/Status-Audited_%26_Verified-success.svg)](Reports/RESULTS_INTEGRITY_GATE.md)
 
 > **Official Research Codebase & Artifact Repository**  
-> **Topic:** *A Lightweight Hybrid YOLO-Mamba Architecture for Real-Time Multi-Class Warehouse Object Detection on Edge Devices*
+> **Topic:** *A Lightweight Hybrid YOLO-Mamba Architecture for Multi-Class Warehouse Object Detection: An Edge-Feasibility Study*
 
 ---
 
@@ -160,7 +160,7 @@ A critical research contribution of this work is investigating the wall-clock ex
 ### Citation
 ```bibtex
 @article{yolo11s_ss2d_2026,
-  title={A Lightweight Hybrid YOLO-Mamba Architecture for Real-Time Multi-Class Warehouse Object Detection on Edge Devices},
+  title={A Lightweight Hybrid YOLO-Mamba Architecture for Multi-Class Warehouse Object Detection: An Edge-Feasibility Study},
   author={Vo, Tuan Hung and Huynh, Tan Phat},
   journal={IEEE Transactions on Automation Science and Engineering},
   year={2026}
