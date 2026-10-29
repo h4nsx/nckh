@@ -110,11 +110,12 @@ To evaluate category-specific representations, Table~\ref{tab:per_class_results}
 \midrule
 \texttt{worker} (Personnel) & \textbf{89.2} & \textbf{63.2} & 87.9 & 60.5 & 88.5 & 60.9 \\
 \texttt{forklift} (Heavy Machinery) & 70.1 & 31.8 & \textbf{76.3} & \textbf{38.4} & 75.3 & 33.8 \\
-\texttt{pallet\_truck} (Manual Jack) & \textbf{32.8} & \textbf{22.4} & 22.9 & 16.2 & 20.0 & 14.6 \\
+\texttt{pallet\_truck}$^{\dagger}$ (Manual Jack) & \textbf{32.8} & \textbf{22.4} & 22.9 & 16.2 & 20.0 & 14.6 \\
 \texttt{amr} (Mobile Robot) & \textbf{87.1} & \textbf{64.7} & 83.7 & 57.5 & 85.0 & 61.7 \\
 \midrule
 \textbf{Macro Average (All Classes)} & \textbf{69.8} & \textbf{45.5} & 67.7 & 43.2 & 67.2 & 42.8 \\
 \bottomrule
+\multicolumn{7}{l}{$^{\dagger}$\footnotesize{\textit{Preliminary metrics: evaluated on 13 validation instances ($0.35\%$ of total labels), exhibiting high sample variance.}}} \\
 \end{tabular}%
 }
 \end{table}
@@ -124,7 +125,7 @@ As summarized in Table~\ref{tab:per_class_results}, the category-level evaluatio
     \item \textbf{Forklift Perception (+6.2\% Gain):} Both Case B ($76.3\%\text{ mAP}_{50}$) and Case C ($75.3\%$) significantly outperform Baseline YOLO11s ($70.1\%$). In busy logistics corridors, motorized forklifts present severe collision hazards to personnel. The 4-direction state-space recurrence along warehouse aisles captures long-range structural dependencies, successfully resolving heavy machinery even under extensive rack occlusions.
     \item \textbf{Personnel Safety Precision ($96.6\%$):} Case C achieves the highest precision for the \texttt{worker} class ($96.6\%$), suppressing false-positive detections that trigger disruptive emergency stops.
     \item \textbf{Autonomous Mobile Robots (AMRs):} Case C achieves $85.0\%\text{ mAP}_{50}$ and $80.2\%$ recall on low-profile AMRs, confirming that intermediate $P_4$ state-space modeling successfully preserves small, floor-level robotic targets.
-    \item \textbf{Rare-Class Limitations and Sample Variance on \texttt{pallet\_truck}:} All evaluated architectures exhibit lower precision and recall on \texttt{pallet\_truck} ($19.9\%$--$32.8\%\text{ mAP}_{50}$). A critical limitation of this benchmark split is that manual pallet jacks constitute only $13$ instances in the $3{,}696$-instance validation set ($0.35\%$ of total annotations), compared to $3{,}488$ worker annotations. With such an extreme class imbalance and small sample denominator, missing or mislocalizing merely $1$ or $2$ pallet jack targets induces high empirical sample variance ($\pm 10\text{--}15\%$ swings in class $\text{mAP}_{50}$). This demonstrates a core boundary condition of the benchmark: while safety-critical classes with adequate representation (\texttt{worker}, \texttt{forklift}, \texttt{amr}) exhibit stable, statistically robust detection, tail classes with sparse validation support require caution and targeted data oversampling in real-world deployment.
+    \item \textbf{Preliminary Rare-Class Observation on \texttt{pallet\_truck}:} All evaluated architectures exhibit lower precision and recall on \texttt{pallet\_truck} ($19.9\%$--$32.8\%\text{ mAP}_{50}$). These metrics must be interpreted as strictly preliminary: manual pallet jacks constitute only $13$ instances in the $3{,}696$-instance validation set ($0.35\%$ of total annotations), compared to $3{,}488$ worker annotations. With such an extreme class imbalance and small sample denominator, missing or mislocalizing merely $1$ or $2$ pallet jack targets induces high empirical sample variance ($\pm 10\text{--}15\%$ swings in class $\text{mAP}_{50}$). This establishes a clear boundary condition: while safety-critical classes with adequate representation (\texttt{worker}, \texttt{forklift}, \texttt{amr}) exhibit stable, statistically reliable detection, tail classes with sparse validation support require targeted oversampling before definitive conclusions can be drawn.
 \end{enumerate}
 
 \subsubsection{Qualitative Visual Inference Comparison}

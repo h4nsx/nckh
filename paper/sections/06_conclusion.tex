@@ -1,21 +1,22 @@
 \section{Conclusion and Future Work}
 \label{sec:conclusion}
 
-\subsection{Conclusion}
+\subsection{Synthesis and Research Implications}
 \label{sec:concl_summary}
-In this study, we investigated the architectural feasibility, computational efficiency, and optimization dynamics of integrating a 2D Selective State Space Model (SSM) into a lightweight real-time object detector for multi-class warehouse perception. By surgically replacing self-attention bottlenecks in \textbf{YOLO11s} with our proposed 4-direction \textbf{\texttt{WarehouseSS2DBlock}} at both single-scale ($P_5$) and dual-scale ($P_4 + P_5$) stages, we demonstrated that:
-\begin{enumerate}
-    \item \textbf{Significant Parameter and Complexity Reduction:} The hybrid architecture achieves a \textbf{$6.72\%$ reduction in overall model parameters} ($8.796\text{ M}$ vs. $9.429\text{ M}$ for the baseline) and lowers computational complexity from $21.7$ to $21.2\text{ GFLOPs}$. Within the attention stage itself, the \texttt{WarehouseSS2DBlock} reduces parameters by \textbf{$63.9\%$} ($357{,}632$ vs. $990{,}976$ parameters), while trimming on-disk checkpoint storage from $19.18\text{ MB}$ to $17.89\text{ MB}$.
-    \item \textbf{Targeted Logistics Detection and Safety Gains:} Evaluated on an independent, zero-leakage multi-scene warehouse benchmark derived from the \textbf{NVIDIA PhysicalAI-SmartSpaces} dataset, the hybrid models converge to $67.10\%$--$67.17\%\text{ mAP}_{50}$ at epoch 20 while reaching a peak validation checkpoint accuracy of \textbf{$71.81\%\text{ mAP}_{50}$}, a $+7.30\%$ absolute boost in personnel recall ($64.52\%$), and a \textbf{$+6.2\%$ gain in forklift detection} ($76.3\%\text{ vs. } 70.1\%$). We document that the rare \texttt{pallet\_truck} class ($13$ validation instances, $0.35\%$) represents an empirical tail-class limitation characterized by high sample variance.
-    \item \textbf{Physical Edge Viability and Latency Realism:} We proved that the hybrid model exports seamlessly to standard ONNX (Opset 17) with zero custom CUDA plugins, maintaining a steady-state physical memory of \textbf{$371.9\text{ MB}$ RSS} on a physical \textbf{Raspberry Pi 4 Model B}---operating \textbf{$62.8\%$ beneath the $1.0\text{ GB}$ physical memory limit}. Concurrently, we demonstrated that approximately $0.72\text{ FPS}$ ($1398\text{ ms}$) on single-threaded CPU recurrence does not constitute real-time execution, establishing that low-power real-time inference requires parallel prefix-scan execution on edge GPUs or NPUs.
-\end{enumerate}
+This investigation examined whether replacing deep self-attention bottlenecks in lightweight single-stage detectors with 2D selective state-space modeling offers a viable path for multi-class warehouse perception on resource-constrained hardware. Our findings point to three primary conclusions:
+
+First, from an architectural efficiency standpoint, substituting the $P_5$ attention block with the 4-direction \texttt{WarehouseSS2DBlock} eliminates $63.9\%$ of the parameters in that stage ($357{,}632$ vs. $990{,}976$) and reduces overall network size by $6.72\%$ ($8.80\text{ M}$ vs. $9.43\text{ M}$), lowering complexity to $21.2\text{ GFLOPs}$. Initializing the output projection to zero avoids gradient disruption, allowing the model to adapt without cold-block destabilization.
+
+Second, in terms of detection utility, the continuous state-space recurrence along warehouse corridors aids in disambiguating large motorized machinery under dense rack occlusions, yielding a $+6.2\%$ $\text{mAP}_{50}$ improvement in forklift detection under two-stage training. However, the evaluation split also highlights an essential dataset limitation: extreme tail classes such as manual pallet jacks ($13$ validation instances, $0.35\%$ representation) experience noticeable metric swings, indicating that comprehensive rare-class validation requires larger, balanced sampling before commercial deployment.
+
+Third, embedded hardware profiling on a physical Raspberry Pi 4 Model B demonstrates that while the zero-plugin ONNX model respects physical memory constraints ($371.9\text{ MB}$ RSS, well under the $1.0\text{ GB}$ ceiling), sequential recurrence updates on a general-purpose ARM CPU achieve only $0.72\text{ FPS}$. This establishes that CPU deployment proves memory and operator feasibility rather than line-rate inference. Achieving real-time frame rates ($>30\text{ FPS}$) will require parallel associative prefix scans executed on edge GPUs or NPUs.
 
 \subsection{Future Research Directions}
 \label{sec:future_work}
-Building upon these empirical foundations, several promising avenues remain for subsequent investigation:
+Building upon these empirical insights, future work will focus on:
 \begin{itemize}
-    \item \textbf{Fused Hardware Scans and TensorRT FP16/INT8 Acceleration:} Deploying fused selective scan kernels via TensorRT plugins on NVIDIA Jetson Orin Nano gateways, combining 8-bit post-training quantization (PTQ) with hardware-accelerated associative parallel scans to unlock sub-$50\text{ ms}$ real-time edge throughput.
-    \item \textbf{Temporal State-Space Video Consistency:} Extending the 2D spatial selective scan along the temporal dimension ($\text{3D-SSM}$) across sequential camera frames to establish persistent tracklet state propagation and trajectory forecasting in congested logistics corridors.
+    \item \textbf{Parallel Prefix Scans via TensorRT Plugins:} Implementing fused 2D selective scans using parallel associative prefix operators on NVIDIA Jetson Orin platforms, coupled with FP16 and INT8 quantization to bridge the gap between memory compliance and real-time execution.
+    \item \textbf{Temporal State Propagation for Tracking:} Extending the 2D spatial scan across sequential video frames to propagate object state representations across time, improving multi-camera tracking stability in congested logistics corridors.
 \end{itemize}
 
 \section*{Acknowledgments}

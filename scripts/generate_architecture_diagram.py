@@ -99,8 +99,8 @@ def generate_transparent_white_diagram():
     ax.add_patch(b_lconv)
     ax.text(56, 25.5, "Local Projections", ha='center', **b_main)
     ax.text(56, 23.6, "1x1 Conv (512 -> 256)", ha='center', **b_sub)
-    ax.text(56, 21.9, "SiLU + LayerNorm", ha='center', **b_sub)
-    ax.text(56, 20.3, "3x3 DWConv + SiLU", ha='center', **b_sub)
+    ax.text(56, 21.9, "BatchNorm2d + SiLU", ha='center', **b_sub)
+    ax.text(56, 20.3, "3x3 DWConv + BN + SiLU", ha='center', **b_sub)
 
     # Arrow to scan core
     ax.annotate('', xy=(68, 23.5), xytext=(64, 23.5), arrowprops=dict(arrowstyle="-|>", lw=1.1, color=LINE_ARROW))
