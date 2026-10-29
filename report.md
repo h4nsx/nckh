@@ -75,9 +75,9 @@ An end-to-end Python pipeline was tested directly on the Raspberry Pi:
 
 1. **LaTeX Paper Manuscript:**
    * File: `paper/sections/05_results_discussion.tex`
-   * Updated **Table 4 (`tab:edge_runtime`)** with the two-tier benchmark (Host CPU vs. Physical Raspberry Pi 4).
+   * Updated **Table 5 (`tab:edge_runtime`)** with the two-tier benchmark (Host CPU vs. Physical Raspberry Pi 4).
    * Refined Section §5.4 (*Edge Deployment and Hardware Verification*) and §5.4.1 (*Scientific Investigation of the Accuracy-Efficiency Trade-off*) with exact empirical hardware metrics.
-   * Successfully recompiled `paper/main.pdf` (9 pages, IEEE conference format).
+   * Successfully recompiled `paper/main.pdf` (10 pages, IEEEtran journal/conference layout).
 2. **Edge Deployment Guide:**
    * File: `gpu_training_package/README_EDGE_DEPLOYMENT.md`
    * Contains hardware specifications, installation commands, and standardized benchmark arguments.
