@@ -42,8 +42,8 @@ graph TD
 ```
 
 ### Phase 1: Deep Diagnostic Review & Reviewer Simulation
-- [ ] Run comprehensive audit against the current manuscript on branch `paper/review`.
-- [ ] Compile a formal **TAIMMA 2027 Reviewer Report** adhering to Part 8 of `promt-review.txt`:
+- [x] Run comprehensive audit against the current manuscript on branch `paper/review`.
+- [x] Compile a formal **TAIMMA 2027 Reviewer Report** adhering to Part 8 of `promt-review.txt`:
   - Section A: Paper Summary (150–200 words).
   - Section B: Overall Assessment.
   - Section C: Major Strengths (Edge memory profiling, zero-leakage split, warmstart box regression transfer).
@@ -54,7 +54,7 @@ graph TD
   - Section H–J: Novelty & Reproducibility Assessment, Scoring Rubric (out of 100), and Area Chair Verdict.
 
 ### Phase 2: Mathematical, Architectural & Literature Hardening
-- [ ] **Mathematical Formulation Audit (`03_methodology.tex`):**
+- [x] **Mathematical Formulation Audit (`03_methodology.tex`):**
   - Verify continuous-to-discrete equations:
     $$\mathbf{\Delta}_k = \text{softplus}(\mathbf{W}_{\Delta, k} \mathbf{u}_k)$$
     $$\overline{\mathbf{A}}_k = \exp(\mathbf{\Delta}_k \mathbf{A}_k), \quad \overline{\mathbf{B}}_k = (\mathbf{\Delta}_k \mathbf{u}_k) \otimes \mathbf{B}_k$$
@@ -65,7 +65,7 @@ graph TD
     3. Vertical column-major forward
     4. Vertical column-major reversed
   - Confirm identity pass-through proof: $\mathbf{W}_{\text{out}} = \mathbf{0} \implies \mathbf{Y} = \mathbf{F} + \mathbf{0} = \mathbf{F}$.
-- [ ] **Literature Comparison Matrix (`02_related_work.tex`):**
+- [x] **Literature Comparison Matrix (`02_related_work.tex`):**
   - Construct a comprehensive comparative table in Section 2 contrasting:
     * MambaNeXt-YOLO (Lei et al., 2025)
     * Hybrid-YOLO (Chen & Er, 2024)
@@ -75,33 +75,31 @@ graph TD
   - Comparison axes: Target domain, SSM block location, operator dependencies (custom C++/CUDA vs. native ONNX), parameter count, and validated hardware platform.
 
 ### Phase 3: Section-by-Section Manuscript Overhaul (`paper/review`)
-- [ ] **3.1 Title Alternatives:**
-  - *Option 1 (Recommended):* "A Lightweight Hybrid YOLO-Mamba Architecture for Multi-Class Warehouse Object Detection: An Edge-Feasibility Study"
-  - *Option 2:* "YOLO11s-SS2D: Exploring 2D Selective State Space Models for Resource-Constrained Warehouse Perception"
-  - *Option 3:* "Towards Edge-Compliant Logistics Perception: A Hybrid CNN-Mamba Architecture with Zero-Plugin Export"
-- [ ] **3.2 Abstract Overhaul (`main.tex`):**
+- [x] **3.1 Title Alternatives:**
+  - *Selected:* "A Lightweight Hybrid YOLO-Mamba Architecture for Multi-Class Warehouse Object Detection: An Edge-Feasibility Study"
+- [x] **3.2 Abstract Overhaul (`main.tex`):**
   - Explicitly attribute $71.81\%\text{ mAP}_{50}$ to Arm 2 peak checkpoint.
   - Explicitly attribute $+6.2\%$ forklift $\text{mAP}_{50}$ and $64.5\%$ recall to Arm 3 two-stage warmup.
   - State final convergence rates: $67.10\%$ (Arm 3) and $67.17\%$ (Arm 4).
   - State Raspberry Pi 4 CPU latency plainly ($1398\text{ ms}$, $\approx 0.72\text{ FPS}$) and highlight $371.9\text{ MB}$ RSS ($62.8\%$ margin).
   - Explicitly note $13$ validation instances of `pallet_truck` as preliminary.
-- [ ] **3.3 Introduction Refinement (`01_introduction.tex`):**
+- [x] **3.3 Introduction Refinement (`01_introduction.tex`):**
   - Deepen the industrial warehouse motivation: high rack occlusions, severe aspect ratio variance, personnel safety clearance.
   - Sharpen Research Questions RQ1 (accuracy-efficiency), RQ2 (optimization shock and warmstart transfer), and RQ3 (edge CPU latency profiling).
-- [ ] **3.4 Experimental Setup Polish (`04_experimental_setup.tex`):**
+- [x] **3.4 Experimental Setup Polish (`04_experimental_setup.tex`):**
   - Confirm canonical arm definitions (Arms 1, 2, 3, 4).
   - Provide complete provenance for the zero-leakage split: Warehouse\_000 (train: 300 frames, 12,959 instances) vs. Warehouse\_015 (val: 100 frames, 3,696 instances).
-- [ ] **3.5 Results & Discussion Enhancement (`05_results_discussion.tex`):**
+- [x] **3.5 Results & Discussion Enhancement (`05_results_discussion.tex`):**
   - Harmonize all table headers to canonical Arms 1–4.
-  - Maintain the preliminary status footnote for `pallet_truck` in Table IV.
+  - Maintain the preliminary status footnote for `pallet_truck` in Table V.
   - Expand the scientific explanation of single-threaded CPU sequential recurrence overhead vs. BLAS GEMM matrix operations.
   - Frame parallel prefix scans on GPUs/NPUs strictly as a future research hypothesis.
-- [ ] **3.6 Conclusion Synthesis (`06_conclusion.tex`):**
+- [x] **3.6 Conclusion Synthesis (`06_conclusion.tex`):**
   - Synthesize architectural compression, empirical safety gains, and edge viability boundaries without repeating raw bullet lists.
 
 ### Phase 4: LaTeX Recompilation, Area Chair Simulation & Final Audit
-- [ ] Recompile PDF using `/usr/bin/pdflatex` and `/usr/bin/bibtex`.
-- [ ] Verify zero LaTeX warnings regarding table overfulls, missing references, or undefined citations.
+- [x] Recompile PDF using `/usr/bin/pdflatex` and `/usr/bin/bibtex`.
+- [x] Verify zero LaTeX warnings regarding table overfulls, missing references, or undefined citations.
 - [ ] Execute an independent 3-reviewer Area Chair simulation to verify that all potential reasons for rejection have been addressed.
 - [ ] Commit and push the verified improvements to `origin paper/review`.
 
