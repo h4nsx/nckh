@@ -52,39 +52,47 @@ A depthwise $3 \times 3$ convolution then aggregates immediate localized spatial
 \end{equation}
 
 \subsubsection{Four-Way 2D Selective State Space Scan}
-To eliminate the 1D causal scanning bias of sequence models and handle 2D spatial layouts, $\mathbf{F}_{\text{dw}}$ is unfolded along four traversal directions across the spatial grid $L = H \times W = 400$:
+To eliminate the 1D causal scanning bias of sequence models and handle 2D spatial layouts, $\mathbf{F}_{\text{dw}} \in \mathbb{R}^{B \times d_{\text{inner}} \times H \times W}$ is unfolded along four traversal directions across the spatial grid $L = H \times W = 400$ ($H=W=20$):
 \begin{enumerate}
-    \item Top-down, left-to-right (standard row-major scan): $\mathbf{u}_1$
-    \item Bottom-up, right-to-left (reversed row-major scan): $\mathbf{u}_2$
-    \item Left-to-right, top-down (column-major scan): $\mathbf{u}_3$
-    \item Right-to-left, bottom-up (reversed column-major scan): $\mathbf{u}_4$
+    \item Standard row-major scan (top-to-bottom, left-to-right): $\mathbf{u}_1 = \text{Reshape}(\mathbf{F}_{\text{dw}}) \in \mathbb{R}^{B \times L \times d_{\text{inner}}}$.
+    \item Reversed row-major scan (bottom-to-top, right-to-left): $\mathbf{u}_2 = \text{Flip}(\mathbf{u}_1, \text{dim}=1)$.
+    \item Standard column-major scan (left-to-right, top-to-bottom): $\mathbf{u}_3 = \text{Permute}(\mathbf{F}_{\text{dw}}, (0, 3, 2, 1)) \to \mathbb{R}^{B \times L \times d_{\text{inner}}}$.
+    \item Reversed column-major scan (right-to-left, bottom-to-top): $\mathbf{u}_4 = \text{Flip}(\mathbf{u}_3, \text{dim}=1)$.
 \end{enumerate}
 
-For each direction $k \in \{1, 2, 3, 4\}$, continuous state-space parameters $(\mathbf{A}_k, \mathbf{B}_k, \mathbf{C}_k, \mathbf{\Delta}_k)$ are dynamically conditioned on the input tokens through linear projections:
+For each direction $k \in \{1, 2, 3, 4\}$, continuous state-space parameters $(\mathbf{A}_k, \mathbf{B}_k, \mathbf{C}_k, \mathbf{\Delta}_k)$ are dynamically conditioned on the input tokens through a direction-specific linear parameter projection:
 \begin{align}
-    \mathbf{\Delta}_k &= \text{softplus}(\mathbf{W}_{\Delta, k} \mathbf{u}_k), \\
-    \mathbf{B}_k &= \mathbf{W}_{B, k} \mathbf{u}_k, \quad \mathbf{C}_k = \mathbf{W}_{C, k} \mathbf{u}_k.
+    \mathbf{\Delta}_k &= \text{softplus}(\mathbf{W}_{\Delta, k} \mathbf{u}_k) \in \mathbb{R}^{B \times L \times d_{\text{inner}}}, \\
+    \mathbf{B}_k &= \mathbf{W}_{B, k} \mathbf{u}_k \in \mathbb{R}^{B \times L \times d_{\text{state}}}, \\
+    \mathbf{C}_k &= \mathbf{W}_{C, k} \mathbf{u}_k \in \mathbb{R}^{B \times L \times d_{\text{state}}}.
 \end{align}
 Discretization maps continuous parameters to discrete step operators:
-\begin{equation}
-    \overline{\mathbf{A}}_k = \exp(\mathbf{\Delta}_k \mathbf{A}_k), \quad \overline{\mathbf{B}}_k = (\mathbf{\Delta}_k \mathbf{u}_k) \otimes \mathbf{B}_k,
-\end{equation}
-where $\overline{\mathbf{A}}_k$ implements the exact matrix exponential of diagonal state matrix $\mathbf{A}_k = -\exp(\mathbf{A}_{\text{logs}, k})$ and $\overline{\mathbf{B}}_k$ adopts a lightweight first-order Euler-bilinear input modulation.
-The discrete recurrence updates the hidden state $\mathbf{h}_k(t) \in \mathbb{R}^{d_{\text{inner}} \times d_{\text{state}}}$ (with state dimension $d_{\text{state}} = 16$) in linear time:
 \begin{align}
-    \mathbf{h}_k(t) &= \overline{\mathbf{A}}_k(t) \mathbf{h}_k(t-1) + \overline{\mathbf{B}}_k(t), \\
-    \mathbf{y}_k(t) &= \sum_{n=1}^{d_{\text{state}}} \mathbf{h}_{k, n}(t) \mathbf{C}_{k, n}(t) + \mathbf{D}_k \mathbf{u}_k(t).
+    \overline{\mathbf{A}}_k &= \exp(\mathbf{\Delta}_k \odot \mathbf{A}_k), \\
+    \overline{\mathbf{B}}_k &= (\mathbf{\Delta}_k \odot \mathbf{u}_k) \odot \mathbf{B}_k,
 \end{align}
-The four scanned sequences are reversed back to original spatial orientation, folded into 2D tensors, and summed:
+where $\odot$ denotes elementwise broadcasting Hadamard multiplication, $\overline{\mathbf{A}}_k$ implements the exact matrix exponential of diagonal state matrix $\mathbf{A}_k = -\exp(\mathbf{A}_{\text{logs}, k}) \in \mathbb{R}^{d_{\text{inner}} \times d_{\text{state}}}$, and $\overline{\mathbf{B}}_k$ adopts a lightweight first-order Euler-bilinear input modulation.
+
+The discrete recurrence updates the hidden state $\mathbf{h}_k(t) \in \mathbb{R}^{d_{\text{inner}} \times d_{\text{state}}}$ (with state dimension $d_{\text{state}} = 16$) in linear time across sequence steps $t \in [1, L]$:
+\begin{align}
+    \mathbf{h}_k(t) &= \overline{\mathbf{A}}_k(t) \odot \mathbf{h}_k(t-1) + \overline{\mathbf{B}}_k(t), \\
+    \mathbf{y}_k(t) &= \sum_{n=1}^{d_{\text{state}}} \mathbf{h}_{k, n}(t) \odot \mathbf{C}_{k, n}(t) + \mathbf{D}_k \odot \mathbf{u}_k(t).
+\end{align}
+The four directional outputs are reversed back to standard spatial orientation, reshaped to $H \times W$, and summed:
 \begin{equation}
-    \mathbf{F}_{\text{ssm}} = \sum_{k=1}^{4} \text{Unfold}_{2\text{D}}(\mathbf{y}_k).
+    \mathbf{F}_{\text{ssm}} = \sum_{k=1}^{4} \text{Restore}_{2\text{D}}(\mathbf{y}_k) \in \mathbb{R}^{B \times d_{\text{inner}} \times H \times W}.
 \end{equation}
 
-The resulting feature representation is projected back to $C_{\text{out}} = 512$ channels and recombined via an identity shortcut:
+\subsubsection{Identity-Preserving Residual Fusion}
+The combined state-space representation is projected back to $C_{\text{out}} = 512$ channels via a $1 \times 1$ convolution and normalized before residual summation:
 \begin{equation}
     \mathbf{Y} = \mathbf{F} + \text{BN}(\text{Conv}_{1 \times 1}(\mathbf{F}_{\text{ssm}})).
 \end{equation}
-This projection preserves the spatial dimensions and channel depth $[B, 512, 20, 20]$, guaranteeing seamless drop-in integration with the downstream YOLO11s feature aggregation network.
+To eliminate the cold-block perturbation shock that typically corrupts pretrained backbone features upon inserting an untrained module, we initialize the output projection kernel to zero ($\mathbf{W}_{\text{out}} = \mathbf{0}$). Consequently, at initialization step $t=0$:
+\begin{equation}
+    \text{Conv}_{1 \times 1}(\mathbf{F}_{\text{ssm}}; \mathbf{W}_{\text{out}}=\mathbf{0}) = \mathbf{0} \implies \mathbf{Y} \equiv \mathbf{F},
+\end{equation}
+guaranteeing an exact identity mapping ($\|\mathbf{Y} - \mathbf{F}\|_{\infty} = 0.0$) that preserves pretrained feature representations during the initial warmup phase.
 
 \subsection{Multi-Scale Feature Fusion and Detection Head}
 \label{sec:fusion}

@@ -13,9 +13,32 @@ To overcome the quadratic computational scaling $O(N^2)$ of self-attention in Vi
 
 \subsection{Hybrid CNN--Mamba Detection Architectures}
 \label{sec:rel_hybrid}
-Hybrid models combining CNNs and state-space layers seek to merge local convolutional inductive bias with long-range receptive fields. In general-domain detection, MambaNeXt-YOLO \cite{lei2025mambanext} paired ConvNeXt stages with an SS2D Mamba block and an adaptive ResGate fusion mechanism, reporting competitive accuracy on PASCAL VOC. However, its execution relied on custom C++/CUDA kernel extensions, precluding out-of-the-box ONNX deployment on edge micro-architectures lacking NVCC toolchains. In aerial remote sensing, UAVDet \cite{yang2026uavdet} integrated Cross Stage Partial Mamba blocks to detect small vehicles in overhead views, demonstrating that state-space processing can compress parameters by replacing deeper feature stages. Similarly, Hybrid-YOLO \cite{chen2024hybridyolo} explored Mamba layers in early backbone stages alongside lightweight spatial attention for underwater and aerial imagery. Other formulations, including Mamba-YOLO \cite{wang2025mambayolo} and Xray-YOLO-Mamba \cite{li2024xraymamba}, demonstrated that directional selective scanning helps resolve severe visual overlap in specialized modalities. 
+Hybrid models combining CNNs and state-space layers seek to merge local convolutional inductive bias with long-range receptive fields. In general-domain detection, MambaNeXt-YOLO \cite{lei2025mambanext} paired ConvNeXt stages with an SS2D Mamba block and an adaptive ResGate fusion mechanism, reporting competitive accuracy on PASCAL VOC. However, its execution relied on custom C++/CUDA kernel extensions, precluding out-of-the-box ONNX deployment on edge micro-architectures lacking NVCC toolchains. In aerial remote sensing, UAVDet \cite{yang2026uavdet} integrated Cross Stage Partial Mamba blocks to detect small vehicles in overhead views, demonstrating that state-space processing can compress parameters by replacing deeper feature stages. Similarly, Hybrid-YOLO \cite{chen2024hybridyolo} explored Mamba layers in early backbone stages alongside lightweight spatial attention for underwater and aerial imagery. Other formulations, including Mamba-YOLO \cite{wang2025mambayolo} and Xray-YOLO-Mamba \cite{li2024xraymamba}, demonstrated that directional selective scanning helps resolve severe visual overlap in specialized modalities.
 
-As highlighted in the systematic review by Vo et~al.\ \cite{vo2026selectivereview}, visual state-space research has largely targeted high-altitude remote sensing or server-grade GPUs using proprietary CUDA extensions. A key practical question remains how a pure-PyTorch 2D selective scan—capable of direct ONNX export without external plugins—performs when substituting self-attention blocks in modern decoupled YOLO architectures for cluttered, multi-class warehouse perception.
+To clearly position our work against existing hybrid detectors, Table~\ref{tab:lit_comparison} contrasts architectural integration choices, operator dependencies, parameter footprints, and edge validation targets.
+
+\begin{table*}[!t]
+\caption{Systematic Comparison of Hybrid CNN--Mamba Object Detection Architectures}
+\label{tab:lit_comparison}
+\centering
+\small
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lcccccc}
+\toprule
+\textbf{Model Architecture} & \textbf{Target Domain} & \textbf{SSM Insertion Stage} & \textbf{Kernel / Operator Dependency} & \textbf{Params (M)} & \textbf{GFLOPs} & \textbf{Physical Hardware Validation} \\
+\midrule
+MambaNeXt-YOLO \cite{lei2025mambanext} & Generic VOC & Early Backbone (ConvNeXt) & Custom C++/CUDA (\texttt{mamba\_ssm}) & 7.10 & 22.4 & NVIDIA Jetson Orin NX (FP16 TensorRT) \\
+Hybrid-YOLO \cite{chen2024hybridyolo} & Underwater / COCO & Shallow Backbone Stages & Custom C++/CUDA Selective Scan & 3.20 & 9.8 & Host PC Simulation (x86 GPU) \\
+UAVDet \cite{yang2026uavdet} & Aerial Remote Sensing & $P_3$ Feature Neck (CSPMB) & Proprietary CUDA Extension & 1.80 & 5.2 & Host GPU Simulation \\
+Mamba-YOLO \cite{wang2025mambayolo} & Generic Vision & Multi-Scale Backbone Branches & VMamba CUDA Scanning & 8.20 & 26.5 & High-End Desktop GPU \\
+\midrule
+\textbf{YOLO11s-SS2D (Ours)} & \textbf{Smart Logistics Warehouses} & \textbf{Stage $P_5$ (and $P_4$) Context} & \textbf{Zero-Plugin Pure PyTorch / Native ONNX} & \textbf{8.80} & \textbf{21.2} & \textbf{Physical Raspberry Pi 4 ARM Silicon} \\
+\bottomrule
+\end{tabular}%
+}
+\end{table*}
+
+As synthesized by Vo et~al.\ in their systematic review \cite{vo2026selectivereview}, visual state-space research has largely targeted high-altitude remote sensing or server-grade GPUs using proprietary CUDA extensions. Two fundamental gaps remain unaddressed: (1) existing models depend heavily on bespoke CUDA kernels that cannot export cleanly to standard ONNX runtimes on edge ARM devices, and (2) how selective scans behave when resolving room-scale perspective vanishing lines and horizontal pallet-rack occlusions in automated warehouses remains unstudied. Our work specifically targets these dual systems and domain gaps.
 
 \subsection{Lightweight Object Detection and Edge Deployment}
 \label{sec:rel_edge}
