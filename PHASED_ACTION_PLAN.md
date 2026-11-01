@@ -100,8 +100,8 @@ graph TD
 ### Phase 4: LaTeX Recompilation, Area Chair Simulation & Final Audit
 - [x] Recompile PDF using `/usr/bin/pdflatex` and `/usr/bin/bibtex`.
 - [x] Verify zero LaTeX warnings regarding table overfulls, missing references, or undefined citations.
-- [ ] Execute an independent 3-reviewer Area Chair simulation to verify that all potential reasons for rejection have been addressed.
-- [ ] Commit and push the verified improvements to `origin paper/review`.
+- [x] Execute an independent 3-reviewer Area Chair simulation to verify that all potential reasons for rejection have been addressed.
+- [x] Commit and push the verified improvements to `origin paper/review`.
 
 ---
 
@@ -109,10 +109,10 @@ graph TD
 
 Before declaring the manuscript ready for conference submission, the following conditions must be satisfied:
 
-- [ ] **Numerical Truth:** Every number in the Abstract, Tables, and Discussion matches the binary checkpoint evaluation logs.
-- [ ] **Statistical Recall Sanity:** Figure 1 reports valid True Positives and standard recall $\le 100\%$ across all qualitative examples.
-- [ ] **Arm Consistency:** Zero mixing of Arm 2 peak checkpoint numbers with Arm 3 two-stage metrics.
-- [ ] **Throughput Honesty:** Zero claims of real-time frame rates on Raspberry Pi 4 CPU.
-- [ ] **Code & Diagram Harmony:** Architecture diagrams, equations, and PyTorch implementation agree on `BatchNorm2d + SiLU` and $\mathbf{W}_{\text{out}} = \mathbf{0}$.
-- [ ] **Bibliographic Accuracy:** Every reference in `paper/references.bib` corresponds to an authentic, peer-reviewed or official preprint publication.
-- [ ] **Clean Git Provenance:** All scripts, configurations, and LaTeX documents are committed to branch `paper/review`.
+- [x] **Numerical Truth:** Every number in the Abstract, Tables, and Discussion matches the binary checkpoint evaluation logs ($8.80\text{ M}$ parameters, $21.2\text{ GFLOPs}$, $71.81\%\text{ mAP}_{50}$ peak, $67.10\%$/$67.17\%$ convergence, $+6.2\%$ forklift gain, $371.9\text{ MB}$ RSS, $1398\text{ ms}$).
+- [x] **Statistical Recall Sanity:** Figure 1 reports valid True Positives and standard recall $\le 100\%$ across all qualitative examples ($TP/GT$, IoU $\ge 0.50$).
+- [x] **Arm Consistency:** Zero mixing of Arm 2 peak checkpoint numbers with Arm 3 two-stage metrics; consistent Arm 1 (Baseline Control), Arm 2 (Single-Stage P5), Arm 3 (Two-Stage P5 Warmup), and Arm 4 (Dual-Scale P4+P5) canonical nomenclature used throughout.
+- [x] **Throughput Honesty:** Zero claims of real-time frame rates on Raspberry Pi 4 CPU; latency ($1398\text{ ms}$, $\approx 0.72\text{ FPS}$) framed as embedded memory feasibility and operator portability, with real-time throughput ($>30\text{ FPS}$) explicitly defined as a future hardware acceleration hypothesis requiring parallel prefix scans on GPUs/NPUs.
+- [x] **Code & Diagram Harmony:** Architecture diagrams, equations, and PyTorch implementation agree on `BatchNorm2d + SiLU` and zero-initialized residual projections ($\mathbf{W}_{\text{out}} = \mathbf{0}$).
+- [x] **Bibliographic Accuracy:** Every reference in `paper/references.bib` corresponds to an authentic, peer-reviewed or official preprint publication with verified DOIs and author lists.
+- [x] **Clean Git Provenance:** All scripts, configurations, generated assets, and LaTeX documents are committed and synchronized on branch `paper/review`.
