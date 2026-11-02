@@ -3,11 +3,11 @@
 
 \subsection{Benchmark Dataset and Leakage Prevention}
 \label{sec:exp_datasets}
-To evaluate warehouse object detection under realistic logistics conditions, we utilize the \textbf{NVIDIA PhysicalAI-SmartSpaces} benchmark (MTMC Tracking dataset)~\cite{wang2026smartspaces}. The raw repository comprises over 280 hours of multi-camera 1080p video across dozens of facility scenes. To maintain computational tractability on edge research hosts while preventing data leakage, we enforce a strict \textbf{Zero-Leakage Multi-Scene Partitioning Protocol}:
+To evaluate warehouse object detection under realistic logistics conditions, we utilize the multi-camera warehouse environments from the \textbf{NVIDIA PhysicalAI-SmartSpaces} benchmark (MTMC Tracking dataset)~\cite{wang2026smartspaces}. Generated via NVIDIA Omniverse high-fidelity physical simulation, the dataset replicates industrial fulfillment centers with calibrated multi-camera visual streams, realistic industrial lighting, and dynamic human-robot interactions. To maintain computational tractability on edge research hosts while preventing data leakage, we enforce a strict \textbf{Zero-Leakage Multi-Scene Partitioning Protocol}:
 
 \begin{itemize}
     \item \textbf{Training Partition ($\texttt{Warehouse\_000}$):} Calibrated multi-camera video streams (\texttt{Camera\_0000} and \texttt{Camera\_0001}) sampled at $0.5\text{ FPS}$ ($1$ frame per $60$ video frames) yield $300$ high-diversity annotated frames and $12,959$ ground-truth bounding box instances.
-    \item \textbf{Validation Partition ($\texttt{Warehouse\_015}$):} Sourced from a geographically independent warehouse layout with disjoint camera trajectories (\texttt{Camera} and \texttt{Camera\_01}), sampled to $100$ evaluation frames and $3,696$ object instances.
+    \item \textbf{Validation Partition ($\texttt{Warehouse\_015}$):} Sourced from a geographically independent warehouse layout with disjoint camera trajectories (\texttt{Camera} and \texttt{Camera\_01}), sampled to $100$ evaluation frames and $3,696$ object instances for hyperparameter validation and checkpoint selection.
     \item \textbf{Strict Leakage Safeguard:} No camera stream, background facility texture, or video sequence in the training partition appears in the validation set, ensuring evaluated metrics measure generalizable domain representation rather than background memorization.
 \end{itemize}
 

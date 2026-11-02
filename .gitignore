@@ -37,3 +37,4 @@ paper/*.synctex.gz
 texput.log
 gpu_training_package/*.tar.gz
 models/*.onnx
+onnxruntime_profile*.json

@@ -181,9 +181,11 @@ class WarehouseSS2DBlock(nn.Module):
         self.out_proj = nn.Conv2d(self.d_inner, c2, kernel_size=1, bias=False)
         self.norm3 = nn.BatchNorm2d(c2)
 
-        # Identity-preserving zero initialization on out_proj only
-        # Leaves BatchNorm weight at 1.0 and bias at 0.0 to preserve normal variance
-        nn.init.zeros_(self.out_proj.weight)
+        # Zero-gamma initialization (Goyal et al., 2017):
+        # Initializing norm3 gamma (weight) and beta (bias) to 0 ensures Y = X at step 0,
+        # and crucially prevents variance amplification across subsequent training steps.
+        nn.init.zeros_(self.norm3.weight)
+        nn.init.zeros_(self.norm3.bias)
 
         # Residual connection
         self.has_residual = (c1 == c2)

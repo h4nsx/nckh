@@ -60,22 +60,22 @@ To eliminate the 1D causal scanning bias of sequence models and handle 2D spatia
     \item Reversed column-major scan (right-to-left, bottom-to-top): $\mathbf{u}_4 = \text{Flip}(\mathbf{u}_3, \text{dim}=1)$.
 \end{enumerate}
 
-For each direction $k \in \{1, 2, 3, 4\}$, continuous state-space parameters $(\mathbf{A}_k, \mathbf{B}_k, \mathbf{C}_k, \mathbf{\Delta}_k)$ are dynamically conditioned on the input tokens through a direction-specific linear parameter projection:
-\begin{align}
-    \mathbf{\Delta}_k &= \text{softplus}(\mathbf{W}_{\Delta, k} \mathbf{u}_k) \in \mathbb{R}^{B \times L \times d_{\text{inner}}}, \\
-    \mathbf{B}_k &= \mathbf{W}_{B, k} \mathbf{u}_k \in \mathbb{R}^{B \times L \times d_{\text{state}}}, \\
-    \mathbf{C}_k &= \mathbf{W}_{C, k} \mathbf{u}_k \in \mathbb{R}^{B \times L \times d_{\text{state}}}.
-\end{align}
+For each direction $k \in \{1, 2, 3, 4\}$, continuous state-space parameters $(\mathbf{B}_k, \mathbf{C}_k, \mathbf{\Delta}_k)$ are dynamically conditioned on the input tokens through a shared parameter projection matrix $\mathbf{W}_{\text{proj}} \in \mathbb{R}^{d_{\text{inner}} \times (2 d_{\text{state}} + d_{\text{inner}})}$:
+\begin{equation}
+    [\mathbf{B}_k, \mathbf{C}_k, \mathbf{d}_k] = \mathbf{u}_k \mathbf{W}_{\text{proj}}, \quad \mathbf{\Delta}_k = \text{softplus}(\mathbf{d}_k),
+\end{equation}
+where $\mathbf{B}_k, \mathbf{C}_k \in \mathbb{R}^{B \times L \times d_{\text{state}}}$ and $\mathbf{\Delta}_k \in \mathbb{R}^{B \times L \times d_{\text{inner}}}$.
+
 Discretization maps continuous parameters to discrete step operators:
 \begin{align}
     \overline{\mathbf{A}}_k &= \exp(\mathbf{\Delta}_k \odot \mathbf{A}_k), \\
-    \overline{\mathbf{B}}_k &= (\mathbf{\Delta}_k \odot \mathbf{u}_k) \odot \mathbf{B}_k,
+    (\overline{\mathbf{B}}\mathbf{u})_k &= (\mathbf{\Delta}_k \odot \mathbf{u}_k) \odot \mathbf{B}_k,
 \end{align}
-where $\odot$ denotes elementwise broadcasting Hadamard multiplication, $\overline{\mathbf{A}}_k$ implements the exact matrix exponential of diagonal state matrix $\mathbf{A}_k = -\exp(\mathbf{A}_{\text{logs}, k}) \in \mathbb{R}^{d_{\text{inner}} \times d_{\text{state}}}$, and $\overline{\mathbf{B}}_k$ adopts a lightweight first-order Euler-bilinear input modulation.
+where $\odot$ denotes elementwise broadcasting Hadamard multiplication, $\overline{\mathbf{A}}_k$ implements the exact Zero-Order Hold (ZOH) discretization of diagonal state matrix $\mathbf{A}_k = -\exp(\mathbf{A}_{\text{logs}, k}) \in \mathbb{R}^{d_{\text{inner}} \times d_{\text{state}}}$, and $(\overline{\mathbf{B}}\mathbf{u})_k$ represents the first-order Euler input modulation.
 
 The discrete recurrence updates the hidden state $\mathbf{h}_k(t) \in \mathbb{R}^{d_{\text{inner}} \times d_{\text{state}}}$ (with state dimension $d_{\text{state}} = 16$) in linear time across sequence steps $t \in [1, L]$:
 \begin{align}
-    \mathbf{h}_k(t) &= \overline{\mathbf{A}}_k(t) \odot \mathbf{h}_k(t-1) + \overline{\mathbf{B}}_k(t), \\
+    \mathbf{h}_k(t) &= \overline{\mathbf{A}}_k(t) \odot \mathbf{h}_k(t-1) + (\overline{\mathbf{B}}\mathbf{u})_k(t), \\
     \mathbf{y}_k(t) &= \sum_{n=1}^{d_{\text{state}}} \mathbf{h}_{k, n}(t) \odot \mathbf{C}_{k, n}(t) + \mathbf{D}_k \odot \mathbf{u}_k(t).
 \end{align}
 The four directional outputs are reversed back to standard spatial orientation, reshaped to $H \times W$, and summed:
@@ -83,16 +83,18 @@ The four directional outputs are reversed back to standard spatial orientation, 
     \mathbf{F}_{\text{ssm}} = \sum_{k=1}^{4} \text{Restore}_{2\text{D}}(\mathbf{y}_k) \in \mathbb{R}^{B \times d_{\text{inner}} \times H \times W}.
 \end{equation}
 
-\subsubsection{Identity-Preserving Residual Fusion}
+\subsubsection{\texorpdfstring{Zero-$\gamma$}{Zero-Gamma} Residual Identity Fusion}
 The combined state-space representation is projected back to $C_{\text{out}} = 512$ channels via a $1 \times 1$ convolution and normalized before residual summation:
 \begin{equation}
-    \mathbf{Y} = \mathbf{F} + \text{BN}(\text{Conv}_{1 \times 1}(\mathbf{F}_{\text{ssm}})).
+    \mathbf{Y} = \mathbf{F} + \text{BN}_{\gamma, \beta}(\text{Conv}_{1 \times 1}(\mathbf{F}_{\text{ssm}})),
 \end{equation}
-To eliminate the cold-block perturbation shock that typically corrupts pretrained backbone features upon inserting an untrained module, we initialize the output projection kernel to zero ($\mathbf{W}_{\text{out}} = \mathbf{0}$). Consequently, at initialization step $t=0$:
+where $\text{BN}_{\gamma, \beta}(\mathbf{Z}) = \gamma \odot \frac{\mathbf{Z} - \mu}{\sqrt{\sigma^2 + \epsilon}} + \beta$. 
+
+To eliminate cold-block perturbation shock upon surgically inserting an untrained SSM block into a pretrained CNN backbone, we initialize the batch normalization affine parameters to zero ($\gamma_0 = \mathbf{0}, \beta_0 = \mathbf{0}$) following zero-$\gamma$ residual principles \cite{goyal2017accurate}:
 \begin{equation}
-    \text{Conv}_{1 \times 1}(\mathbf{F}_{\text{ssm}}; \mathbf{W}_{\text{out}}=\mathbf{0}) = \mathbf{0} \implies \mathbf{Y} \equiv \mathbf{F},
+    \gamma_0 = \mathbf{0}, \beta_0 = \mathbf{0} \implies \mathbf{Y}_0 \equiv \mathbf{F}.
 \end{equation}
-guaranteeing an exact identity mapping ($\|\mathbf{Y} - \mathbf{F}\|_{\infty} = 0.0$) that preserves pretrained feature representations during the initial warmup phase.
+Crucially, unlike zeroing the convolution kernel prior to normalization, zero-$\gamma$ initialization guarantees $\|\mathbf{Y}_0 - \mathbf{F}\|_{\infty} = 0.0$ at step $0$ while preventing batch variance normalization from amplifying small weight updates during subsequent optimization steps ($\partial \mathbf{Y} / \partial \gamma \ne \mathbf{0}$). This preserves pretrained backbone features and enables smooth adaptive emergence of spatial state-space context.
 
 \subsection{Multi-Scale Feature Fusion and Detection Head}
 \label{sec:fusion}

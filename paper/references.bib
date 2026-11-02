@@ -218,15 +218,7 @@
   publisher = {PMLR}
 }
 
-% --- Edge Hardware & Jetson Orin Nano Benchmarking ---
-@article{szegedi2026jetson,
-  author    = {Richard Szegedi and Yannick Bukschat and Marcus Vetter},
-  title     = {A Comparative Study of Neural Network Performance on the {NVIDIA} {Jetson} {Orin} {Nano}},
-  journal   = {IEEE Access},
-  year      = {2026},
-  doi       = {10.1109/ACCESS.2026.3712902}
-}
-
+% --- Edge Acceleration Frameworks ---
 @article{ratul2024accelerating,
   author    = {Ishrak Jahan Ratul and Yuxiao Zhou and Kecheng Yang},
   title     = {Accelerating Deep Learning Inference: A Comparative Analysis of Modern Acceleration Frameworks},
@@ -238,30 +230,39 @@
   doi       = {10.3390/electronics13234782}
 }
 
-% --- Selective State Space Object Detection Models ---
-@article{wang2025mambayolo,
-  author    = {Z. Wang and others},
-  title     = {{Mamba-YOLO}: Lightweight and Accurate Object Detection via Regional Attention With Gated Enhancement},
-  journal   = {IEEE Access},
+% --- Core SSM Detection & Architecture Literature ---
+@inproceedings{wang2025mambayolo,
+  author    = {Zeyu Wang and Chen Li and Huiying Xu and Xinzhong Zhu and Hongbo Li},
+  title     = {{Mamba-YOLO}: {SSMs}-Based {YOLO} For Object Detection},
+  booktitle = {Proceedings of the AAAI Conference on Artificial Intelligence (AAAI)},
   year      = {2025},
-  doi       = {10.1109/ACCESS.2025}
+  note      = {arXiv:2406.05835}
 }
 
-@article{li2024xraymamba,
-  author    = {X. Li and others},
-  title     = {A Lightweight {Xray-YOLO-Mamba} Model for Prohibited Item Detection in {X}-ray Images Using Selective State Space Models},
-  journal   = {Scientific Reports},
-  volume    = {14},
-  year      = {2024},
-  publisher = {Nature Publishing Group}
-}
-
-@article{vo2026selectivereview,
-  author    = {Thanh Kiet Vo and Rene Jaros and Ly Duc Minh and Petr Bilik and Radek Martinek},
-  title     = {Selective State-Space Modeling for Real-Time Object Detection in Intelligent Transportation: A Systematic Literature Review},
-  journal   = {Artificial Intelligence Review},
+@article{chan2026mambapsa,
+  author    = {Sheng-Wei Chan and Chia-Min Lin and Hsin-Jui Pan and Ching-Yu Tsai and Chih-Hsiang Yang and Yung-Che},
+  title     = {{MambaPSA}: A {Mamba}-based Replacement for {C2PSA} in {YOLO26}},
+  journal   = {arXiv preprint arXiv:2607.12681},
   year      = {2026},
-  doi       = {10.1007/s10462-026-11673-9}
+  url       = {https://arxiv.org/abs/2607.12681}
+}
+
+@article{yu2024mambaout,
+  author    = {Weihao Yu and Xinchao Wang},
+  title     = {{MambaOut}: Do We Really Need {Mamba} for Vision?},
+  journal   = {arXiv preprint arXiv:2405.07992},
+  year      = {2024},
+  url       = {https://arxiv.org/abs/2405.07992}
+}
+
+@article{zhao2025xraymamba,
+  author    = {Y. Zhao and Y. Peng and X. Li and H. Lu},
+  title     = {A lightweight {Xray-YOLO-Mamba} model for prohibited item detection in {X}-ray images using selective state space models},
+  journal   = {Scientific Reports},
+  volume    = {15},
+  pages     = {96035},
+  year      = {2025},
+  doi       = {10.1038/s41598-025-96035-1}
 }
 
 @article{yang2024freezerwarehouse,
@@ -271,5 +272,14 @@
   volume    = {14},
   year      = {2024},
   publisher = {Nature Publishing Group}
+}
+
+% --- Foundational Optimization & Zero-Gamma Normalization ---
+@article{goyal2017accurate,
+  author    = {Priya Goyal and Piotr Doll{\'a}r and Ross Girshick and Pieter Noordhuis and Lukasz Wesolowski and Aapo Kyrola and Andrew Tulloch and Yangqing Jia and Kaiming He},
+  title     = {Accurate, Large Minibatch {SGD}: Training {ImageNet} in 1 Hour},
+  journal   = {arXiv preprint arXiv:1706.02677},
+  year      = {2017},
+  url       = {https://arxiv.org/abs/1706.02677}
 }
 
