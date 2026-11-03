@@ -13,7 +13,7 @@ The target class taxonomy is derived from logistics-critical warehouse categorie
 \begin{figure*}[!t]
 \centering
 \includegraphics[width=\textwidth]{figures/fig_architecture_diagram.pdf}
-\caption{Detailed architectural overview of \textbf{YOLO11s-SS2D}: (Left) Macro architecture showing surgical replacement of Layer 10 attention with the lightweight \texttt{WarehouseSS2DBlock} at Stage $P_5$; (Right) Internal micro-architecture illustrating the 4-direction vectorized selective state-space scan (SS2D) core, input-dependent parameter projections, and zero-initialized residual connection ($\mathbf{W}_{\text{out}} = \mathbf{0}$) ensuring exact identity pass-through at initialization.}
+\caption{Detailed architectural overview of \textbf{YOLO11s-SS2D}: (Left) Macro architecture showing the replacement of Layer 10 attention with the lightweight \texttt{WarehouseSS2DBlock} at Stage $P_5$; (Right) Internal micro-architecture illustrating the 4-direction sequential selective state-space scan (SS2D) core, input-dependent parameter projections, and the residual output branch ($1\times1$ convolution followed by batch normalization). The panel labels the earlier $\mathbf{W}_{\text{out}} = \mathbf{0}$ initialization used for the reported models; the current implementation instead uses zero-$\gamma$ initialization (Eq.~\eqref{eq:zero_gamma}).}
 \label{fig:arch_diagram}
 \end{figure*}
 
@@ -90,11 +90,12 @@ The combined state-space representation is projected back to $C_{\text{out}} = 5
 \end{equation}
 where $\text{BN}_{\gamma, \beta}(\mathbf{Z}) = \gamma \odot \frac{\mathbf{Z} - \mu}{\sqrt{\sigma^2 + \epsilon}} + \beta$. 
 
-To eliminate cold-block perturbation shock upon surgically inserting an untrained SSM block into a pretrained CNN backbone, we initialize the batch normalization affine parameters to zero ($\gamma_0 = \mathbf{0}, \beta_0 = \mathbf{0}$) following zero-$\gamma$ residual principles \cite{goyal2017accurate}:
+To avoid perturbing pretrained features when inserting an untrained SSM block into a pretrained CNN backbone, we initialize the batch normalization affine parameters to zero ($\gamma_0 = \mathbf{0}, \beta_0 = \mathbf{0}$) following zero-$\gamma$ residual principles \cite{goyal2017accurate}:
 \begin{equation}
     \gamma_0 = \mathbf{0}, \beta_0 = \mathbf{0} \implies \mathbf{Y}_0 \equiv \mathbf{F}.
+    \label{eq:zero_gamma}
 \end{equation}
-Crucially, unlike zeroing the convolution kernel prior to normalization, zero-$\gamma$ initialization guarantees $\|\mathbf{Y}_0 - \mathbf{F}\|_{\infty} = 0.0$ at step $0$ while preventing batch variance normalization from amplifying small weight updates during subsequent optimization steps ($\partial \mathbf{Y} / \partial \gamma \ne \mathbf{0}$). This preserves pretrained backbone features and enables smooth adaptive emergence of spatial state-space context.
+Zeroing the convolution kernel ahead of batch normalization, as in our earlier implementation, also yields $\mathbf{Y}_0 = \mathbf{F}$, but after the first update batch normalization rescales the small convolution output to unit variance, so the residual branch immediately contributes at full scale. With zero-$\gamma$, the residual branch contributes $\gamma \odot \hat{\mathbf{Z}} + \beta$, whose magnitude grows with $\gamma$, while $\partial \mathbf{Y} / \partial \gamma = \hat{\mathbf{Z}} \neq \mathbf{0}$ keeps the branch trainable. We verify this behavior on an isolated block (\texttt{tests/test\_zero\_gamma\_identity.py}); its effect on full-detector training has not yet been measured.
 
 \subsection{Multi-Scale Feature Fusion and Detection Head}
 \label{sec:fusion}
@@ -108,16 +109,16 @@ where $\mathcal{L}_{\text{box}}$ is Complete Intersection-over-Union (CIoU) loss
 
 \subsection{Analytical Complexity and Parameter Footprint}
 \label{sec:complexity}
-The surgical substitution of Layer 10 significantly reduces both model parameters and computational complexity:
+The substitution of Layer 10 reduces model parameters and slightly reduces computational complexity:
 \begin{itemize}
     \item \textbf{Standard \texttt{C2PSA} (Self-Attention):} Requires $990,976$ parameters.
     \item \textbf{Proposed \texttt{WarehouseSS2DBlock}:} Requires $357,632$ parameters ($633,344$ fewer block parameters, a $63.9\%$ parameter reduction in the attention stage).
-    \item \textbf{Global Model Impact:} Overall parameters decrease from $9,429,340$ ($9.43\text{ M}$) to $8,795,996$ ($8.80\text{ M}$, a $-6.72\%$ overall reduction on warehouse detection). Computational complexity is maintained at $21.2\text{ GFLOPs}$.
+    \item \textbf{Global Model Impact:} Overall parameters decrease from $9,429,340$ ($9.43\text{ M}$) to $8,795,996$ ($8.80\text{ M}$, a $-6.72\%$ overall reduction on warehouse detection). Computational complexity decreases from $21.7$ to $21.2\text{ GFLOPs}$.
 \end{itemize}
 
 \subsection{Two-Stage Training Protocol}
 \label{sec:training_workflow}
-Empirical evidence reveals a ``cold block'' perturbation phenomenon when inserting a newly initialized SSM block into a pretrained CNN backbone. We establish a structured two-stage optimization strategy:
+In our earlier trials, inserting a newly initialized SSM block into a pretrained CNN backbone was followed by unstable early-epoch validation metrics (``cold block'' perturbation). We therefore evaluate a two-stage optimization strategy alongside single-stage training. Whether it remains beneficial once zero-$\gamma$ initialization is used is an open question that our current experiments do not address:
 \begin{enumerate}
     \item \textbf{Stage 1 (SSM Warmup):} The pretrained CNN backbone stages ($P_1$--$P_4$) are frozen. The learning rate is applied strictly to the \texttt{WarehouseSS2DBlock} and detection head for $5$ warm-up epochs to align the continuous state-space matrices without destabilizing early visual filters.
     \item \textbf{Stage 2 (End-to-End Fine-Tuning):} All parameters are unfrozen for fine-tuning using AdamW with cosine learning rate decay.
