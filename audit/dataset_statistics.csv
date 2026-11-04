@@ -1,0 +1,3 @@
+split,num_images,num_instances,worker,forklift,pallet_truck,amr
+train,300,12959,11399,600,236,724
+val,100,3696,3488,150,13,45

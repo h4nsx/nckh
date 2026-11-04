@@ -1,0 +1,24 @@
+argcomplete==3.7.2
+attrs==26.1.0
+Brlapi==0.8.8
+cffi==2.1.1
+cryptography==50.0.2
+dasbus==1.7
+dbus-python==1.5.0
+defusedxml==0.7.1
+filelock==4.0.10
+louis==3.39.0
+netsnmp-python==1.0a1
+nftables==0.1
+packaging==26.3
+psutil==7.2.2
+pwquality==1.4.5
+pycairo==1.29.2
+pycparser==3.12
+PyGObject==3.58.1
+pyxdg==0.28
+setproctitle==1.3.7
+TBB @ file:///build/onetbb/src/build/python/python_build
+typing_extensions==4.16.0
+VapourSynth==81
+wheel==0.48.0
