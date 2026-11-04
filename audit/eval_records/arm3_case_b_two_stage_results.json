@@ -1,0 +1,17 @@
+{
+  "experiment_id": "arm3_case_b_two_stage_results",
+  "checkpoint_path": "artifacts/arm3_case_b_two_stage_results/best.pt",
+  "checkpoint_sha256": "UNKNOWN",
+  "dataset_id": "PhysicalAI-SmartSpaces",
+  "dataset_split": "validation",
+  "evaluation_timestamp": "2026-11-04T18:07:54.152082Z",
+  "evaluation_config": {},
+  "software_versions": {},
+  "metrics": {
+    "map50": 0.67101,
+    "map50_95": 0.43172,
+    "precision": 0.72547,
+    "recall": 0.64528
+  },
+  "per_class_metrics": {}
+}
