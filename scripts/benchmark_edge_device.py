@@ -71,12 +71,26 @@ def benchmark_onnx(model_path: str, num_runs: int = 100, warmup: int = 10, imgsz
     rss_end = measure_rss_mb()
     latencies = np.array(latencies)
 
+    # Compute statistics
     mean_lat = np.mean(latencies)
     median_lat = np.median(latencies)
     p90_lat = np.percentile(latencies, 90)
     p95_lat = np.percentile(latencies, 95)
     std_lat = np.std(latencies)
-    fps = 1000.0 / median_lat
+    # FPS defined from mean latency (single source of truth)
+    fps = 1000.0 / mean_lat
+
+    # Save per‑iteration latency to CSV for reproducibility
+    import csv
+    from pathlib import Path
+    out_dir = Path("results/edge")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    csv_path = out_dir / f"{os.path.splitext(os.path.basename(model_path))[0]}_latency.csv"
+    with open(csv_path, "w", newline="") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["iteration", "latency_ms"])  # header
+        for i, lat in enumerate(latencies, start=1):
+            writer.writerow([i, lat])
 
     print("\n" + "-" * 40)
     print("BENCHMARK METRICS SUMMARY")
@@ -88,7 +102,7 @@ def benchmark_onnx(model_path: str, num_runs: int = 100, warmup: int = 10, imgsz
     print(f"Mean Latency:    {mean_lat:.2f} ms +/- {std_lat:.2f} ms")
     print(f"P90 Latency:     {p90_lat:.2f} ms")
     print(f"P95 Latency:     {p95_lat:.2f} ms")
-    print(f"Throughput:      {fps:.2f} FPS")
+    print(f"Throughput:      {fps:.2f} FPS (based on mean latency)")
     if rss_start > 0:
         print(f"Memory RSS:      {rss_end:.1f} MB (Delta: +{rss_end - rss_start:.1f} MB)")
     print("-" * 40)
@@ -100,7 +114,8 @@ def benchmark_onnx(model_path: str, num_runs: int = 100, warmup: int = 10, imgsz
         "p90_ms": p90_lat,
         "p95_ms": p95_lat,
         "fps": fps,
-        "rss_mb": rss_end
+        "rss_mb": rss_end,
+        "latency_csv": str(csv_path)
     }
 
 def main():

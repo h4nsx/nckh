@@ -13,7 +13,7 @@ The target class taxonomy is derived from logistics-critical warehouse categorie
 \begin{figure*}[!t]
 \centering
 \includegraphics[width=\textwidth]{figures/fig_architecture_diagram.pdf}
-\caption{Detailed architectural overview of \textbf{YOLO11s-SS2D}: (Left) Macro architecture showing surgical replacement of Layer 10 attention with the lightweight \texttt{WarehouseSS2DBlock} at Stage $P_5$; (Right) Internal micro-architecture illustrating the 4-direction vectorized selective state-space scan (SS2D) core, input-dependent parameter projections, and zero-initialized residual connection ($\mathbf{W}_{\text{out}} = \mathbf{0}$) ensuring exact identity pass-through at initialization.}
+\caption{Detailed architectural overview of \textbf{YOLO11s-SS2D}: (Left) Macro architecture showing surgical replacement of Layer 10 attention with the lightweight \texttt{WarehouseSS2DBlock} at Stage $P_5$ (Arms 2 and 3; in the dual-scale Case C / Arm 4 configuration, SS2D blocks are deployed at both $P_4$ and $P_5$); (Right) Internal micro-architecture illustrating the 4-direction vectorized selective state-space scan (SS2D) core, input-dependent parameter projections, and zero-initialized residual connection ($\mathbf{W}_{\text{out}} = \mathbf{0}$) ensuring exact identity pass-through at initialization.}
 \label{fig:arch_diagram}
 \end{figure*}
 
