@@ -1,0 +1,2 @@
+subsample_interval = 60 frames (≈ 0.5 FPS for 30 FPS source)
+max_frames_per_camera: train=150, val=50
