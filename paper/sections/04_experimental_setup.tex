@@ -13,6 +13,8 @@ To evaluate warehouse object detection under realistic logistics conditions, we 
 
 The verified dataset taxonomy comprises four primary logistics classes: \texttt{worker} ($11,399$ train / $3,488$ val instances), \texttt{forklift} ($600$ train / $150$ val instances), \texttt{amr} (NovaCarter, $724$ train / $45$ val instances), and \texttt{pallet\_truck} (Transporter, $236$ train / $13$ val instances). Table~\ref{tab:dataset_distribution} details the partitioned instance distribution and role taxonomy.
 
+\noindent\textbf{Dataset Limitations and Class Imbalance:} While the cross-facility zero-leakage split rigorously safeguards against visual background memorization, the validation set exhibits pronounced class distribution skew reflective of realistic warehouse operational densities. In the held-out validation set of $3,696$ instances, \texttt{worker} constitutes $94.37\%$ ($3,488$ instances), \texttt{forklift} comprises $4.06\%$ ($150$ instances), \texttt{amr} represents $1.22\%$ ($45$ instances), and \texttt{pallet\_truck} accounts for only $0.35\%$ ($13$ instances across $100$ frames). Because tail-class sample sizes are inherently constrained ($N=13$ for pallet trucks), per-class metric estimates for these underrepresented categories carry wider empirical confidence intervals and higher statistical variance across training runs compared to majority worker representations. Readers and practitioners should interpret single-class shifts on \texttt{pallet\_truck} within the context of this small sample support, while aggregate and majority-class trends reflect robust sample volume.
+
 \begin{table}[!t]
 \caption{SmartSpaces Warehouse Benchmark Zero-Leakage Dataset Partitioning}
 \label{tab:dataset_distribution}
