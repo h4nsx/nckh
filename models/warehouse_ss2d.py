@@ -41,10 +41,10 @@ class PurePyTorch2DSelectiveScan(nn.Module):
         batch_size, seq_len, d_model = u.shape
         d_state = A.shape[-1]
 
-        # Simplified ZOH discretization:
-        # delta_A = exp(delta * A) where A has negative diagonal
+        # Continuous-to-discrete parameter mapping:
+        # Exact matrix exponential for diagonal transition: delta_A = exp(delta * A)
         delta_A = torch.exp(delta.unsqueeze(-1) * A.view(1, 1, d_model, d_state))
-        # delta_B_u = (delta * u) * B
+        # First-order Euler input modulation approximation: delta_B_u = (delta * u) * B
         delta_B_u = (delta.unsqueeze(-1) * u.unsqueeze(-1)) * B.unsqueeze(2)
 
         # Sequential scan along sequence length L

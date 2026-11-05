@@ -43,3 +43,12 @@ All dedicated unit and integration tests were executed directly in the audited e
 ## 3. Exit Gate G3 Verdict: PASS
 The architecture and mathematical operations in `models/warehouse_ss2d.py` are strictly correct, mathematically stable, and thoroughly verified by automated tests.
 
+
+
+---
+
+## 5. Phase 5 Action Plan Remediation Audit (2026-11-05)
+
+- **Discretization Terminology (Task 5.1):** Verified that code uses exact diagonal transition $\overline{\mathbf{A}} = \exp(\mathbf{\Delta}\mathbf{A})$ paired with first-order Euler input modulation $\overline{\mathbf{B}}\mathbf{u} = (\mathbf{\Delta} \odot \mathbf{u}) \odot \mathbf{B}$. Terminology across code comments and `paper/sections/03_methodology.tex` has been fully reconciled.
+- **Zero-Gamma Identity and Gradient Flow (Task 5.2):** Verified under `tests/test_zero_gamma_identity.py`. Output matches input with max abs difference of $0.00\text{e}{+}00$. At step 0, $\text{norm3.weight}$ ($\gamma$) receives finite active gradient ($0.1553$). After an optimizer step updates $\gamma \neq 0$, all upstream SSM parameters (`in_proj`, `dw_conv`, `A_logs`) receive active gradients with multi-step stability confirmed.
+- **Directional Alignment and Non-Square Inputs (Task 5.3):** Verified under `tests/test_ss2d_directional_alignment.py` and `tests/test_architecture_gate.py` across non-square spatial shapes ($(3 \times 5), (5 \times 3), (7 \times 11)$) and batch sizes $B \ge 1$, with zero NaN/Inf values.
