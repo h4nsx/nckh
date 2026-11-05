@@ -102,7 +102,7 @@ def generate_edge_deployment_chart():
         'Pi 4 Baseline Control\n(BCM2711 ARM Cortex-A72)',
         'Pi 4 YOLO11s-SS2D\n(BCM2711 ARM Cortex-A72)',
         'Host x86 CPU\n(YOLO11s-SS2D Case B)',
-        'Edge Embedded Budget\n(1.0 GB Envelope Limit)'
+        'Edge Embedded Budget\n(1024 MB Gateway Limit)'
     ]
     rss_values = [231.5, 371.9, 395.7, 1024.0] # Peak RSS in MB
     colors = ['#4575b4', '#313695', '#74add1', '#d73027']
@@ -128,11 +128,11 @@ def generate_edge_deployment_chart():
         if width == 1024.0:
             label += " (Target Ceiling)"
         elif width == 371.9:
-            label += " (-62.8% below 1GB limit)"
+            label += " (-63.7% margin)"
         elif width == 231.5:
-            label += " (-77.4% below limit)"
+            label += " (-77.4% margin)"
         elif width == 395.7:
-            label += " (-61.4% below limit)"
+            label += " (-61.4% margin)"
         ax.annotate(label,
                     xy=(width, bar.get_y() + bar.get_height() / 2),
                     xytext=(6, 0), textcoords="offset points",

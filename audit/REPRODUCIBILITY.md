@@ -19,13 +19,13 @@ This document establishes the artifact availability, cryptographic hashes (SHA-2
 | **Arm 4 Checkpoint** | `runs/detect/runs/two_stage_protocol_study/arm4_case_c_dual_scale/weights/best.pt` | 17.26 MB | `22267e09e823cfab58e02b9e15ed976114ad72e1420224509ba0d981d33685c5` | Local Reproducible |
 | **Arm 1 ONNX Export** | `yolo11s.onnx` | 36.29 MB | `bc6de8534de80e197a75604e2d475eab182a48f80d458f83d77457e6d8fadf49` | Local Reproducible |
 | **Arm 3 ONNX Export** | `runs/detect/runs/two_stage_protocol_study/arm3_stage2_finetune/weights/best.onnx` | 38.47 MB | `677274c7d89a350f1ad812ea1c2cef16428b5301b2f04597d04c301319051e0a` | Local Reproducible |
-| **Arm 1 Evaluation Record** | `audit/eval_records/arm1_baseline_results.json` | 1361 B | `c6780c99a4ed2084850e5c3d5bf9eac68bbce67a3f15addfba88b93947ba771a` | Tracked in Git |
+| **Arm 1 Evaluation Record** | `audit/eval_records/arm1_baseline_results.json` | 1435 B | `823324fcb52505674b94ba7631a9db7f3cf94dc86f9250dc7a1bc385c73a9698` | Tracked in Git |
 | **Arm 2 Evaluation Record** | `audit/eval_records/arm2_case_b_single_results.json` | 1383 B | `8f903a74e0ef26a36243a7c5edde24328dd178b7fb4444a632b48c41f8c44abf` | Tracked in Git |
 | **Arm 3 Evaluation Record** | `audit/eval_records/arm3_case_b_two_stage_results.json` | 1386 B | `d1ad5d51cd01f34f2ca4421515ac2d1266a52180645c4dc6847ce767b3f0107e` | Tracked in Git |
 | **Arm 4 Evaluation Record** | `audit/eval_records/arm4_case_c_dual_results.json` | 1378 B | `db10f5b45d81ce8c65968320f96484d48bba77c99965002cdfb2305f20b735db` | Tracked in Git |
 | **Arm 3 Multi-Stage Schedule** | `audit/arm3_two_stage_global_schedule.csv` | 2745 B | `1288b18c17313d87718e4f2f9ec367dc1b97fef7a8a0b76b3be3419e331fd80c` | Tracked in Git |
 | **Dataset Micro Sample Spec** | `data/smartspaces_micro/smartspaces_micro.yaml` | 199 B | `2d9685cb3157a06fde0dd489cce106e30b32cbb2d57628084884d26da91650e0` | Local Reproducible |
-| **Compiled Manuscript PDF** | `paper/main.pdf` | 8.55 MB | `2289c5e7a868dc0a097361fa853833bf4f6b0278928379ab9e3e3783ea81f3db` | Tracked in Git |
+| **Compiled Manuscript PDF** | `paper/main.pdf` | 8.55 MB | `6cae170cee158347cd2b0afc76a114c3f2d42f348d94d86bf9f2ef3cd24d5e7c` | Tracked in Git |
 
 ## 3. Step-by-Step Reproduction Procedure
 

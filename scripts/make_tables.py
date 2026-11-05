@@ -53,7 +53,8 @@ def generate_multi_arm_convergence_table():
         recall = m["recall"]
         val_loss = m.get("val_box_loss", "-")
         
-        peak_str = f"\\textbf{{{peak_mAP50:.2f}\\% (Ep. {peak_ep})}}" if arm == "Arm 2" else f"{peak_mAP50:.2f}\\% (Ep. {peak_ep})"
+        peak_ep_str = f"Global Ep. 19 (Stg 2 Ep. 14)" if arm == "Arm 3" else f"Ep. {peak_ep}"
+        peak_str = f"\\textbf{{{peak_mAP50:.2f}\\% ({peak_ep_str})}}" if arm == "Arm 2" else f"{peak_mAP50:.2f}\\% ({peak_ep_str})"
         p_str = f"\\textbf{{{precision:.3f}}}" if arm == "Arm 1" else f"{precision:.3f}"
         r_str = f"\\textbf{{{recall:.3f}}}" if arm == "Arm 3" else f"{recall:.3f}"
         loss_str = f"\\textbf{{{val_loss:.4f}}}" if arm == "Arm 1" else f"{val_loss:.4f}"
@@ -110,11 +111,29 @@ def generate_per_class_table():
         v4_50, v4_95 = a4["mAP50"], a4["mAP50_95"]
         lines.append(f"{clabel} & {f50(v1_50)} & {fm(v1_95)} & {f50(v2_50)} & {fm(v2_95)} & {f50(v3_50)} & {fm(v3_95)} & {f50(v4_50)} & {fm(v4_95)} \\\\")
     lines.append(r"\midrule")
+    # Add 3-Class Macro Average (excl pallet_truck)
+    m3c_1 = (EVAL_RECORDS[ARM_ID_MAP["Arm 1"]]["per_class_metrics"]["worker"]["mAP50"] + EVAL_RECORDS[ARM_ID_MAP["Arm 1"]]["per_class_metrics"]["forklift"]["mAP50"] + EVAL_RECORDS[ARM_ID_MAP["Arm 1"]]["per_class_metrics"]["amr"]["mAP50"]) / 3.0
+    m3c_2 = (EVAL_RECORDS[ARM_ID_MAP["Arm 2"]]["per_class_metrics"]["worker"]["mAP50"] + EVAL_RECORDS[ARM_ID_MAP["Arm 2"]]["per_class_metrics"]["forklift"]["mAP50"] + EVAL_RECORDS[ARM_ID_MAP["Arm 2"]]["per_class_metrics"]["amr"]["mAP50"]) / 3.0
+    m3c_3 = (EVAL_RECORDS[ARM_ID_MAP["Arm 3"]]["per_class_metrics"]["worker"]["mAP50"] + EVAL_RECORDS[ARM_ID_MAP["Arm 3"]]["per_class_metrics"]["forklift"]["mAP50"] + EVAL_RECORDS[ARM_ID_MAP["Arm 3"]]["per_class_metrics"]["amr"]["mAP50"]) / 3.0
+    m3c_4 = (EVAL_RECORDS[ARM_ID_MAP["Arm 4"]]["per_class_metrics"]["worker"]["mAP50"] + EVAL_RECORDS[ARM_ID_MAP["Arm 4"]]["per_class_metrics"]["forklift"]["mAP50"] + EVAL_RECORDS[ARM_ID_MAP["Arm 4"]]["per_class_metrics"]["amr"]["mAP50"]) / 3.0
+    
+    m3c_95_1 = (EVAL_RECORDS[ARM_ID_MAP["Arm 1"]]["per_class_metrics"]["worker"]["mAP50_95"] + EVAL_RECORDS[ARM_ID_MAP["Arm 1"]]["per_class_metrics"]["forklift"]["mAP50_95"] + EVAL_RECORDS[ARM_ID_MAP["Arm 1"]]["per_class_metrics"]["amr"]["mAP50_95"]) / 3.0
+    m3c_95_2 = (EVAL_RECORDS[ARM_ID_MAP["Arm 2"]]["per_class_metrics"]["worker"]["mAP50_95"] + EVAL_RECORDS[ARM_ID_MAP["Arm 2"]]["per_class_metrics"]["forklift"]["mAP50_95"] + EVAL_RECORDS[ARM_ID_MAP["Arm 2"]]["per_class_metrics"]["amr"]["mAP50_95"]) / 3.0
+    m3c_95_3 = (EVAL_RECORDS[ARM_ID_MAP["Arm 3"]]["per_class_metrics"]["worker"]["mAP50_95"] + EVAL_RECORDS[ARM_ID_MAP["Arm 3"]]["per_class_metrics"]["forklift"]["mAP50_95"] + EVAL_RECORDS[ARM_ID_MAP["Arm 3"]]["per_class_metrics"]["amr"]["mAP50_95"]) / 3.0
+    m3c_95_4 = (EVAL_RECORDS[ARM_ID_MAP["Arm 4"]]["per_class_metrics"]["worker"]["mAP50_95"] + EVAL_RECORDS[ARM_ID_MAP["Arm 4"]]["per_class_metrics"]["forklift"]["mAP50_95"] + EVAL_RECORDS[ARM_ID_MAP["Arm 4"]]["per_class_metrics"]["amr"]["mAP50_95"]) / 3.0
+
+    lines.append(f"\\textbf{{3-Class Macro (excl. pallet)}} & {m3c_1:.2f} & \\textbf{{{m3c_95_1:.2f}}} & \\textbf{{{m3c_2:.2f}}} & {m3c_95_2:.2f} & {m3c_3:.2f} & {m3c_95_3:.2f} & {m3c_4:.2f} & {m3c_95_4:.2f} \\\\")
+
     m1 = EVAL_RECORDS[ARM_ID_MAP["Arm 1"]]["metrics"]
     m2 = EVAL_RECORDS[ARM_ID_MAP["Arm 2"]]["metrics"]
     m3 = EVAL_RECORDS[ARM_ID_MAP["Arm 3"]]["metrics"]
     m4 = EVAL_RECORDS[ARM_ID_MAP["Arm 4"]]["metrics"]
-    lines.append(f"\\textbf{{Global Macro Metric}} & {m1['peak_mAP50']*100:.2f} & \\textbf{{{m1['map50_95']*100:.2f}}} & \\textbf{{{m2['peak_mAP50']*100:.2f}}} & {m2['map50_95']*100:.2f} & {m3['peak_mAP50']*100:.2f} & {m3['map50_95']*100:.2f} & {m4['peak_mAP50']*100:.2f} & {m4['map50_95']*100:.2f} \\\\")
+    lines.append(f"\\textbf{{4-Class Global Macro (Peak)}} & {m1['peak_mAP50']*100:.2f} & \\textbf{{{m1['map50_95']*100:.2f}}} & \\textbf{{{m2['peak_mAP50']*100:.2f}}} & {m2['map50_95']*100:.2f} & {m3['peak_mAP50']*100:.2f} & {m3['map50_95']*100:.2f} & {m4['peak_mAP50']*100:.2f} & {m4['map50_95']*100:.2f} \\\\")
+    final1 = m1.get('final_mAP50', m1['map50']) * 100
+    final2 = m2.get('final_mAP50', m2['map50']) * 100
+    final3 = m3.get('final_mAP50', m3['map50']) * 100
+    final4 = m4.get('final_mAP50', m4['map50']) * 100
+    lines.append(f"\\textbf{{4-Class Global Macro (Final Ep)}} & \\textbf{{{final1:.2f}}} & - & {final2:.2f} & - & {final3:.2f} & - & {final4:.2f} & - \\\\")
     lines.append(r"\bottomrule")
     lines.append(r"\multicolumn{9}{l}{\footnotesize $^{\dagger}$Notice on rare tail class: \texttt{pallet\_truck} contains only 13 validation instances ($0.35\%$ of total labels), exhibiting high sample variance.} \\\\")
     lines.append(r"\end{tabular}%")

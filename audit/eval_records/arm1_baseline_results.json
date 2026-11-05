@@ -49,8 +49,10 @@
   "hardware_benchmark": {
     "onnx_mb": 36.18,
     "latency_rpi4": 1169.73,
-    "throughput_fps": 0.85,
+    "latency_rpi4_median": 1166.70,
+    "throughput_fps": 0.86,
     "rss_rpi4": 231.5,
-    "headroom_pct": 76.8
+    "headroom_pct": 76.8,
+    "headroom_pct_1024": 77.4
   }
 }

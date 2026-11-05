@@ -132,7 +132,7 @@ def generate_transparent_white_diagram():
     ax.text(115, 21.8, "Re-Orientation", ha='center', **b_main)
     ax.text(115, 20.0, "Fold 4 Directions + Sum", ha='center', **b_sub)
     ax.text(115, 18.2, "1x1 Conv (256 -> 512)", ha='center', **b_sub)
-    ax.text(115, 16.5, "W_out = 0 (Zero-Init)", ha='center', fontsize=7.0, color="#C62828", fontweight='bold')
+    ax.text(115, 16.5, r"$\gamma_0 = 0$ (Zero-Init BN)", ha='center', fontsize=7.0, color="#C62828", fontweight='bold')
 
     # Arrow to Addition Node
     ax.annotate('', xy=(117, 11.8), xytext=(115, 15.0), arrowprops=dict(arrowstyle="-|>", lw=1.1, color=LINE_ARROW))
