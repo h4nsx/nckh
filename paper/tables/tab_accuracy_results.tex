@@ -8,12 +8,12 @@
 \setlength{\tabcolsep}{3pt}
 \begin{tabular}{lcccccc}
 \toprule
-\textbf{Experimental Arm} & \textbf{Final Ep. $\text{mAP}_{50}$} & \textbf{Peak Checkpoint $\text{mAP}_{50}$} & \textbf{Peak $\text{mAP}_{50-95}$} & \textbf{Precision} & \textbf{Recall} & \textbf{Val Box Loss} \\
+\textbf{Experimental Arm} & \textbf{Final Ep. $\text{mAP}_{50}$} & \textbf{Peak Checkpoint $\text{mAP}_{50}$} & \textbf{Peak $\text{mAP}_{50-95}$} & \textbf{Precision} & \textbf{Recall} & \textbf{Val Box Loss} \\\\
 \midrule
-Arm 1: Baseline YOLO11s Control & 69.75\% & 69.75\% & 45.82\% & 0.818 & 0.572 & - \\
-Arm 2: YOLO11s-SS2D (Case B, Single-Stage) & 65.46\% & 65.46\% & 41.56\% & 0.738 & 0.557 & - \\
-Arm 3: YOLO11s-SS2D (Case B, Two-Stage Warmup) & 67.10\% & 67.10\% & 43.17\% & 0.725 & 0.645 & - \\
-Arm 4: YOLO11s-SS2D (Case C, Dual-Scale P4+P5) & 67.17\% & 67.17\% & 42.73\% & 0.738 & 0.516 & - \\
+Arm 1: Baseline YOLO11s Control & 69.75\% & 69.80\% (Ep. 6) & 45.82\% & \textbf{0.818} & 0.572 & \textbf{1.0196} \\
+Arm 2: YOLO11s-SS2D (Case B, Single-Stage) & 65.46\% & \textbf{71.95\% (Ep. 18)} & 41.56\% & 0.738 & 0.557 & 1.0688 \\
+Arm 3: YOLO11s-SS2D (Case B, Two-Stage Warmup) & 67.10\% & 67.67\% (Ep. 14) & 43.17\% & 0.725 & \textbf{0.645} & 1.0512 \\
+Arm 4: YOLO11s-SS2D (Case C, Dual-Scale P4+P5) & 67.17\% & 67.17\% (Ep. 20) & 42.73\% & 0.738 & 0.515 & 1.0863 \\
 \bottomrule
 \end{tabular}%
 }

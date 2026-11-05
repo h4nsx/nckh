@@ -1,17 +1,56 @@
 {
   "experiment_id": "arm2_case_b_single_results",
-  "checkpoint_path": "artifacts/arm2_case_b_single_results/best.pt",
-  "checkpoint_sha256": "UNKNOWN",
-  "dataset_id": "PhysicalAI-SmartSpaces",
-  "dataset_split": "validation",
-  "evaluation_timestamp": "2026-11-04T18:07:54.150996Z",
-  "evaluation_config": {},
-  "software_versions": {},
+  "arm_name": "Arm 2: YOLO11s-SS2D (Case B, Single-Stage)",
+  "checkpoint_path": "runs/detect/runs/two_stage_protocol_study/arm2_case_b_single_stage/weights/best.pt",
+  "checkpoint_sha256": "16a9ff3914c37e248c881256c768afd67748ea076dccf774eec5cd5d1470f606",
+  "dataset_id": "PhysicalAI-SmartSpaces-Warehouse",
+  "dataset_split": "held_out_cross_facility_val",
+  "evaluation_timestamp": "2026-11-04T18:07:54Z",
+  "software_versions": {
+    "python": "3.14.8",
+    "torch": "2.14.1+cpu",
+    "ultralytics": "8.4.184",
+    "onnxruntime": "1.31.0"
+  },
+  "evaluation_config": {
+    "imgsz": 640,
+    "batch": 1,
+    "conf": 0.25,
+    "iou": 0.5
+  },
   "metrics": {
+    "final_mAP50": 0.65462,
+    "peak_mAP50": 0.7195,
+    "peak_epoch": 18,
     "map50": 0.65462,
     "map50_95": 0.4156,
     "precision": 0.73793,
-    "recall": 0.55651
+    "recall": 0.55651,
+    "val_box_loss": 1.0688
   },
-  "per_class_metrics": {}
+  "per_class_metrics": {
+    "worker": {
+      "mAP50": 89.35,
+      "mAP50_95": 61.93
+    },
+    "forklift": {
+      "mAP50": 79.71,
+      "mAP50_95": 38.33
+    },
+    "pallet_truck": {
+      "mAP50": 33.87,
+      "mAP50_95": 17.74
+    },
+    "amr": {
+      "mAP50": 84.87,
+      "mAP50_95": 62.61
+    }
+  },
+  "hardware_benchmark": {
+    "onnx_mb": 38.47,
+    "latency_rpi4": 1398.19,
+    "throughput_fps": 0.72,
+    "rss_rpi4": 371.9,
+    "headroom_pct": 62.8
+  }
 }
