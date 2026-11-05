@@ -71,7 +71,7 @@ Discretization maps continuous parameters to discrete step operators:
     \overline{\mathbf{A}}_k &= \exp(\mathbf{\Delta}_k \odot \mathbf{A}_k), \\
     (\overline{\mathbf{B}}\mathbf{u})_k &= (\mathbf{\Delta}_k \odot \mathbf{u}_k) \odot \mathbf{B}_k,
 \end{align}
-where $\odot$ denotes elementwise broadcasting Hadamard multiplication, $\overline{\mathbf{A}}_k$ implements the exact Zero-Order Hold (ZOH) discretization of diagonal state matrix $\mathbf{A}_k = -\exp(\mathbf{A}_{\text{logs}, k}) \in \mathbb{R}^{d_{\text{inner}} \times d_{\text{state}}}$, and $(\overline{\mathbf{B}}\mathbf{u})_k$ represents the first-order Euler input modulation.
+where $\odot$ denotes elementwise broadcasting Hadamard multiplication, $\overline{\mathbf{A}}_k$ represents the exact matrix exponential transition for the diagonal state matrix $\mathbf{A}_k = -\exp(\mathbf{A}_{\text{logs}, k}) \in \mathbb{R}^{d_{\text{inner}} \times d_{\text{state}}}$, and $(\overline{\mathbf{B}}\mathbf{u})_k$ denotes the first-order Euler input modulation approximation commonly adopted in selective state-space architectures.
 
 The discrete recurrence updates the hidden state $\mathbf{h}_k(t) \in \mathbb{R}^{d_{\text{inner}} \times d_{\text{state}}}$ (with state dimension $d_{\text{state}} = 16$) in linear time across sequence steps $t \in [1, L]$:
 \begin{align}
