@@ -41,3 +41,14 @@
 ## 3. Exit Gate G4 Verdict: PASS WITH DOCUMENTED DISCLOSURE
 All 4 experimental arms are verified on disk with logged training histories. The 20-epoch comparative protocol is confirmed sound.
 
+
+
+---
+
+## 4. Phase 6 Epoch Numbering & Schedule Provenance (2026-11-05)
+
+- **Arm 3 Two-Stage Schedule Formulation:**
+  - **Stage 1 (Warmup):** 5 epochs with backbone frozen (`freeze=10`, layers 0..9 frozen). Recorded in `runs/detect/runs/two_stage_protocol_study/arm3_stage1_warmup/results.csv` (epochs 1..5).
+  - **Stage 2 (Fine-tuning):** 15 epochs with all layers unfrozen (`freeze=0`, $\text{lr}_0 = 0.0005$). Recorded in `runs/detect/runs/two_stage_protocol_study/arm3_stage2_finetune/results.csv` (stage epochs 1..15).
+  - **Global Epoch Mapping:** Global epoch $E_{\text{global}} = E_{\text{stage2}} + 5$. The peak validation checkpoint occurring at stage epoch 14 corresponds strictly to global epoch 19 ($14 + 5 = 19$).
+  - **Canonical Dataset Provenance:** Combined multi-stage log generated and preserved at `audit/arm3_two_stage_global_schedule.csv`.
