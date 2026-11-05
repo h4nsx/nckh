@@ -121,5 +121,5 @@ The surgical substitution of Layer 10 significantly reduces both block parameter
 Empirical evidence reveals a ``cold block'' perturbation phenomenon when inserting a newly initialized SSM block into a pretrained CNN backbone. We establish a structured two-stage optimization strategy:
 \begin{enumerate}
     \item \textbf{Stage 1 (SSM Warmup):} The pretrained CNN backbone stages ($P_1$--$P_4$) are frozen. The learning rate is applied strictly to the \texttt{WarehouseSS2DBlock} and detection head for $5$ warm-up epochs to align the continuous state-space matrices without destabilizing early visual filters.
-    \item \textbf{Stage 2 (End-to-End Fine-Tuning):} All parameters are unfrozen for fine-tuning using AdamW with cosine learning rate decay.
+    \item \textbf{Stage 2 (End-to-End Fine-Tuning):} All parameters are unfrozen for $15$ epochs of end-to-end fine-tuning using AdamW with cosine learning rate decay and a refined learning rate ($\eta = 0.0005$).
 \end{enumerate}
