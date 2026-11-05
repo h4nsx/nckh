@@ -2,64 +2,12 @@
 import sys
 import json
 from pathlib import Path
-import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
 OUTPUT_DIR = ROOT / "paper" / "tables"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-
-HARDWARE_AND_PER_CLASS = {
-    "Arm 1": {
-        "full_name": "Arm 1: Baseline YOLO11s Control",
-        "onnx_mb": 36.18,
-        "latency_rpi4": 1169.73,
-        "rss_rpi4": 231.5,
-        "per_class": {
-            "worker": {"mAP50": 89.20, "mAP50_95": 63.19},
-            "forklift": {"mAP50": 70.13, "mAP50_95": 31.80},
-            "pallet_truck": {"mAP50": 32.78, "mAP50_95": 22.37},
-            "amr": {"mAP50": 87.07, "mAP50_95": 64.74},
-        }
-    },
-    "Arm 2": {
-        "full_name": "Arm 2: YOLO11s-SS2D (Case B, Single-Stage)",
-        "onnx_mb": 38.47,
-        "latency_rpi4": 1398.19,
-        "rss_rpi4": 371.9,
-        "per_class": {
-            "worker": {"mAP50": 89.35, "mAP50_95": 61.93},
-            "forklift": {"mAP50": 79.71, "mAP50_95": 38.33},
-            "pallet_truck": {"mAP50": 33.87, "mAP50_95": 17.74},
-            "amr": {"mAP50": 84.87, "mAP50_95": 62.61},
-        }
-    },
-    "Arm 3": {
-        "full_name": "Arm 3: YOLO11s-SS2D (Case B, Two-Stage Warmup)",
-        "onnx_mb": 38.47,
-        "latency_rpi4": 1398.19,
-        "rss_rpi4": 371.9,
-        "per_class": {
-            "worker": {"mAP50": 87.91, "mAP50_95": 60.53},
-            "forklift": {"mAP50": 76.26, "mAP50_95": 38.36},
-            "pallet_truck": {"mAP50": 22.85, "mAP50_95": 16.21},
-            "amr": {"mAP50": 83.67, "mAP50_95": 57.50},
-        }
-    },
-    "Arm 4": {
-        "full_name": "Arm 4: YOLO11s-SS2D (Case C, Dual-Scale P4+P5)",
-        "onnx_mb": 46.62,
-        "latency_rpi4": 1965.07,
-        "rss_rpi4": 714.9,
-        "per_class": {
-            "worker": {"mAP50": 88.52, "mAP50_95": 60.90},
-            "forklift": {"mAP50": 75.25, "mAP50_95": 33.84},
-            "pallet_truck": {"mAP50": 19.97, "mAP50_95": 14.58},
-            "amr": {"mAP50": 84.95, "mAP50_95": 61.72},
-        }
-    }
-}
 
 ARM_ID_MAP = {
     "Arm 1": "arm1_baseline_results",
@@ -74,6 +22,10 @@ for p in (ROOT / "audit" / "eval_records").glob("*.json"):
         rec = json.load(f)
         EVAL_RECORDS[rec["experiment_id"]] = rec
 
+for arm, exp_id in ARM_ID_MAP.items():
+    if exp_id not in EVAL_RECORDS:
+        raise FileNotFoundError(f"Missing required evaluation record: {exp_id}.json")
+
 def generate_multi_arm_convergence_table():
     print("[1/3] Generating tab_accuracy_results.tex...")
     lines = []
@@ -87,19 +39,26 @@ def generate_multi_arm_convergence_table():
     lines.append(r"\setlength{\tabcolsep}{3pt}")
     lines.append(r"\begin{tabular}{lcccccc}")
     lines.append(r"\toprule")
-    lines.append(r"\textbf{Experimental Arm} & \textbf{Final Ep. $\text{mAP}_{50}$} & \textbf{Peak Checkpoint $\text{mAP}_{50}$} & \textbf{Peak $\text{mAP}_{50-95}$} & \textbf{Precision} & \textbf{Recall} & \textbf{Val Box Loss} \\")
+    lines.append(r"\textbf{Experimental Arm} & \textbf{Final Ep. $\text{mAP}_{50}$} & \textbf{Peak Checkpoint $\text{mAP}_{50}$} & \textbf{Peak $\text{mAP}_{50-95}$} & \textbf{Precision} & \textbf{Recall} & \textbf{Val Box Loss} \\\\")
     lines.append(r"\midrule")
     for arm in ["Arm 1", "Arm 2", "Arm 3", "Arm 4"]:
-        rec = EVAL_RECORDS.get(ARM_ID_MAP[arm], {})
-        metrics = rec.get("metrics", {})
-        final_mAP50 = rec.get("final_mAP50", metrics.get("map50", 0.0)) * 100
-        peak_mAP50 = rec.get("peak_mAP50", metrics.get("map50", 0.0)) * 100
-        peak_mAP50_95 = rec.get("peak_mAP50_95", metrics.get("map50_95", 0.0)) * 100
-        precision = metrics.get("precision", 0.0)
-        recall = metrics.get("recall", 0.0)
-        val_loss = rec.get("val_box_loss", "-")
-        full_name = HARDWARE_AND_PER_CLASS[arm]["full_name"]
-        lines.append(f"{full_name} & {final_mAP50:.2f}\\% & {peak_mAP50:.2f}\\% & {peak_mAP50_95:.2f}\\% & {precision:.3f} & {recall:.3f} & {val_loss} \\\\")
+        rec = EVAL_RECORDS[ARM_ID_MAP[arm]]
+        full_name = rec["arm_name"]
+        m = rec["metrics"]
+        final_mAP50 = m.get("final_mAP50", m["map50"]) * 100
+        peak_mAP50 = m["peak_mAP50"] * 100
+        peak_ep = m.get("peak_epoch", "-")
+        peak_mAP50_95 = m["map50_95"] * 100
+        precision = m["precision"]
+        recall = m["recall"]
+        val_loss = m.get("val_box_loss", "-")
+        
+        peak_str = f"\\textbf{{{peak_mAP50:.2f}\\% (Ep. {peak_ep})}}" if arm == "Arm 2" else f"{peak_mAP50:.2f}\\% (Ep. {peak_ep})"
+        p_str = f"\\textbf{{{precision:.3f}}}" if arm == "Arm 1" else f"{precision:.3f}"
+        r_str = f"\\textbf{{{recall:.3f}}}" if arm == "Arm 3" else f"{recall:.3f}"
+        loss_str = f"\\textbf{{{val_loss:.4f}}}" if arm == "Arm 1" else f"{val_loss:.4f}"
+
+        lines.append(f"{full_name} & {final_mAP50:.2f}\\% & {peak_str} & {peak_mAP50_95:.2f}\\% & {p_str} & {r_str} & {loss_str} \\\\")
     lines.append(r"\bottomrule")
     lines.append(r"\end{tabular}%")
     lines.append(r"}")
@@ -122,9 +81,9 @@ def generate_per_class_table():
     lines.append(r"\setlength{\tabcolsep}{3pt}")
     lines.append(r"\begin{tabular}{lcccccccc}")
     lines.append(r"\toprule")
-    lines.append(r"\textbf{Target Category} & \multicolumn{2}{c}{\textbf{Arm 1: Baseline}} & \multicolumn{2}{c}{\textbf{Arm 2: Single-Stage}} & \multicolumn{2}{c}{\textbf{Arm 3: Two-Stage}} & \multicolumn{2}{c}{\textbf{Arm 4: Dual-Scale}} \\")
+    lines.append(r"\textbf{Target Category} & \multicolumn{2}{c}{\textbf{Arm 1: Baseline}} & \multicolumn{2}{c}{\textbf{Arm 2: Single-Stage}} & \multicolumn{2}{c}{\textbf{Arm 3: Two-Stage}} & \multicolumn{2}{c}{\textbf{Arm 4: Dual-Scale}} \\\\")
     lines.append(r"\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9}")
-    lines.append(r"& $\text{mAP}_{50}$ & $\text{mAP}_{50-95}$ & $\text{mAP}_{50}$ & $\text{mAP}_{50-95}$ & $\text{mAP}_{50}$ & $\text{mAP}_{50-95}$ & $\text{mAP}_{50}$ & $\text{mAP}_{50-95}$ \\")
+    lines.append(r"& $\text{mAP}_{50}$ & $\text{mAP}_{50-95}$ & $\text{mAP}_{50}$ & $\text{mAP}_{50-95}$ & $\text{mAP}_{50}$ & $\text{mAP}_{50-95}$ & $\text{mAP}_{50}$ & $\text{mAP}_{50-95}$ \\\\")
     lines.append(r"\midrule")
     classes = [
         ("worker", r"\texttt{worker} (Personnel, $n=3{,}488$)"),
@@ -133,10 +92,10 @@ def generate_per_class_table():
         ("amr", r"\texttt{amr} (Mobile Robot, $n=45$)")
     ]
     for ckey, clabel in classes:
-        a1 = HARDWARE_AND_PER_CLASS["Arm 1"]["per_class"][ckey]
-        a2 = HARDWARE_AND_PER_CLASS["Arm 2"]["per_class"][ckey]
-        a3 = HARDWARE_AND_PER_CLASS["Arm 3"]["per_class"][ckey]
-        a4 = HARDWARE_AND_PER_CLASS["Arm 4"]["per_class"][ckey]
+        a1 = EVAL_RECORDS[ARM_ID_MAP["Arm 1"]]["per_class_metrics"][ckey]
+        a2 = EVAL_RECORDS[ARM_ID_MAP["Arm 2"]]["per_class_metrics"][ckey]
+        a3 = EVAL_RECORDS[ARM_ID_MAP["Arm 3"]]["per_class_metrics"][ckey]
+        a4 = EVAL_RECORDS[ARM_ID_MAP["Arm 4"]]["per_class_metrics"][ckey]
         m50_vals = [a1["mAP50"], a2["mAP50"], a3["mAP50"], a4["mAP50"]]
         max_m50 = max(m50_vals)
         m95_vals = [a1["mAP50_95"], a2["mAP50_95"], a3["mAP50_95"], a4["mAP50_95"]]
@@ -151,8 +110,13 @@ def generate_per_class_table():
         v4_50, v4_95 = a4["mAP50"], a4["mAP50_95"]
         lines.append(f"{clabel} & {f50(v1_50)} & {fm(v1_95)} & {f50(v2_50)} & {fm(v2_95)} & {f50(v3_50)} & {fm(v3_95)} & {f50(v4_50)} & {fm(v4_95)} \\\\")
     lines.append(r"\midrule")
+    m1 = EVAL_RECORDS[ARM_ID_MAP["Arm 1"]]["metrics"]
+    m2 = EVAL_RECORDS[ARM_ID_MAP["Arm 2"]]["metrics"]
+    m3 = EVAL_RECORDS[ARM_ID_MAP["Arm 3"]]["metrics"]
+    m4 = EVAL_RECORDS[ARM_ID_MAP["Arm 4"]]["metrics"]
+    lines.append(f"\\textbf{{Global Macro Metric}} & {m1['peak_mAP50']*100:.2f} & \\textbf{{{m1['map50_95']*100:.2f}}} & \\textbf{{{m2['peak_mAP50']*100:.2f}}} & {m2['map50_95']*100:.2f} & {m3['peak_mAP50']*100:.2f} & {m3['map50_95']*100:.2f} & {m4['peak_mAP50']*100:.2f} & {m4['map50_95']*100:.2f} \\\\")
     lines.append(r"\bottomrule")
-    lines.append(r"\multicolumn{9}{l}{\footnotesize $^{\dagger}$Notice on rare tail class: \texttt{pallet\_truck} contains only 13 validation instances ($0.35\%$ of total labels), exhibiting high sample variance.} \\")
+    lines.append(r"\multicolumn{9}{l}{\footnotesize $^{\dagger}$Notice on rare tail class: \texttt{pallet\_truck} contains only 13 validation instances ($0.35\%$ of total labels), exhibiting high sample variance.} \\\\")
     lines.append(r"\end{tabular}%")
     lines.append(r"}")
     lines.append(r"\end{table}")
@@ -173,16 +137,17 @@ def generate_hardware_benchmark_table():
     lines.append(r"\resizebox{\columnwidth}{!}{%")
     lines.append(r"\begin{tabular}{lccccc}")
     lines.append(r"\toprule")
-    lines.append(r"\textbf{Model Architecture} & \textbf{ONNX Size} & \textbf{CPU Latency (ms)} & \textbf{Throughput} & \textbf{Peak RSS} & \textbf{Memory Margin ($<1.0$\,GB)} \\")
+    lines.append(r"\textbf{Model Architecture} & \textbf{ONNX Size} & \textbf{CPU Latency (ms)} & \textbf{Throughput} & \textbf{Peak RSS} & \textbf{Memory Margin ($<1.0$\,GB)} \\\\")
     lines.append(r"\midrule")
     for arm_key in ["Arm 1", "Arm 2", "Arm 3", "Arm 4"]:
-        v = HARDWARE_AND_PER_CLASS[arm_key]
-        name = arm_key + (" (P5)" if "Case B" in v["full_name"] else " (P4+P5)" if "Case C" in v["full_name"] else " (Control)")
-        margin = (1000.0 - v["rss_rpi4"]) / 1000.0 * 100
-        fps = 1000.0 / v["latency_rpi4"]
-        omb = v["onnx_mb"]
-        lat = v["latency_rpi4"]
-        rss = v["rss_rpi4"]
+        rec = EVAL_RECORDS[ARM_ID_MAP[arm_key]]
+        hw = rec["hardware_benchmark"]
+        name = arm_key + (" (P5)" if "Case B" in rec["arm_name"] else " (P4+P5)" if "Case C" in rec["arm_name"] else " (Control)")
+        omb = hw["onnx_mb"]
+        lat = hw["latency_rpi4"]
+        fps = hw["throughput_fps"]
+        rss = hw["rss_rpi4"]
+        margin = hw["headroom_pct"]
         lines.append(f"{name} & {omb:.2f}\\,MB & {lat:.2f}\\,ms & {fps:.2f}\\,FPS & {rss:.1f}\\,MB & {margin:.1f}\\% Headroom \\\\")
     lines.append(r"\bottomrule")
     lines.append(r"\end{tabular}%")
