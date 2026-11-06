@@ -75,7 +75,7 @@ We assess model performance along both accuracy and edge efficiency dimensions:
     \item \textbf{Precision and Recall:} Class-specific and overall Precision ($P$), Recall ($R$), and F1-score across operational confidence thresholds.
     \item \textbf{Mean Average Precision:} Standard logistics $\text{mAP}_{50}$ (IoU threshold $0.50$) and strict $\text{mAP}_{50-95}$ (averaged across IoU thresholds from $0.50$ to $0.95$ at $0.05$ intervals), reported across both 4-class global totals and 3-class primary subsets.
     \item \textbf{Computational Footprint:} Overall parameter count (M), GFLOPs at $640 \times 640$, model checkpoint disk size (MB), and physical process memory consumption (peak RSS).
-    \item \textbf{Inference Latency Breakdown:} Per-image execution time decomposed into image preprocessing, pure model forward pass (\texttt{session.run}), and non-maximum suppression (NMS).
+    \item \textbf{Inference Latency and Throughput:} Steady-state neural network model forward execution time (\texttt{session.run}) and throughput (FPS), isolating core graph execution latency from host image preprocessing and post-processing.
 \end{enumerate}
 
 \subsection{Edge Deployment and Export Verification Protocol}
