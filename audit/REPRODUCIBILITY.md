@@ -25,7 +25,7 @@ This document establishes the artifact availability, cryptographic hashes (SHA-2
 | **Arm 4 Evaluation Record** | `audit/eval_records/arm4_case_c_dual_results.json` | 1378 B | `db10f5b45d81ce8c65968320f96484d48bba77c99965002cdfb2305f20b735db` | Tracked in Git |
 | **Arm 3 Multi-Stage Schedule** | `audit/arm3_two_stage_global_schedule.csv` | 2745 B | `1288b18c17313d87718e4f2f9ec367dc1b97fef7a8a0b76b3be3419e331fd80c` | Tracked in Git |
 | **Dataset Micro Sample Spec** | `data/smartspaces_micro/smartspaces_micro.yaml` | 199 B | `2d9685cb3157a06fde0dd489cce106e30b32cbb2d57628084884d26da91650e0` | Local Reproducible |
-| **Compiled Manuscript PDF** | `paper/main.pdf` | 8.55 MB | `6cae170cee158347cd2b0afc76a114c3f2d42f348d94d86bf9f2ef3cd24d5e7c` | Tracked in Git |
+| **Compiled Manuscript PDF** | `paper/main.pdf` | 8.55 MB | `899864ab932e5cefeee15212c9c6e01af8d75064a07e81e1508dd5f371bfd890` | Tracked in Git |
 
 ## 3. Step-by-Step Reproduction Procedure
 
