@@ -1,24 +1,29 @@
 \section{Conclusion and Future Work}
 \label{sec:conclusion}
 
-\subsection{Synthesis and Research Implications}
+\subsection{Answers to the Research Questions}
 \label{sec:concl_summary}
-This investigation examined whether replacing deep self-attention bottlenecks in lightweight single-stage detectors with 2D selective state-space modeling offers a viable path for multi-class warehouse perception on resource-constrained hardware. Our findings point to three primary conclusions:
+We examined whether replacing the deepest attention block of YOLO11s with a plugin-free 2D selective scan is a viable path for multi-class warehouse detection on resource-constrained hardware.
 
-First, from an architectural efficiency standpoint, substituting the $P_5$ attention block with the 4-direction \texttt{WarehouseSS2DBlock} eliminates $63.9\%$ of the parameters in that stage ($357{,}632$ vs. $990{,}976$) and reduces overall network size by $6.72\%$ ($8.80\text{ M}$ vs. $9.43\text{ M}$), lowering complexity to $21.2\text{ GFLOPs}$. We also identified that zero-initializing the output convolution ahead of batch normalization does not preserve identity beyond the first update, and replaced it with zero-$\gamma$ initialization; re-training with this fix is pending.
+\textbf{RQ1 (accuracy and complexity).} The replacement removes $63.9\%$ of the stage-10 parameters ($357{,}632$ vs.\ $990{,}976$) and $6.72\%$ of the model ($8.80$ vs.\ $9.43$\,M), at $21.2$ instead of $21.7$ GFLOPs. It does not preserve overall accuracy in our single-seed experiments: all SS2D variants have lower $\text{mAP}_{50-95}$ than the baseline, and the baseline has the highest $\text{mAP}_{50}$ at the final epoch. The SS2D variants score higher on forklifts ($75.2$--$79.7\%$ vs.\ $70.1\%\ \text{mAP}_{50}$), but whether this reflects the selective scan, the removal of \texttt{C2PSA}, or run-to-run variance remains to be established.
 
-Second, in terms of detection accuracy, results from a single seed on a $100$-frame synthetic validation facility are mixed. The SS2D arms score higher on forklifts ($+6.2$ points $\text{mAP}_{50}$ and $+6.56$ points $\text{mAP}_{50-95}$ for two-stage training) and two-stage training raises macro recall by $+7.85$ points, but all SS2D arms are lower than the baseline in overall $\text{mAP}_{50-95}$, and at the final epoch the baseline has the highest overall $\text{mAP}_{50}$. Whether the forklift difference reflects the selective scan, the removal of \texttt{C2PSA}, or run-to-run variance remains to be established with multiple seeds, a held-out test facility, and identity/convolution-only ablations. Tail classes such as manual pallet jacks ($13$ validation instances) are too sparse for conclusions.
+\textbf{RQ2 (optimization).} Two-stage training did not improve overall accuracy over single-stage training; it mainly shifted the precision--recall operating point. All reported models zero-initialize the output convolution ahead of batch normalization, which preserves identity only at step $0$: batch normalization then rescales the branch to full scale, a plausible but untested contributor to the early instability that motivated two-stage training. We have implemented zero-$\gamma$ initialization as a correction; whether it makes a dedicated protocol unnecessary requires re-training. Transferring all shape-compatible pretrained head tensors proved necessary for a fair comparison.
 
-Third, physical embedded benchmarking on a Raspberry Pi 4 Model B shows that the plugin-free ONNX model fits within a $1.0\text{ GB}$ memory budget ($371.9\text{ MB}$ RSS) but is slower and more memory-hungry than the baseline ($1398$ vs. $1170\text{ ms}$; $371.9$ vs. $231.5\text{ MB}$). Graph inspection indicates that the sequential scan unrolls into $14{,}767$ ONNX nodes versus $320$ for the baseline, which we consider the most likely source of this overhead. CPU deployment therefore demonstrates memory feasibility and operator portability rather than real-time tracking; whether parallel or chunked scan formulations close the gap remains to be measured.
+\textbf{RQ3 (embedded deployment).} The model exports to ONNX without plugins and fits a $1$\,GiB budget on a Raspberry Pi~4 ($371.9$\,MiB RSS), but it is slower and uses more memory than the baseline ($1398$ vs.\ $1170$\,ms; $371.9$ vs.\ $231.5$\,MiB). Analytical costs show that the scan's arithmetic is small, whereas the sequential scan unrolls into $14{,}767$ ONNX nodes versus $320$ for the baseline; we consider this the most likely source of the overhead. Fewer FLOPs therefore did not translate into lower CPU latency, and CPU deployment demonstrates memory feasibility and operator portability rather than real-time operation.
 
 \subsection{Future Research Directions}
 \label{sec:future_work}
-Building upon these empirical insights, future work will focus on:
 \begin{itemize}
-    \item \textbf{Re-training, Multi-Seed and Expanded Facility Evaluation:} Re-training all arms with zero-$\gamma$ initialization across multiple random seeds and longer schedules, adding identity and convolution-only ablations, evaluating on a held-out test facility (and, where available, real-world warehouse footage), and reporting confidence intervals, including for sparse tail classes (\texttt{pallet\_truck}).
-    \item \textbf{Parallel Prefix Scans via TensorRT Plugins:} Implementing fused 2D selective scans using parallel associative prefix operators on NVIDIA Jetson Orin platforms, coupled with FP16 and INT8 quantization to bridge the gap between memory compliance and real-time execution.
-    \item \textbf{Temporal State Propagation for Tracking:} Extending the 2D spatial scan across sequential video frames to propagate object state representations across time, improving multi-camera tracking stability in congested logistics corridors.
+    \item \textbf{Re-training and statistical evaluation:} Re-training all arms with zero-$\gamma$ initialization over multiple seeds, with identity and convolution-only ablations and a standard Mamba-style variant (gating and step-size initialization), on a held-out test facility, with significance tests and frame- or track-level confidence intervals for per-class results.
+    \item \textbf{Plugin-free chunked and parallel scans:} Replacing the sequential recurrence with chunked or associative scans, or with ONNX \texttt{Loop}/\texttt{Scan} control-flow operators, built from standard ONNX operators, and measuring their effect on node count, latency, and peak memory on CPUs and on accelerators (GPU/NPU, FP16/INT8), while preserving the plugin-free property.
+    \item \textbf{Real-world data and temporal context:} Evaluating on real warehouse footage, and extending the scan across video frames to propagate object state over time for multi-camera tracking.
 \end{itemize}
 
+\section*{Code and Data Availability}
+% TODO(authors): add the public repository URL (or state that it will be released on acceptance)
+% and the SmartSpaces dataset license/terms of use.
+The model code, configuration files, table-generation scripts, and benchmarking scripts used in this study are available in the authors' repository. The NVIDIA PhysicalAI-SmartSpaces dataset is available from its maintainers~\cite{wang2026smartspaces}.
+
 \section*{Acknowledgments}
-The authors acknowledge the open-source computer vision and deep learning research communities, including the Ultralytics development team and NVIDIA Physical AI SmartSpaces contributors, for providing reproducible benchmarks and foundational detector architectures.
+% TODO(authors): add funding sources and compute resources (e.g., GPU type and hours), if any.
+The authors thank the Ultralytics developers and the NVIDIA PhysicalAI-SmartSpaces contributors for making their detectors and benchmark available.

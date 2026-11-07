@@ -3,83 +3,97 @@
 
 \subsection{Benchmark Dataset and Leakage Prevention}
 \label{sec:exp_datasets}
-To evaluate warehouse object detection under controlled, simulated logistics conditions, we utilize the multi-camera warehouse environments from the \textbf{NVIDIA PhysicalAI-SmartSpaces} benchmark (MTMC Tracking dataset)~\cite{wang2026smartspaces}. Generated via NVIDIA Omniverse high-fidelity physical simulation, the dataset replicates industrial fulfillment centers with calibrated multi-camera visual streams, realistic industrial lighting, and dynamic human-robot interactions. To maintain computational tractability on edge research hosts while preventing data leakage, we enforce a strict \textbf{Zero-Leakage Multi-Scene Partitioning Protocol}:
+We use the multi-camera warehouse environments of the \textbf{NVIDIA PhysicalAI-SmartSpaces} benchmark (MTMC Tracking dataset)~\cite{wang2026smartspaces}, which is generated with NVIDIA Omniverse simulation and provides calibrated camera streams of synthetic fulfillment centers with workers and vehicles. The evaluation is therefore controlled and simulated. To keep training tractable while preventing leakage between training and evaluation, we partition the data by facility:
 
 \begin{itemize}
-    \item \textbf{Training Partition ($\texttt{Warehouse\_000}$):} Calibrated multi-camera video streams (\texttt{Camera\_0000} and \texttt{Camera\_0001}) sampled at $0.5\text{ FPS}$ ($1$ frame per $60$ video frames) yield $300$ high-diversity annotated frames and $12,959$ ground-truth bounding box instances.
-    \item \textbf{Validation Partition ($\texttt{Warehouse\_015}$):} Sourced from a geographically independent warehouse layout with disjoint camera trajectories (\texttt{Camera} and \texttt{Camera\_01}), sampled to $100$ evaluation frames and $3,696$ object instances for hyperparameter validation and checkpoint selection.
-    \item \textbf{Strict Leakage Safeguard:} No camera stream, background facility texture, or video sequence in the training partition appears in the validation set, ensuring evaluated metrics measure generalizable domain representation rather than background memorization.
+    \item \textbf{Training partition (\texttt{Warehouse\_000}):} Two camera streams (\texttt{Camera\_0000} and \texttt{Camera\_0001}) sampled at $0.5$\,FPS ($1$ frame per $60$ video frames), yielding $300$ annotated frames with $12{,}959$ box instances.
+    \item \textbf{Validation partition (\texttt{Warehouse\_015}):} A different facility layout with a disjoint camera set (\texttt{Camera} and \texttt{Camera\_01}), sampled to $100$ frames with $3{,}696$ instances, used for checkpoint selection and reporting.
+    \item \textbf{Leakage safeguard:} No camera stream, facility, or video sequence of the training partition appears in the validation partition.
+    \item \textbf{Scope of the separation:} Although facility geometry and viewpoints are disjoint, 3D assets such as specific forklift models and robot avatars come from the shared Omniverse asset library, so object appearance is not independent across partitions. All views are static overhead cameras in simulation; mobile platforms would add further domain shifts (e.g., motion blur, real sensor noise) that this study does not cover.
 \end{itemize}
+% TODO(authors): confirm the camera directory names, and report the number of unique object
+% tracks per class and split (MTMC track IDs); consecutive sampled frames are highly correlated.
 
-The verified dataset taxonomy comprises four primary logistics classes: \texttt{worker} ($11,399$ train / $3,488$ val instances), \texttt{forklift} ($600$ train / $150$ val instances), \texttt{amr} (NovaCarter, $724$ train / $45$ val instances), and \texttt{pallet\_truck} (Transporter, $236$ train / $13$ val instances). Table~\ref{tab:dataset_distribution} details the partitioned instance distribution and role taxonomy.
+The taxonomy comprises four classes: \texttt{worker} ($11{,}399$ train / $3{,}488$ val instances), \texttt{forklift} ($600$ / $150$), \texttt{amr} (NovaCarter, $724$ / $45$), and \texttt{pallet\_truck} (Transporter, $236$ / $13$). Table~\ref{tab:dataset_distribution} summarizes the distribution. The validation partition is strongly imbalanced: \texttt{worker} accounts for $94.37\%$ of instances, \texttt{forklift} $4.06\%$, \texttt{amr} $1.22\%$, and \texttt{pallet\_truck} $0.35\%$, so per-class estimates for the minority classes carry wide uncertainty.
 
 \begin{table}[!t]
-\caption{SmartSpaces Warehouse Benchmark Zero-Leakage Dataset Partitioning}
+\caption{Instance Distribution of the Cross-Facility SmartSpaces Partition}
 \label{tab:dataset_distribution}
 \centering
-\small
-\resizebox{\columnwidth}{!}{%
+\footnotesize
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{llccc}
+\begin{tabular}{llcc}
 \toprule
-\textbf{Class Label} & \textbf{Physical Target Type} & \textbf{Train Instances} & \textbf{Val Instances} & \textbf{Operational Role} \\
+\textbf{Class} & \textbf{Object Type} & \textbf{Train} & \textbf{Val} \\
 \midrule
-\texttt{worker} & Human logistics personnel & 11,399 & 3,488 & Collision avoidance, severe occlusion \\
-\texttt{forklift} & Motorized forklift truck & 600 & 150 & High-velocity heavy machinery \\
-\texttt{amr} & Autonomous mobile robot & 724 & 45 & Low-profile automated transport \\
-\texttt{pallet\_truck} & Manual/electric pallet jack & 236 & 13 & Floor-level moveable inventory \\
+\texttt{worker} & Warehouse personnel & 11,399 & 3,488 \\
+\texttt{forklift} & Motorized forklift & 600 & 150 \\
+\texttt{amr} & Autonomous mobile robot & 724 & 45 \\
+\texttt{pallet\_truck} & Pallet jack (Transporter) & 236 & 13 \\
 \midrule
-\textbf{Total} & \textbf{Multi-Class Warehouse} & \textbf{12,959} & \textbf{3,696} & \textbf{Zero-Leakage Facility Split} \\
+\textbf{Total} & & \textbf{12,959} & \textbf{3,696} \\
 \bottomrule
-\end{tabular}%
-}
+\end{tabular}
 \end{table}
 
 \subsection{Data Preprocessing and Augmentation}
 \label{sec:exp_preprocessing}
-Raw 1080p frames ($1920 \times 1080$) are converted directly into normalized bounding box coordinates $(x_c, y_c, w_n, h_n)$. Degenerate boxes with dimensions $\le 4\text{ pixels}$ are filtered. Extracted frames are rescaled to standard detector resolution ($640 \times 640$). Augmentations during training include random horizontal flipping ($p=0.5$), HSV color space jitter ($h=0.015, s=0.7, v=0.4$), and spatial translation ($0.1$).
+Annotations of the $1920 \times 1080$ frames are converted to normalized box coordinates $(x_c, y_c, w_n, h_n)$, and boxes with a side of at most $4$ pixels are removed. Images are letterboxed to $640 \times 640$. All arms use the Ultralytics default augmentation pipeline: mosaic ($p = 1.0$, disabled for the last $10$ epochs via \texttt{close\_mosaic=10}), random scaling ($\pm 0.5$), translation ($0.1$), horizontal flipping ($p=0.5$), and HSV jitter ($h=0.015$, $s=0.7$, $v=0.4$). With a $20$-epoch budget, mosaic is therefore active only in the first half of training, which changes the training distribution at epoch $11$.
+% TODO(authors): confirm against args.yaml of every run and commit those files.
 
-\subsection{Experimental Arms and Architectural Configurations}
+\subsection{Experimental Arms}
 \label{sec:exp_baselines}
-Our evaluation is organized around four strictly controlled experimental arms to isolate architectural and optimization effects:
+We compare four arms:
 \begin{itemize}
-    \item \textbf{Arm 1 (Baseline YOLO11s Control):} Standard unmodified YOLO11s containing the original \texttt{C2PSA} self-attention block at Layer 10 ($9.43\text{ M}$ parameters, $21.7\text{ GFLOPs}$), fine-tuned end-to-end from COCO weights.
-    \item \textbf{Arm 2 (SS2D Single-Scale, Single-Stage):} Architectural Case B replacing Layer 10 with the 4-direction \texttt{WarehouseSS2DBlock} at $P_5$ ($8.80\text{ M}$ parameters, $21.2\text{ GFLOPs}$), trained in a single 20-epoch stage.
-    \item \textbf{Arm 3 (SS2D Single-Scale, Two-Stage Warmup):} Architectural Case B ($P_5$, $8.80\text{ M}$ parameters, $21.2\text{ GFLOPs}$) trained via a staged protocol: 5 warmup epochs freezing the backbone followed by 15 epochs of end-to-end fine-tuning.
-    \item \textbf{Arm 4 (SS2D Dual-Scale, Case C):} Architectural Case C inserting \texttt{WarehouseSS2DBlock} at both $P_4$ ($40 \times 40$) and $P_5$ ($20 \times 20$) feature scales ($8.89\text{ M}$ parameters, $21.8\text{ GFLOPs}$), trained across the standard 20-epoch budget.
+    \item \textbf{Arm 1 (Baseline):} Unmodified YOLO11s with \texttt{C2PSA} at Layer 10 ($9.43$\,M parameters, $21.7$ GFLOPs), fine-tuned end-to-end from COCO weights.
+    \item \textbf{Arm 2 (SS2D, single-stage):} Case B, Layer 10 replaced by \texttt{WarehouseSS2DBlock} at $P_5$ ($8.80$\,M, $21.2$ GFLOPs), trained in a single 20-epoch stage.
+    \item \textbf{Arm 3 (SS2D, two-stage):} Case B trained with the two-stage protocol of Section~\ref{sec:training_workflow} ($5$ epochs with layers $0$--$9$ frozen, then $15$ epochs end-to-end).
+    \item \textbf{Arm 4 (SS2D, dual-scale):} Case C, SS2D blocks at $P_4$ ($40 \times 40$) and $P_5$ ($20 \times 20$) ($8.89$\,M, $21.8$ GFLOPs), trained for $20$ epochs.
 \end{itemize}
+In Arms 2--4 only the SS2D blocks are newly initialized; all other shape-compatible layers are warm-started from the same COCO checkpoint as the baseline.
+
+\textbf{Confounders.} The comparison is not a single-variable intervention: (1) in Arm 1 the \texttt{C2PSA} block starts from COCO-pretrained weights, whereas the SS2D blocks in Arms 2--4 start untrained and receive about $1{,}500$ optimizer steps ($300$ images $\times$ $20$ epochs / batch $4$); (2) Arm 1 is trained without a frozen phase; and (3) Arm 3 differs from Arm 2 both in the frozen first stage and in a restarted learning-rate warmup and decay in stage 2 (Section~\ref{sec:training_workflow}), so its behavior reflects the combined protocol rather than freezing alone.
 
 \subsection{Implementation, Training Details, and Reproducibility}
 \label{sec:exp_implementation}
-All experiments are executed in the following environment:
 % TODO(authors): confirm the actual training hardware and batch size for EACH arm.
 % gpu_training_package/README_GPU_TRAINING.md describes Colab/Kaggle T4 runs with --batch 8,
 % and the per-epoch times in results/tables/*.csv (~9 s for Arm 1) are hard to reach on an i7-7600U CPU.
-% configs/experiment_settings.yaml also lists momentum 0.9, not 0.937. State what was actually used.
+% Note: scripts/run_two_stage_experiment.py passes lr0=0.0005 for Arm 3 stage 2, but with the
+% default optimizer=auto Ultralytics ignores lr0/momentum; the CSV learning-rate columns
+% (peak ~0.0011 in stage 2) are consistent with the auto value 0.00125 being used.
+% TODO(authors): verify all version strings with pip freeze and commit an environment lock file.
+% All four versions exist on PyPI/python.org (checked 2026-11-07): torch 2.14.1 (2026-09-30),
+% ultralytics 8.4.184 (2026-10-22) and 8.4.185 (2026-10-24), onnxruntime 1.31.0 (2026-10-09),
+% Python 3.14.8 (2026-09-30). Open point: docs/STAGE_REPORT_CASE_B_MILESTONE.md lists
+% ultralytics==8.4.184 while this section says 8.4.185; read the "version" field of the checkpoints.
 \begin{itemize}
-    \item \textbf{Software Stack \& Execution Environments:} Training and host evaluations were executed on a Linux x86\_64 environment (Python 3.14.8, PyTorch 2.14.1+cpu, Ultralytics 8.4.185, and OpenCV). Checkpoint metadata verifies execution under Ultralytics version 8.4.185. Embedded inference benchmarking was conducted on the physical Raspberry Pi 4 using an isolated Python 3.11 virtual environment with ONNX Runtime v1.31.0 and \texttt{psutil} for memory RSS logging.
-    \item \textbf{Optimizer:} AdamW with initial learning rate $\eta = 0.00125$, final learning rate factor $\text{lrf} = 0.01$, momentum $0.937$, and weight decay $\lambda = 0.0005$.
-    \item \textbf{Hyperparameters:} Batch size of $4$, input resolution $640 \times 640$, random seed $0$ fixed across all runs (one run per arm).
-    \item \textbf{Checkpoint Selection:} For each arm we report both the final-epoch model and the checkpoint with the highest Ultralytics validation fitness (\texttt{best.pt}). Both are evaluated on the same validation partition used for selection, so best-checkpoint figures are optimistically biased.
-    \item \textbf{Provenance:} Checkpoints and initialization states are identified by SHA-256 hashes (e.g., pretrained baseline: \texttt{85a76fe...}, Case B warmstart: \texttt{1e92c10...}).
-    \item \textbf{Hardware Profile:} Intel Core i7-7600U CPU @ 2.80GHz host workstation and a physical Raspberry Pi 4 Model B (Quad-Core Cortex-A72 @ 1.5\,GHz). Process peak memory RSS is recorded and compared against a $1.0\text{ GB}$ budget.
+    \item \textbf{Software:} Training and host evaluation used Linux x86\_64 with Python 3.14.8, PyTorch 2.14.1+cpu, Ultralytics 8.4.185 (confirmed by checkpoint metadata), and OpenCV. Embedded benchmarking used Python 3.11 with ONNX Runtime 1.31.0 and \texttt{psutil} on the Raspberry Pi~4.
+    \item \textbf{Optimizer:} AdamW, selected by Ultralytics' \texttt{optimizer=auto} rule, which for this dataset size and $4$ classes sets the initial learning rate to $\eta = 0.00125$ and $\beta_1 = 0.9$; final learning-rate factor $\text{lrf} = 0.01$ with linear decay after a $3$-epoch warmup; weight decay $0.0005$.
+    \item \textbf{Hyperparameters:} Batch size $4$, input resolution $640 \times 640$, random seed $0$ for all runs (one run per arm).
+    \item \textbf{Checkpoint selection:} For each arm we report both the final-epoch model and the checkpoint with the highest Ultralytics validation fitness ($0.1\,\text{mAP}_{50} + 0.9\,\text{mAP}_{50-95}$, \texttt{best.pt}). Both are evaluated on the partition used for selection, so best-checkpoint figures are optimistically biased.
+    \item \textbf{Provenance:} Checkpoints and initialization states are identified by SHA-256 hashes (e.g., pretrained baseline \texttt{85a76fe...}, Case B warmstart \texttt{1e92c10...}).
+    \item \textbf{Hardware:} An Intel Core i7-7600U host (2.80\,GHz) and a Raspberry Pi~4 Model B (quad-core Cortex-A72, 1.5\,GHz).
+    % TODO(authors): Pi RAM size (1/2/4/8 GB), OS image, CPU governor, cooling, and throttling status.
 \end{itemize}
 
 \subsection{Evaluation Metrics}
 \label{sec:exp_metrics}
-We assess model performance along both accuracy and edge efficiency dimensions:
 \begin{enumerate}
-    \item \textbf{Precision and Recall:} Class-specific and overall Precision ($P$), Recall ($R$), and F1-score across operational confidence thresholds.
-    \item \textbf{Mean Average Precision:} Standard logistics $\text{mAP}_{50}$ (IoU threshold $0.50$) and strict $\text{mAP}_{50-95}$ (averaged across IoU thresholds from $0.50$ to $0.95$ at $0.05$ intervals).
-    \item \textbf{Computational Footprint:} Overall parameter count (M), GFLOPs at $640 \times 640$, model checkpoint disk size (MB), and physical process memory consumption (peak RSS).
-    \item \textbf{Inference Latency Breakdown:} Per-image execution time decomposed into image preprocessing, neural forward pass, and non-maximum suppression (NMS).
+    \item \textbf{Precision and recall:} Ultralytics reports class-mean precision ($P$) and recall ($R$) at the confidence threshold that maximizes the mean F1 score; both therefore depend on that operating point.
+    \item \textbf{Mean Average Precision:} $\text{mAP}_{50}$ (IoU threshold $0.50$) and $\text{mAP}_{50-95}$ (averaged over IoU thresholds $0.50{:}0.05{:}0.95$), macro-averaged over classes.
+    \item \textbf{Computational footprint:} Parameter count, GFLOPs at $640 \times 640$, checkpoint size on disk, and ONNX file size.
+    \item \textbf{Runtime:} Forward-pass latency and process resident memory on the target CPU (Section~\ref{sec:exp_export}).
 \end{enumerate}
 
-\subsection{Edge Deployment and Export Verification Protocol}
+\subsection{Edge Deployment and Measurement Protocol}
 \label{sec:exp_export}
-To evaluate hardware deployability on resource-constrained embedded devices without relying on speculative simulation, we execute a practical edge verification protocol:
 \begin{enumerate}
-    \item \textbf{Native Graph Export:} PyTorch checkpoints are compiled directly to optimized Open Neural Network Exchange (ONNX Opset 17) representations via standard operators, strictly avoiding proprietary uncompilable custom kernels.
-    \item \textbf{Inference Runtime Testing:} Models are evaluated using ONNX Runtime v1.31 with the CPU execution provider (FP32) at batch size $1$ and $640 \times 640$ resolution. No GPU, TensorRT, or quantized execution was evaluated.
-    \item \textbf{Resource Profiling:} Physical process memory consumption (peak RSS in MB) is tracked via \texttt{psutil} alongside steady-state latency percentiles (Median, P90, P95) across 100 timed iterations preceded by 10 warmup iterations.
+    \item \textbf{Export:} PyTorch checkpoints are exported to ONNX (opset 17) using only standard operators and simplified with \texttt{onnxslim}; no custom kernels are required.
+    \item \textbf{Runtime:} ONNX Runtime 1.31 with the CPU execution provider (FP32), graph optimization level \texttt{ORT\_ENABLE\_ALL}, batch size $1$, $640 \times 640$ input, and the default intra-op thread count (all physical cores). No GPU, TensorRT, or quantized execution was evaluated.
+    \item \textbf{Latency:} $100$ timed calls of the forward pass (\texttt{session.run}) on a fixed input tensor after $10$ untimed warmup calls; we report the median, mean $\pm$ standard deviation, and throughput as $1000 / \text{median}$. Image preprocessing and NMS are not included.
+    \item \textbf{Memory:} The process resident set size (RSS, via \texttt{psutil}) recorded after the timed loop, in MiB ($1$\,MiB $= 2^{20}$ bytes), compared with a $1$\,GiB ($1024$\,MiB) budget. This value includes the Python interpreter and the ONNX Runtime session; it is not the process high-water mark, which may be higher during session creation.
 \end{enumerate}
+% The revised scripts/benchmark_edge_device.py additionally records the true peak RSS (VmHWM),
+% idle RSS, a fixed thread count, and end-to-end latency (preprocessing + forward + NMS) on real
+% frames; the measurements in Section V predate it and will be repeated with it.

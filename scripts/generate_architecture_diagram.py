@@ -78,7 +78,7 @@ def generate_transparent_white_diagram():
                                         fc=BG_BOX, ec=BORDER_PANEL, lw=0.9, zorder=1)
     ax.add_patch(rect_micro)
     ax.text(86, 43.5, "(b) WarehouseSS2DBlock Micro-Architecture & 4-Direction Selective Scan", ha='center', **t_sec)
-    ax.text(86, 41.5, "Vectorized Pure PyTorch 2D State Space Sequence Modeling (ONNX Opset 17 Compatible)", ha='center', **t_sub)
+    ax.text(86, 41.5, "Sequential Pure-PyTorch Selective Scan (Standard ONNX Opset 17 Operators)", ha='center', **t_sub)
 
     # Input Tensor
     b_tin = patches.FancyBboxPatch((48, 32.0), 16, 6.0, boxstyle="round,pad=0.15", fc=BG_BOX, ec=BORDER_BOX, lw=0.9, zorder=2)
@@ -87,8 +87,9 @@ def generate_transparent_white_diagram():
     ax.text(56, 33.8, "[B, 512, 20, 20]", ha='center', **b_sub)
 
     # Residual path across top
-    ax.plot([64, 117], [35.0, 35.0], color=LINE_ARROW, lw=1.1, linestyle="--", zorder=3)
-    ax.annotate('', xy=(117, 24.5), xytext=(117, 35.0), arrowprops=dict(arrowstyle="-|>", lw=1.1, color=LINE_ARROW, linestyle="--"))
+    # Routed right of the out-proj block so that it enters the addition node, not the block
+    ax.plot([64, 125.5, 125.5], [35.0, 35.0, 9.8], color=LINE_ARROW, lw=1.1, linestyle="--", zorder=3)
+    ax.annotate('', xy=(119.0, 9.8), xytext=(125.5, 9.8), arrowprops=dict(arrowstyle="-|>", lw=1.1, color=LINE_ARROW, linestyle="--"))
     ax.text(90, 36.2, "Residual Identity Connection (Exact Pass-Through)", ha='center', fontsize=7.6, color=TEXT_MUTED)
 
     # Main branch downward
@@ -109,7 +110,7 @@ def generate_transparent_white_diagram():
     rect_score = patches.FancyBboxPatch((68, 8.0), 35, 26.0, boxstyle="round,pad=0.2", fc=BG_BOX, ec=ACCENT_LINE, lw=1.0, zorder=2)
     ax.add_patch(rect_score)
     ax.text(85.5, 31.5, "4-Way Selective Scan Core (SS2D)", ha='center', fontsize=8.8, fontweight='bold', color=ACCENT_LINE)
-    ax.text(85.5, 29.5, r"Continuous Recurrence: $\mathbf{h}(t) = \mathbf{\bar{A}}_t \mathbf{h}(t-1) + \mathbf{\bar{B}}_t \mathbf{u}(t)$", ha='center', fontsize=7.4, color=TEXT_MUTED)
+    ax.text(85.5, 29.5, r"Discrete Sequential Recurrence: $\mathbf{h}_t = \mathbf{\bar{A}}_t \odot \mathbf{h}_{t-1} + (\mathbf{\bar{B}}\mathbf{u})_t$", ha='center', fontsize=7.4, color=TEXT_MUTED)
 
     # 4 Scan Directions
     dir_boxes = [
@@ -129,10 +130,12 @@ def generate_transparent_white_diagram():
     # Re-orientation & Out-proj block
     b_fuse = patches.FancyBboxPatch((107, 15.0), 16, 9.0, boxstyle="round,pad=0.15", fc=BG_BOX, ec=BORDER_BOX, lw=0.9, zorder=2)
     ax.add_patch(b_fuse)
-    ax.text(115, 21.8, "Re-Orientation", ha='center', **b_main)
-    ax.text(115, 20.0, "Fold 4 Directions + Sum", ha='center', **b_sub)
-    ax.text(115, 18.2, "1x1 Conv (256 -> 512)", ha='center', **b_sub)
-    ax.text(115, 16.5, "W_out = 0 (Zero-Init)", ha='center', fontsize=7.0, color="#C62828", fontweight='bold')
+    ax.text(115, 22.4, "Re-Orientation", ha='center', **b_main)
+    ax.text(115, 20.9, "Fold 4 Directions + Sum", ha='center', **b_sub)
+    ax.text(115, 19.4, "1x1 Conv (256 -> 512)", ha='center', **b_sub)
+    ax.text(115, 17.9, "BatchNorm2d", ha='center', **b_sub)
+    # Initialization of the reported runs; zero-gamma (gamma=beta=0) is the corrected scheme, not yet evaluated
+    ax.text(115, 16.2, "Reported runs: Conv W = 0", ha='center', fontsize=6.6, color="#C62828", fontweight='bold')
 
     # Arrow to Addition Node
     ax.annotate('', xy=(117, 11.8), xytext=(115, 15.0), arrowprops=dict(arrowstyle="-|>", lw=1.1, color=LINE_ARROW))
@@ -140,7 +143,8 @@ def generate_transparent_white_diagram():
     # Addition Node Circle
     circle = patches.Circle((117, 9.8), radius=1.9, fc=BG_BOX, ec=LINE_ARROW, lw=1.1, zorder=4)
     ax.add_patch(circle)
-    ax.text(117, 9.8, "+", ha='center', va='center', fontsize=11, fontweight='bold', color=TEXT_MAIN)
+    # zorder above the circle (4), otherwise the patch hides the sign
+    ax.text(117, 9.8, "+", ha='center', va='center', fontsize=11, fontweight='bold', color=TEXT_MAIN, zorder=5)
 
     # Final Output Arrow & Box
     # Addition circle is at y=9.8 with radius 1.9 -> bottom edge is at y=7.9

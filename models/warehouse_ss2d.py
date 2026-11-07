@@ -5,7 +5,7 @@ import torch.nn.functional as F
 
 class PurePyTorch2DSelectiveScan(nn.Module):
     """
-    Vectorized pure PyTorch 4-direction 2D Selective Scan (v2 - Spatially Aligned).
+    Pure PyTorch 4-direction 2D Selective Scan (v2 - Spatially Aligned).
     Runs on CPU or GPU without requiring custom CUDA compilation.
 
     Directional Scan Mapping:
@@ -13,11 +13,27 @@ class PurePyTorch2DSelectiveScan(nn.Module):
     2. Direction 2: Row-major, reversed (Bottom-up, right-to-left)
     3. Direction 3: Column-major, forward (Left-to-right, top-down)
     4. Direction 4: Column-major, reversed (Right-to-left, bottom-up)
+
+    chunk_size: 0 runs the reference sequential recurrence (one step per token,
+    which unrolls into ~L graph blocks on ONNX export). A positive value runs the
+    mathematically equivalent chunked scan, which loops over ceil(L / chunk_size)
+    chunks and resolves each chunk in closed form. Parameters are identical, so
+    a trained checkpoint can be evaluated with either mode.
+    n_directions: 4 (row and column, both ways) or 2 (row-major only, both ways).
+
+    Ultralytics rebuilds models from YAML inside the trainer, so per-instance settings
+    are lost there; set the class attribute `default_chunk_size` before training to
+    choose the scan mode for every instance created afterwards.
     """
-    def __init__(self, d_model: int, d_state: int = 16):
+    default_chunk_size = 0
+
+    def __init__(self, d_model: int, d_state: int = 16, chunk_size: int = None, n_directions: int = 4):
         super().__init__()
+        assert n_directions in (2, 4), "n_directions must be 2 or 4"
         self.d_model = d_model
         self.d_state = d_state
+        self.chunk_size = self.default_chunk_size if chunk_size is None else chunk_size
+        self.n_directions = n_directions
 
         # Continuous state matrix parameters A and skip parameter D per direction
         self.A_logs = nn.Parameter(torch.randn(4, d_model, d_state))
@@ -47,6 +63,13 @@ class PurePyTorch2DSelectiveScan(nn.Module):
         # delta_B_u = (delta * u) * B
         delta_B_u = (delta.unsqueeze(-1) * u.unsqueeze(-1)) * B.unsqueeze(2)
 
+        # Checkpoints pickled before chunk_size existed fall back to the class default
+        chunk_size = getattr(self, "chunk_size", self.default_chunk_size)
+        if chunk_size and chunk_size > 0:
+            log_A = delta.unsqueeze(-1) * A.view(1, 1, d_model, d_state)  # log(delta_A), <= 0
+            y = self._chunked_scan(log_A, delta_B_u, C, chunk_size)
+            return y + u * D.view(1, 1, d_model)
+
         # Sequential scan along sequence length L
         states = []
         h = torch.zeros(batch_size, d_model, d_state, device=u.device, dtype=u.dtype)
@@ -59,6 +82,30 @@ class PurePyTorch2DSelectiveScan(nn.Module):
         # Skip connection D * u
         y = y + u * D.view(1, 1, d_model)
         return y
+
+    @staticmethod
+    def _chunked_scan(log_A, bu, C, chunk_size):
+        """
+        Chunked closed-form evaluation of h_t = exp(log_A_t) * h_{t-1} + bu_t.
+        Within a chunk, with S_t = cumsum(log_A)_t:
+            h_t = exp(S_t) * h_prev + sum_{s<=t} exp(S_t - S_s) * bu_s
+        log_A, bu: [B, L, D, N]; C: [B, L, N]; returns y: [B, L, D]
+        """
+        batch_size, seq_len, d_model, d_state = bu.shape
+        h_prev = torch.zeros(batch_size, d_model, d_state, device=bu.device, dtype=bu.dtype)
+        outputs = []
+        for start in range(0, seq_len, chunk_size):
+            end = min(start + chunk_size, seq_len)
+            T = end - start
+            cs = torch.cumsum(log_A[:, start:end], dim=1)               # [B, T, D, N]
+            seg = cs.unsqueeze(2) - cs.unsqueeze(1)                     # [B, T(t), T(s), D, N]
+            causal = torch.tril(torch.ones(T, T, dtype=torch.bool, device=bu.device))
+            seg = seg.masked_fill(~causal.view(1, T, T, 1, 1), float("-inf"))
+            h_intra = (torch.exp(seg) * bu[:, start:end].unsqueeze(1)).sum(dim=2)
+            h = h_intra + torch.exp(cs) * h_prev.unsqueeze(1)           # [B, T, D, N]
+            outputs.append((h * C[:, start:end].unsqueeze(2)).sum(dim=-1))
+            h_prev = h[:, -1]
+        return torch.cat(outputs, dim=1)
 
     def forward(self, x):
         """
@@ -93,6 +140,10 @@ class PurePyTorch2DSelectiveScan(nn.Module):
         y_2 = self._selective_scan_1d(x_2, F.softplus(d_2), A[1], B_2, C_2, self.D[1])
         # Restore row-major orientation
         y_2 = torch.flip(y_2, dims=[1])
+
+        if getattr(self, "n_directions", 4) == 2:
+            y = y_1 + y_2
+            return y.reshape(B, H, W, C).permute(0, 3, 1, 2)
 
         # Direction 3:
         p_3 = self.proj_params(x_3)
@@ -206,3 +257,35 @@ class WarehouseSS2DBlock(nn.Module):
             out = out + res
 
         return out
+
+
+class WarehouseConvBlock(WarehouseSS2DBlock):
+    """
+    Ablation control: identical to WarehouseSS2DBlock (1x1 conv, DWConv, out_proj,
+    zero-gamma BN, residual) but with the selective scan replaced by identity.
+    Isolates the contribution of the SSM from that of the surrounding convolutions.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.ss2d = nn.Identity()
+
+
+class WarehouseSS2DBlock2Dir(WarehouseSS2DBlock):
+    """
+    Ablation: row-major scan only (forward and reversed). A_logs and D keep their
+    4-direction shape for checkpoint compatibility; rows 2-3 are unused, so report
+    the parameter count of this variant from its trainable, gradient-receiving tensors.
+    """
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.ss2d.n_directions = 2
+
+
+def set_scan_chunk_size(model: nn.Module, chunk_size: int) -> int:
+    """Switch every selective scan in `model` to sequential (0) or chunked mode. Returns count."""
+    count = 0
+    for m in model.modules():
+        if isinstance(m, PurePyTorch2DSelectiveScan):
+            m.chunk_size = chunk_size
+            count += 1
+    return count

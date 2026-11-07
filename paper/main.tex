@@ -1,4 +1,6 @@
-\documentclass[lettersize,journal]{IEEEtran}
+% TODO(authors): confirm against the official TAIMMA 2027 template/CFP (class options, page limit,
+% author block, copyright notice). IEEE conference style is assumed here.
+\documentclass[conference]{IEEEtran}
 
 % --- Core Typography & Encoding ---
 \usepackage[utf8]{inputenc}
@@ -6,37 +8,29 @@
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{booktabs}
 \usepackage{graphicx}
-\usepackage[protrusion=true,expansion=true]{microtype}
+\usepackage{microtype}
 \usepackage{cite}
 \usepackage{url}
 \usepackage{tabularx}
 \usepackage{multirow}
 \usepackage[caption=false,font=footnotesize,labelfont=sf,textfont=sf]{subfig}
-
-% --- Booktabs row padding for clean table readability ---
-\renewcommand{\arraystretch}{1.12}
-
-% --- Standard IEEE Float & Bibliography Spacing Tightening ---
-\setlength{\textfloatsep}{8pt plus 1.0pt minus 2.0pt}
-\setlength{\floatsep}{8pt plus 1.0pt minus 2.0pt}
-\setlength{\intextsep}{8pt plus 1.0pt minus 2.0pt}
-\setlength{\dbltextfloatsep}{8pt plus 1.0pt minus 2.0pt}
-\setlength{\dblfloatsep}{8pt plus 1.0pt minus 2.0pt}
-
-% --- Professional Hyperref Setup (Blue Link Text for Citations & Figures) ---
-\usepackage{xcolor}
-\definecolor{ieeeblue}{rgb}{0.0, 0.25, 0.70}
-\usepackage[colorlinks=true,linkcolor=ieeeblue,citecolor=ieeeblue,urlcolor=ieeeblue]{hyperref}
+\usepackage[hidelinks]{hyperref}
 
 % --- Working Metadata ---
 \title{A Lightweight Hybrid YOLO-Mamba Architecture for Multi-Class Warehouse Object Detection: An Edge-Feasibility Study}
 
+% TODO(authors): full institution name for "College of Technology II", the second author's
+% department and e-mail, and the corresponding author.
 \author{
-    Vo~Tuan~Hung
-    and~Huynh~Tan~Phat
-    \thanks{Manuscript received October 25, 2026. This research investigates lightweight edge perception architectures for automated logistics.}
-    \thanks{Vo Tuan Hung is an undergraduate student with the Department of Computer Science and Automation Engineering, College of Technology II (e-mail: \href{mailto:votuanhung1205.work@gmail.com}{votuanhung1205.work@gmail.com}, ORCID: \href{https://orcid.org/0009-0005-8730-7930}{0009-0005-8730-7930}).}
-    \thanks{Huynh Tan Phat is an instructor/advisor with Ho Chi Minh City Open University.}
+\IEEEauthorblockN{Vo Tuan Hung}
+\IEEEauthorblockA{\textit{Department of Computer Science and Automation Engineering}\\
+\textit{College of Technology II}\\
+votuanhung1205.work@gmail.com\\
+ORCID: 0009-0005-8730-7930}
+\and
+\IEEEauthorblockN{Huynh Tan Phat}
+\IEEEauthorblockA{\textit{Ho Chi Minh City Open University}\\
+Ho Chi Minh City, Vietnam}
 }
 
 \begin{document}
@@ -44,17 +38,11 @@
 \maketitle
 
 \begin{abstract}
-\textbf{Objective:} Real-time visual perception in automated warehouses requires dependable multi-class object detection across severe perspective disparities, aisle occlusions, and dynamic logistics entities (workers, forklifts, mobile robots, and pallet jacks). YOLO11 places a self-attention block (\texttt{C2PSA}) at its deepest stage, which accounts for about $10\%$ of the parameters of YOLO11s. Selective State Space Models (Mamba) offer global receptive fields with linear complexity $\mathcal{O}(N)$ and are a candidate replacement, but their accuracy and deployment cost in lightweight warehouse detectors on embedded CPUs are not well characterized.
-
-\textbf{Method:} We study \textbf{YOLO11s-SS2D}, which replaces the $P_5$ (and optionally $P_4$) self-attention block with a plugin-free 4-direction 2D Selective State Space block (\texttt{WarehouseSS2DBlock}). We evaluate single-stage, two-stage warmup, and dual-scale configurations against baseline YOLO11s on a cross-facility partition of the synthetic NVIDIA PhysicalAI-SmartSpaces benchmark (300 training frames from one facility, 100 validation frames from another), using a single seed and a 20-epoch budget.
-
-\textbf{Results:} Replacing the $P_5$ attention block reduces model parameters by $6.72\%$ ($8.80\text{ M}$ vs. $9.43\text{ M}$) and the stage-10 block by $63.9\%$ ($357{,}632$ vs. $990{,}976$), at $21.2$ vs. $21.7\text{ GFLOPs}$. Accuracy results are mixed: the best-fitness checkpoint of the single-stage model reaches $71.95\%\text{ mAP}_{50}$ versus $69.80\%$ for the baseline, but checkpoints were selected on the same validation partition, at the final epoch the baseline leads ($69.75\%$ vs. $65.46$--$67.17\%$), and all SS2D arms have lower $\text{mAP}_{50-95}$. The clearest per-class difference is on forklifts ($76.3\%$ vs. $70.1\%\text{ mAP}_{50}$ with two-stage training), which also raises macro recall by $+7.85$ points; these differences are not tested for significance.
-
-\textbf{Significance:} On a physical \textbf{Raspberry Pi 4 Model B} (Cortex-A72 @ 1.5\,GHz, ONNX Runtime, FP32), the SS2D model uses $371.9\text{ MB}$ peak RSS (vs. $231.5\text{ MB}$) and runs at $0.72\text{ FPS}$ ($1398\text{ ms}$ vs. $1170\text{ ms}$), despite having fewer parameters and FLOPs. Graph inspection attributes this overhead mainly to the sequential scan unrolling into $14{,}767$ ONNX nodes (vs. $320$). We also report a normalization issue in our zero-initialized residual design and its zero-$\gamma$ correction, whose end-to-end evaluation is pending.
+YOLO11 places a self-attention block (\texttt{C2PSA}) at the deepest stage of its backbone. Selective state space models (SSMs) offer global receptive fields with linear complexity and are a candidate replacement, but their accuracy and deployment cost in lightweight detectors on embedded CPUs are poorly characterized. We replace the $P_5$ attention block of YOLO11s with a plugin-free, four-direction 2D selective-scan block built from standard PyTorch operators, and compare single-stage, two-stage, and dual-scale ($P_4{+}P_5$) variants with YOLO11s on a cross-facility partition of the synthetic NVIDIA PhysicalAI-SmartSpaces warehouse benchmark (300 training frames from one facility, 100 validation frames from another; one seed, 20 epochs). The replacement removes $63.9\%$ of the stage-10 parameters ($6.72\%$ of the model) and lowers complexity from $21.7$ to $21.2$ GFLOPs. Accuracy is mixed: at the final epoch the baseline has the highest $\text{mAP}_{50}$ ($69.75\%$ vs.\ $65.46$--$67.17\%$), all SS2D variants have lower $\text{mAP}_{50-95}$, and the clearest per-class difference (forklift, $70.1\%$ vs.\ $75.2$--$79.7\%$ AP$_{50}$) has not been tested for significance. On a Raspberry Pi~4 (Cortex-A72, ONNX Runtime, FP32), the SS2D model is $19.5\%$ slower than the baseline ($1398$ vs.\ $1170$\,ms mean forward latency) and occupies more resident memory ($371.9$ vs.\ $231.5$\,MiB) despite fewer FLOPs. Graph inspection links this overhead to the sequential scan unrolling into $14{,}767$ ONNX nodes (vs.\ $320$). We also identify a normalization issue in zero-initializing a residual branch ahead of batch normalization and replace it with zero-$\gamma$ initialization, whose end-to-end evaluation is pending.
 \end{abstract}
 
 \begin{IEEEkeywords}
-Object detection, YOLO, Mamba, State space models, Lightweight neural networks, Edge AI, Warehouse perception.
+Object detection, YOLO, Mamba, state space models, lightweight neural networks, edge AI, warehouse perception.
 \end{IEEEkeywords}
 
 % --- Main Sections ---
@@ -66,10 +54,7 @@ Object detection, YOLO, Mamba, State space models, Lightweight neural networks, 
 \input{sections/06_conclusion}
 
 % --- References ---
-\bibliographystyle{ieeetr}
-{\small
-\setlength{\itemsep}{0.5pt plus 0.2pt}
+\bibliographystyle{IEEEtran}
 \bibliography{references}
-}
 
 \end{document}

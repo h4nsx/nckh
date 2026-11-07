@@ -5,7 +5,7 @@ This section reviews the core literature establishing our research context, orga
 
 \subsection{YOLO-Based Object Detection Evolution}
 \label{sec:rel_yolo}
-Single-stage object detectors originated with the unified regression formulation of YOLO \cite{redmon2016yolo}, which mapped image pixels directly to spatial bounding box coordinates and class conditional probabilities. Over the past decade, the YOLO family has evolved significantly \cite{sapkota2026ultralytics}. YOLOv5 established a modular anchor-based PyTorch architecture using Cross Stage Partial (CSP) networks and Path Aggregation Necks (PANet). YOLOv8 transitioned to an anchor-free design with a decoupled head, Distribution Focal Loss (DFL), and Task-Aligned Assigner (TAL) for dynamic label assignment. YOLO11 introduced C3k2 building blocks and cross-stage spatial attention (C2PSA) to optimize gradient pathways across model scales. Most recently, YOLO26 has adopted end-to-end NMS-free inference while retaining the C3k2 and C2PSA backbone \cite{sapkota2026ultralytics}. Lightweight YOLO variants rely predominantly on local convolutions (YOLOv8n/s entirely; YOLO11n/s apart from a single C2PSA block at the deepest stage), which limits long-range context aggregation in cluttered scenes.
+Single-stage object detectors originated with the unified regression formulation of YOLO \cite{redmon2016yolo}, which mapped image pixels directly to spatial bounding box coordinates and class conditional probabilities. Over the past decade, the YOLO family has evolved significantly \cite{sapkota2026ultralytics}. YOLOv5 established a modular anchor-based PyTorch architecture using Cross Stage Partial (CSP) networks and Path Aggregation Necks (PANet). YOLOv8 transitioned to an anchor-free design with a decoupled head, Distribution Focal Loss (DFL), and Task-Aligned Assigner (TAL) for dynamic label assignment. YOLO11 introduced C3k2 building blocks and the 	exttt{C2PSA} block, a cross-stage partial block wrapping the position-sensitive (partial) self-attention module (PSA) introduced in YOLOv10~	te{wang2024yolov10}. Most recently, YOLO26 has adopted end-to-end NMS-free inference while retaining the C3k2 and C2PSA backbone \cite{sapkota2026ultralytics}. Lightweight YOLO variants rely predominantly on local convolutions (YOLOv8n/s entirely; YOLO11n/s apart from a single C2PSA block at the deepest stage), which limits long-range context aggregation in cluttered scenes.
 
 \subsection{Mamba and State-Space Models for Visual Perception}
 \label{sec:rel_mamba}
@@ -25,28 +25,27 @@ To clearly position our work against existing hybrid detectors, Table~\ref{tab:l
 % TODO(authors): verify every cell of this table against the cited papers (table/page numbers),
 % in particular the MambaPSA row (8.90 M, 24.1 GFLOPs, "17--20 FPS") and the kernel-dependency column.
 \centering
-\small
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{lcccccc}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.3cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}X c c >{\raggedright\arraybackslash}X}
 \toprule
-\textbf{Model Architecture} & \textbf{Target Domain} & \textbf{SSM Insertion Stage} & \textbf{Kernel / Operator Dependency} & \textbf{Params (M)} & \textbf{GFLOPs} & \textbf{Physical Hardware Validation} \\
+\textbf{Model} & \textbf{Target Domain} & \textbf{SSM Insertion Stage} & \textbf{Kernel / Operator Dependency} & \textbf{Params (M)} & \textbf{GFLOPs} & \textbf{Hardware Evaluated} \\
 \midrule
-Mamba-YOLO \cite{wang2025mambayolo} & Generic Vision (COCO/VOC) & ODMamba Multi-Branch Backbone & VMamba Selective Scan & 8.20 & 26.5 & High-End Desktop GPU \\
-MambaNeXt-YOLO \cite{lei2025mambanext} & Generic VOC & Early Backbone (ConvNeXt) & Custom C++/CUDA (\texttt{mamba\_ssm}) & 7.10 & 22.4 & NVIDIA Jetson Orin NX (FP16 TensorRT) \\
-Hybrid-YOLO \cite{chen2024hybridyolo} & Underwater / COCO & Shallow Backbone Stages & Custom C++/CUDA Selective Scan & 3.20 & 9.8 & Host PC Simulation (x86 GPU) \\
-MambaPSA \cite{chan2026mambapsa} & Generic VOC & Backbone $P_5$ Neck (C2PSA) & PyTorch / CUDA SSM & 8.90 & 24.1 & Intel Core i7 CPU (17--20 FPS) \\
+Mamba-YOLO \cite{wang2025mambayolo} & Generic (COCO/VOC) & ODMamba multi-branch backbone & VMamba selective scan & 8.20 & 26.5 & Desktop GPU \\
+MambaNeXt-YOLO \cite{lei2025mambanext} & Generic (VOC) & Early backbone (ConvNeXt) & Custom C++/CUDA (\texttt{mamba\_ssm}) & 7.10 & 22.4 & NVIDIA Jetson Orin NX (FP16 TensorRT) \\
+Hybrid-YOLO \cite{chen2024hybridyolo} & Underwater / COCO & Shallow backbone stages & Custom C++/CUDA selective scan & 3.20 & 9.8 & x86 GPU host \\
+MambaPSA \cite{chan2026mambapsa} & Generic (VOC) & $P_5$ (replaces C2PSA) & PyTorch / CUDA SSM & 8.90 & 24.1 & Intel Core i7 CPU (17--20 FPS) \\
 \midrule
-\textbf{YOLO11s-SS2D (Ours)} & \textbf{Smart Logistics Warehouses} & \textbf{Stage $P_5$ (and $P_4$) Context} & \textbf{Zero-Plugin Pure PyTorch / Native ONNX} & \textbf{8.80} & \textbf{21.2} & \textbf{Physical Raspberry Pi 4 ARM Silicon} \\
+YOLO11s-SS2D (this work) & Warehouse logistics (synthetic) & $P_5$ (and $P_4$), replaces C2PSA & Standard PyTorch / ONNX operators & 8.80 & 21.2 & Raspberry Pi~4 (Cortex-A72 CPU) \\
 \bottomrule
-\end{tabular}%
-}
+\end{tabularx}
 \end{table*}
 
 While prior hybrid CNN--Mamba detectors report efficiency primarily via parameter count, FLOPs, or GPU throughput on natural images, two critical questions relevant to warehouse edge perception remain open: (1) how selective-scan mechanisms behave under a rigorous cross-facility warehouse partition where elongated perspective aisles and severe vertical rack occlusions challenge standard spatial attention, and (2) what actually determines the measured latency and physical memory footprint of plugin-free selective scans on embedded ARM CPUs, where FLOP counts are poor latency predictors \cite{mittal2024lightweightsurvey}. Our work specifically addresses these dual systems and domain questions.
 
 \subsection{Lightweight Object Detection and Edge Deployment}
 \label{sec:rel_edge}
-Deploying deep learning detectors to edge platforms requires balancing algorithmic complexity with physical hardware constraints \cite{mittal2024lightweightsurvey, capra2022edgehardware}. As surveyed by Mittal \cite{mittal2024lightweightsurvey}, parameter counts and FLOPs alone are insufficient predictors of on-device latency: Memory Access Cost (MAC) and operator fragmentation (launching numerous small, non-fused kernels) frequently dominate runtime. In a comparative evaluation of runtime frameworks across edge platforms, Ratul et~al.\ \cite{ratul2024accelerating} report that ONNX Runtime and TensorRT outperform standard PyTorch by fusing operators and streamlining memory transfers. Recent edge-tailored detectors such as LEAF-YOLO \cite{quang2024leafyolo} and Edge-YOLO \cite{li2023edgeyolo} further demonstrate that operator graph simplicity and memory access efficiency are vital for real-time edge execution.
+Deploying deep learning detectors to edge platforms requires balancing algorithmic complexity with physical hardware constraints \cite{mittal2024lightweightsurvey, capra2022edgehardware}. As argued in the design guidelines of ShuffleNet~V2~\cite{ma2018shufflenetv2} and surveyed by Mittal~\cite{mittal2024lightweightsurvey}, parameter counts and FLOPs alone are insufficient predictors of on-device latency: Memory Access Cost (MAC) and operator fragmentation (launching numerous small, non-fused kernels) frequently dominate runtime. In a comparative evaluation of runtime frameworks across edge platforms, Ratul et~al.\ \cite{ratul2024accelerating} report that ONNX Runtime and TensorRT outperform standard PyTorch by fusing operators and streamlining memory transfers. Recent edge-tailored detectors such as LEAF-YOLO \cite{quang2024leafyolo} and Edge-YOLO \cite{li2023edgeyolo} further demonstrate that operator graph simplicity and memory access efficiency are vital for real-time edge execution.
 
 \subsection{Warehouse Perception and Industrial Benchmarks}
 \label{sec:rel_warehouse}
