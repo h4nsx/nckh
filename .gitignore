@@ -12,7 +12,15 @@ __pycache__/
 .pytest_cache/
 
 # Datasets and heavy binary files
-data/
+data/*
+!data/smartspaces_micro/
+data/smartspaces_micro/*
+!data/smartspaces_micro/images/
+data/smartspaces_micro/images/*
+!data/smartspaces_micro/images/val/
+!data/smartspaces_micro/labels/
+data/smartspaces_micro/labels/*
+!data/smartspaces_micro/labels/val/
 datasets/
 *.h5
 *.hdf5
@@ -21,10 +29,29 @@ datasets/
 *.zip
 
 # Ultralytics runs & weights
-runs/
+runs/*
+!runs/detect/
+runs/detect/*
+!runs/detect/runs/
+runs/detect/runs/*
+!runs/detect/runs/two_stage_protocol_study/
+runs/detect/runs/two_stage_protocol_study/*
+!runs/detect/runs/two_stage_protocol_study/arm1_baseline_control/
+!runs/detect/runs/two_stage_protocol_study/arm2_case_b_single_stage/
+!runs/detect/runs/two_stage_protocol_study/arm3_stage2_finetune/
+!runs/detect/runs/two_stage_protocol_study/arm4_case_c_dual_scale/
+runs/detect/runs/two_stage_protocol_study/*/*
+!runs/detect/runs/two_stage_protocol_study/*/weights/
+runs/detect/runs/two_stage_protocol_study/*/weights/*
+!runs/detect/runs/two_stage_protocol_study/arm1_baseline_control/weights/best.pt
+!runs/detect/runs/two_stage_protocol_study/arm2_case_b_single_stage/weights/best.pt
+!runs/detect/runs/two_stage_protocol_study/arm3_stage2_finetune/weights/best.pt
+!runs/detect/runs/two_stage_protocol_study/arm4_case_c_dual_scale/weights/best.pt
+
 *.pt
 *.onnx
 *.engine
+!runs/detect/runs/two_stage_protocol_study/*/weights/best.pt
 
 # LaTeX compilation temporaries
 paper/*.aux
