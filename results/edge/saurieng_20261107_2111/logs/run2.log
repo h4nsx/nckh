@@ -1,0 +1,103 @@
+nohup: ignoring input
+[INFO] system info -> results/edge/saurieng_20261107_2111/system_info.txt
+[RUN] yolo11s_ss2d  threads=1
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_ss2d.onnx
+=================================================================
+
+1. Warming up (10 iterations)...
+2. Timing forward pass over 100 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_ss2d.onnx  (14767 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 1
+Forward median:   3641.94 ms  (P95 3649.83 ms, 0.27 FPS)
+RSS idle / end:   47.8 / 373.5 MiB
+Peak RSS (HWM):   373.5 MiB
+----------------------------------------
+[SAVED] results/edge/saurieng_20261107_2111/yolo11s_ss2d_t1.json
+[RUN] yolo11s_ss2d  threads=4
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_ss2d.onnx
+=================================================================
+
+1. Warming up (10 iterations)...
+2. Timing forward pass over 100 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_ss2d.onnx  (14767 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 4
+Forward median:   1352.89 ms  (P95 1440.04 ms, 0.74 FPS)
+RSS idle / end:   47.8 / 373.7 MiB
+Peak RSS (HWM):   373.7 MiB
+----------------------------------------
+[SAVED] results/edge/saurieng_20261107_2111/yolo11s_ss2d_t4.json
+[PROFILE] yolo11s_ss2d
+=================================================================
+PROFILING ONNX GRAPH: yolo11s_ss2d.onnx
+=================================================================
+Total Graph Nodes: 14767
+Operator Distribution:
+  - Gather         :   4800 nodes ( 32.5%)
+  - Mul            :   3289 nodes ( 22.3%)
+  - Unsqueeze      :   3212 nodes ( 21.8%)
+  - Add            :   1621 nodes ( 11.0%)
+  - ReduceSum      :   1600 nodes ( 10.8%)
+  - Conv           :     84 nodes (  0.6%)
+  - Sigmoid        :     77 nodes (  0.5%)
+  - Concat         :     24 nodes (  0.2%)
+  - Reshape        :     15 nodes (  0.1%)
+  - Split          :     12 nodes (  0.1%)
+[0;93m2026-11-08 06:29:20.087318292 [W:onnxruntime:, inference_session.cc:3240 operator()] Serializing optimized model with Graph Optimization level greater than ORT_ENABLE_EXTENDED and the NchwcTransformer enabled. The generated model may contain hardware specific optimizations, and should only be used in the same environment the model was optimized in.[m
+Nodes after ORT graph optimization: 14697
+
+Saved detailed ORT profile log to: results/edge/saurieng_20261107_2111/profiles/ort_profile_yolo11s_ss2d_2026-11-08_06-28-33_867.json
+
+Operator Time Breakdown (Top 8):
+  - Conv           :  4361.57 ms ( 49.7%)
+  - Mul            :   935.00 ms ( 10.7%)
+  - QuickGelu      :   765.20 ms (  8.7%)
+  - Squeeze        :   487.64 ms (  5.6%)
+  - Unsqueeze      :   461.04 ms (  5.3%)
+  - Add            :   388.16 ms (  4.4%)
+  - ReduceSum      :   291.35 ms (  3.3%)
+  - Split          :   256.84 ms (  2.9%)
+[SAVED] results/edge/saurieng_20261107_2111/profiles/yolo11s_ss2d_t4_profile.json
+[DONE] results in results/edge/saurieng_20261107_2111
+       commit them with: git add -f results/edge/saurieng_20261107_2111 && git commit -m 'Pi 4 edge measurements'
+=================================================================
+PROFILING ONNX GRAPH: yolo11s_case_c.onnx
+=================================================================
+Total Graph Nodes: 90201
+Operator Distribution:
+  - Gather         :  24009 nodes ( 26.6%)
+  - Constant       :  17713 nodes ( 19.6%)
+  - Mul            :  16113 nodes ( 17.9%)
+  - Unsqueeze      :  16024 nodes ( 17.8%)
+  - Add            :   8030 nodes (  8.9%)
+  - ReduceSum      :   8000 nodes (  8.9%)
+  - Conv           :     87 nodes (  0.1%)
+  - Sigmoid        :     79 nodes (  0.1%)
+  - Reshape        :     30 nodes (  0.0%)
+  - Concat         :     28 nodes (  0.0%)
+[0;93m2026-11-08 06:51:20.213665902 [W:onnxruntime:, inference_session.cc:3240 operator()] Serializing optimized model with Graph Optimization level greater than ORT_ENABLE_EXTENDED and the NchwcTransformer enabled. The generated model may contain hardware specific optimizations, and should only be used in the same environment the model was optimized in.[m
+Nodes after ORT graph optimization: 72385
+
+Saved detailed ORT profile log to: results/edge/saurieng_20261107_2111/profiles/ort_profile_yolo11s_case_c_2026-11-08_06-30-16_660.json
+
+Operator Time Breakdown (Top 8):
+  - Conv           :  4386.06 ms ( 22.5%)
+  - Mul            :  3827.77 ms ( 19.6%)
+  - Squeeze        :  2439.80 ms ( 12.5%)
+  - Unsqueeze      :  2256.53 ms ( 11.6%)
+  - Add            :  1547.80 ms (  7.9%)
+  - ReduceSum      :  1357.00 ms (  7.0%)
+  - Gather         :  1195.78 ms (  6.1%)
+  - QuickGelu      :   738.14 ms (  3.8%)
+[SAVED] results/edge/saurieng_20261107_2111/profiles/yolo11s_case_c_t4_profile.json

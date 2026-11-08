@@ -168,6 +168,10 @@ def benchmark_onnx(model_path: str, num_runs: int = 100, warmup: int = 10, imgsz
         _ = session.run([output_name], {input_name: dummy_input})
         latencies.append((time.perf_counter() - t0) * 1000.0)
     forward = summarize(latencies)
+    # Memory of the inference session alone: read before OpenCV, real images or onnx.load
+    # (used for the node count below) can raise the high-water mark.
+    rss_end_forward = current_rss_mib()
+    peak_rss_forward = peak_rss_mib()
 
     # --- End-to-end timing on real images ---
     end_to_end = None
@@ -200,10 +204,12 @@ def benchmark_onnx(model_path: str, num_runs: int = 100, warmup: int = 10, imgsz
             "mean_detections": float(np.mean(n_det)) if n_det else 0.0,
         }
 
+    rss_end_all = current_rss_mib()
+    peak_rss_all = peak_rss_mib()
     record = {
         "model": os.path.basename(model_path),
         "onnx_size_mib": os.path.getsize(model_path) / MIB,
-        "onnx_nodes": count_onnx_nodes(model_path),
+        "onnx_nodes": count_onnx_nodes(model_path),  # after all memory readings
         "provider": session.get_providers()[0],
         "intra_op_threads": threads if threads > 0 else "ort_default",
         "cpu_count": os.cpu_count(),
@@ -217,8 +223,10 @@ def benchmark_onnx(model_path: str, num_runs: int = 100, warmup: int = 10, imgsz
         "end_to_end": end_to_end,
         "rss_idle_mib": rss_idle,
         "rss_after_load_mib": rss_after_load,
-        "rss_end_mib": current_rss_mib(),
-        "peak_rss_mib": peak_rss_mib(),
+        "rss_end_mib": rss_end_forward,         # comparable to the paper's current "RSS" column
+        "peak_rss_mib": peak_rss_forward,       # session creation + forward loop (report this)
+        "rss_end_with_e2e_mib": rss_end_all,
+        "peak_rss_with_e2e_mib": peak_rss_all,  # also includes OpenCV and image decoding
     }
 
     print("\n" + "-" * 40)

@@ -61,6 +61,14 @@ What each comparison answers:
    (its "RSS" is the value after the timed loop, not the peak), so replace it entirely.
    Also record the Pi RAM size, OS image, CPU governor, cooling, and `vcgencmd get_throttled`.
 
+4. **Training-free latency ablation (can be done first, ~1 hour).** Latency, node
+   count and memory do not depend on trained weights, so the runtime question of
+   RQ3 can be answered before any retraining: build `identity`, `convonly`,
+   `ss2d` (sequential) and `ss2d` (`default_chunk_size = 20`) from their YAMLs
+   with untrained weights, export each to ONNX (opset 17, `onnxslim`), and run
+   `scripts/benchmark_edge_device.py` on the Pi exactly as in step 3. Report these
+   as a runtime-only ablation; do not report accuracy for untrained models.
+
 The chunked run is the controlled intervention that tests the claim that graph
 unrolling, not SSM arithmetic, causes the latency and memory overhead.
 

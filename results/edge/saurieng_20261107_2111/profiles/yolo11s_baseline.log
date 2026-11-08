@@ -1,0 +1,29 @@
+=================================================================
+PROFILING ONNX GRAPH: yolo11s_baseline.onnx
+=================================================================
+Total Graph Nodes: 320
+Operator Distribution:
+  - Conv           :     88 nodes ( 27.5%)
+  - Mul            :     79 nodes ( 24.7%)
+  - Sigmoid        :     78 nodes ( 24.4%)
+  - Concat         :     21 nodes (  6.6%)
+  - Add            :     16 nodes (  5.0%)
+  - Reshape        :     11 nodes (  3.4%)
+  - Split          :     10 nodes (  3.1%)
+  - MaxPool        :      3 nodes (  0.9%)
+  - Transpose      :      3 nodes (  0.9%)
+  - MatMul         :      2 nodes (  0.6%)
+Nodes after ORT graph optimization: 236
+
+Saved detailed ORT profile log to: results/edge/saurieng_20261107_2111/profiles/ort_profile_yolo11s_baseline_2026-11-07_21-21-19_412.json
+
+Operator Time Breakdown (Top 8):
+  - Conv           : 13730.96 ms ( 78.1%)
+  - QuickGelu      :  2304.09 ms ( 13.1%)
+  - Concat         :   520.88 ms (  3.0%)
+  - Softmax        :   371.31 ms (  2.1%)
+  - Split          :   206.03 ms (  1.2%)
+  - Add            :   152.15 ms (  0.9%)
+  - FusedConv      :   101.87 ms (  0.6%)
+  - FusedMatMul    :    83.81 ms (  0.5%)
+[SAVED] results/edge/saurieng_20261107_2111/profiles/yolo11s_baseline_t4_profile.json

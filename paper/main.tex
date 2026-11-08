@@ -17,10 +17,10 @@
 \usepackage[hidelinks]{hyperref}
 
 % --- Working Metadata ---
-\title{A Lightweight Hybrid YOLO-Mamba Architecture for Multi-Class Warehouse Object Detection: An Edge-Feasibility Study}
+\title{Replacing Self-Attention with 2D Selective State Spaces in YOLO11s for Warehouse Object Detection: An Edge-Feasibility Study}
 
-% TODO(authors): full institution name for "College of Technology II", the second author's
-% department and e-mail, and the corresponding author.
+% TODO(authors): full official name and city of "College of Technology II"; optionally the second
+% author's faculty and ORCID.
 \author{
 \IEEEauthorblockN{Vo Tuan Hung}
 \IEEEauthorblockA{\textit{Department of Computer Science and Automation Engineering}\\
@@ -28,9 +28,11 @@
 votuanhung1205.work@gmail.com\\
 ORCID: 0009-0005-8730-7930}
 \and
-\IEEEauthorblockN{Huynh Tan Phat}
+\IEEEauthorblockN{Huynh Tan Phat\textsuperscript{*}}
 \IEEEauthorblockA{\textit{Ho Chi Minh City Open University}\\
-Ho Chi Minh City, Vietnam}
+Ho Chi Minh City, Vietnam\\
+phat.ht@ou.edu.vn\\
+\textsuperscript{*}Corresponding author}
 }
 
 \begin{document}
@@ -38,7 +40,7 @@ Ho Chi Minh City, Vietnam}
 \maketitle
 
 \begin{abstract}
-YOLO11 places a self-attention block (\texttt{C2PSA}) at the deepest stage of its backbone. Selective state space models (SSMs) offer global receptive fields with linear complexity and are a candidate replacement, but their accuracy and deployment cost in lightweight detectors on embedded CPUs are poorly characterized. We replace the $P_5$ attention block of YOLO11s with a plugin-free, four-direction 2D selective-scan block built from standard PyTorch operators, and compare single-stage, two-stage, and dual-scale ($P_4{+}P_5$) variants with YOLO11s on a cross-facility partition of the synthetic NVIDIA PhysicalAI-SmartSpaces warehouse benchmark (300 training frames from one facility, 100 validation frames from another; one seed, 20 epochs). The replacement removes $63.9\%$ of the stage-10 parameters ($6.72\%$ of the model) and lowers complexity from $21.7$ to $21.2$ GFLOPs. Accuracy is mixed: at the final epoch the baseline has the highest $\text{mAP}_{50}$ ($69.75\%$ vs.\ $65.46$--$67.17\%$), all SS2D variants have lower $\text{mAP}_{50-95}$, and the clearest per-class difference (forklift, $70.1\%$ vs.\ $75.2$--$79.7\%$ AP$_{50}$) has not been tested for significance. On a Raspberry Pi~4 (Cortex-A72, ONNX Runtime, FP32), the SS2D model is $19.5\%$ slower than the baseline ($1398$ vs.\ $1170$\,ms mean forward latency) and occupies more resident memory ($371.9$ vs.\ $231.5$\,MiB) despite fewer FLOPs. Graph inspection links this overhead to the sequential scan unrolling into $14{,}767$ ONNX nodes (vs.\ $320$). We also identify a normalization issue in zero-initializing a residual branch ahead of batch normalization and replace it with zero-$\gamma$ initialization, whose end-to-end evaluation is pending.
+Selective state space models (SSMs) offer global context with linear complexity, but their cost in lightweight detectors on embedded CPUs is poorly characterized. We replace the $P_5$ self-attention block (\texttt{C2PSA}) of YOLO11s with a plugin-free, four-direction 2D selective scan built from standard PyTorch operators, and compare single-stage, two-stage, and dual-scale variants with YOLO11s on a cross-facility partition of the synthetic NVIDIA PhysicalAI-SmartSpaces warehouse benchmark (300 training and 100 validation frames; one seed, 20 epochs). The replacement removes $63.9\%$ of the block's parameters ($6.72\%$ of the model; $21.7 \to 21.2$ GFLOPs), mainly by narrowing channels. Accuracy is mixed: the baseline leads at the final epoch in $\text{mAP}_{50}$ and in $\text{mAP}_{50-95}$, while the SS2D variants score higher on forklifts, a difference not yet tested for significance. On a Raspberry Pi~4 (Cortex-A72, FP32 ONNX Runtime), the SS2D model is $23\%$ slower with four threads ($1366$ vs.\ $1107$\,ms median forward latency; $8\%$ with one thread) and has a higher peak memory ($373.7$ vs.\ $233.3$\,MiB) despite fewer FLOPs. An analytical cost breakdown, graph inspection, and operator profiling suggest that the sequential scan, which unrolls into $14{,}767$ ONNX nodes (vs.\ $320$) and scales poorly across cores, rather than its arithmetic, causes this overhead. We summarize three design lessons for hybrid CNN--SSM detectors on edge CPUs and identify a pitfall in zero-initializing a convolution ahead of batch normalization, for which we propose zero-$\gamma$ initialization.
 \end{abstract}
 
 \begin{IEEEkeywords}

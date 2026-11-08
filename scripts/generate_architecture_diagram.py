@@ -44,8 +44,8 @@ def generate_transparent_white_diagram():
     # P1-P4 Backbone
     b_bb = patches.FancyBboxPatch((5, 22.5), 32, 6.5, boxstyle="round,pad=0.15", fc=BG_BOX, ec=BORDER_BOX, lw=0.9, zorder=2)
     ax.add_patch(b_bb)
-    ax.text(21, 26.5, "Backbone Stages P1-P4 (Local Conv)", ha='center', **b_main)
-    ax.text(21, 24.6, "C3k2 Blocks -> P4 Output: [256, 40, 40]", ha='center', **b_sub)
+    ax.text(21, 26.5, "Backbone Layers 0-9 (Local Conv)", ha='center', **b_main)
+    ax.text(21, 24.6, "Conv + C3k2 (P1-P5) + SPPF -> [512, 20, 20]", ha='center', **b_sub)
 
     ax.annotate('', xy=(21, 18.5), xytext=(21, 22.5), arrowprops=dict(arrowstyle="-|>", lw=1.1, color=LINE_ARROW))
 
@@ -83,8 +83,8 @@ def generate_transparent_white_diagram():
     # Input Tensor
     b_tin = patches.FancyBboxPatch((48, 32.0), 16, 6.0, boxstyle="round,pad=0.15", fc=BG_BOX, ec=BORDER_BOX, lw=0.9, zorder=2)
     ax.add_patch(b_tin)
-    ax.text(56, 35.8, "Input Tensor X", ha='center', **b_main)
-    ax.text(56, 33.8, "[B, 512, 20, 20]", ha='center', **b_sub)
+    ax.text(56, 35.8, "Input Tensor F", ha='center', **b_main)
+    ax.text(56, 33.8, "[b, 512, 20, 20]", ha='center', **b_sub)
 
     # Residual path across top
     # Routed right of the out-proj block so that it enters the addition node, not the block
@@ -154,7 +154,7 @@ def generate_transparent_white_diagram():
 
     b_out = patches.FancyBboxPatch((107, 2.2), 20, 3.6, boxstyle="round,pad=0.15", fc=BG_BOX, ec=BORDER_BOX, lw=1.0, zorder=2)
     ax.add_patch(b_out)
-    ax.text(117, 4.0, r"$\mathbf{Y} = \mathbf{X} + \text{SS2D}(\mathbf{X})$", ha='center', va='center', color=TEXT_MAIN, fontweight='bold', fontsize=8.2)
+    ax.text(117, 4.0, r"$\mathbf{Y} = \mathbf{F} + \text{SS2D}(\mathbf{F})$", ha='center', va='center', color=TEXT_MAIN, fontweight='bold', fontsize=8.2)
 
     plt.tight_layout()
     output_pdf = "paper/figures/fig_architecture_diagram.pdf"

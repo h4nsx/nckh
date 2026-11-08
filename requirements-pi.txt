@@ -1,0 +1,8 @@
+# Raspberry Pi 4 (aarch64) inference-only environment for scripts/run_pi_benchmarks.sh.
+# No torch/ultralytics needed: ONNX files are exported on a PC with scripts/export_onnx.py.
+# onnxruntime is pinned to the version reported in the paper (Section IV-D).
+onnxruntime==1.31.0
+onnx
+numpy
+opencv-python-headless
+psutil

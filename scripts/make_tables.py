@@ -176,6 +176,10 @@ def generate_multi_arm_convergence_table():
     lines.append(f"Arm 3: Case B SS2D (Two-Stage Warmup) & {f_map50_3:.2f}\\% & {p_map50_3:.2f}\\% (S2 Ep. {ep3}) & {p_map_3:.2f}\\% & {p_prec_3:.3f} & \\textbf{{{p_rec_3:.3f}}} & {vbox_3:.4f} \\\\")
     lines.append(f"Arm 4: Case C SS2D (Dual-Scale P4+P5) & {f_map50_4:.2f}\\% & {p_map50_4:.2f}\\% (Ep. {ep4}) & {p_map_4:.2f}\\% & {p_prec_4:.3f} & {p_rec_4:.3f} & {vbox_4:.4f} \\\\")
     lines.append("\\bottomrule")
+    lines.append("\\multicolumn{7}{p{0.96\\textwidth}}{\\scriptsize Checkpoints are selected on the in-loop validation values by maximizing $0.1\\,\\text{mAP}_{50} + 0.9\\,\\text{mAP}_{50-95}$. "
+                 "For Arm 1, epoch 20 (in-loop $\\text{mAP}_{50} = 69.75\\%$, $\\text{mAP}_{50-95} = 45.82\\%$) is preferred over epoch 6, where $\\text{mAP}_{50}$ peaks at $70.32\\%$ "
+                 "but $\\text{mAP}_{50-95}$ is only $41.53\\%$ (Fig.~\\ref{fig:convergence_map}). The best-fitness columns report a re-evaluation of the saved checkpoint "
+                 "after training, which differs slightly from the in-loop values of the same epoch ($69.80\\%$ and $45.53\\%$ for Arm 1).} \\\\")
     lines.append("\\end{tabular}")
     lines.append("\\end{table*}")
 
@@ -195,7 +199,7 @@ def generate_per_class_table():
     lines.append("\\centering")
     lines.append("\\footnotesize")  # full-width float, no resizebox (keeps fonts >= 8 pt)
     lines.append("\\setlength{\\tabcolsep}{3pt}")
-    lines.append("\\begin{tabular}{lcccccccc}")
+    lines.append("\\begin{tabular*}{\\textwidth}{@{\\extracolsep{\\fill}}lcccccccc}")
     lines.append("\\toprule")
     lines.append("\\textbf{Target Category} & \\multicolumn{2}{c}{\\textbf{Arm 1: Baseline}} & \\multicolumn{2}{c}{\\textbf{Arm 2: Single-Stage}} & \\multicolumn{2}{c}{\\textbf{Arm 3: Two-Stage}} & \\multicolumn{2}{c}{\\textbf{Arm 4: Dual-Scale}} \\\\")
     lines.append("\\cmidrule(lr){2-3} \\cmidrule(lr){4-5} \\cmidrule(lr){6-7} \\cmidrule(lr){8-9}")
@@ -231,9 +235,22 @@ def generate_per_class_table():
     lines.append("\\midrule")
     # Macro metrics
     lines.append(f"\\textbf{{Global Macro Metric}} & {CHECKPOINT_RESULTS['Arm 1: Baseline YOLO11s Control']['mAP50']:.2f} & \\textbf{{{CHECKPOINT_RESULTS['Arm 1: Baseline YOLO11s Control']['mAP50_95']:.2f}}} & \\textbf{{{CHECKPOINT_RESULTS['Arm 2: YOLO11s-SS2D (Case B, Single-Stage)']['mAP50']:.2f}}} & {CHECKPOINT_RESULTS['Arm 2: YOLO11s-SS2D (Case B, Single-Stage)']['mAP50_95']:.2f} & {CHECKPOINT_RESULTS['Arm 3: YOLO11s-SS2D (Case B, Two-Stage Warmup)']['mAP50']:.2f} & {CHECKPOINT_RESULTS['Arm 3: YOLO11s-SS2D (Case B, Two-Stage Warmup)']['mAP50_95']:.2f} & {CHECKPOINT_RESULTS['Arm 4: YOLO11s-SS2D (Case C, Dual-Scale P4+P5)']['mAP50']:.2f} & {CHECKPOINT_RESULTS['Arm 4: YOLO11s-SS2D (Case C, Dual-Scale P4+P5)']['mAP50_95']:.2f} \\\\")
+    # Supplementary post-hoc row: mean of the three classes with n >= 45 (same precision as the macro row)
+    arm_keys = ["Arm 1: Baseline YOLO11s Control", "Arm 2: YOLO11s-SS2D (Case B, Single-Stage)",
+                "Arm 3: YOLO11s-SS2D (Case B, Two-Stage Warmup)", "Arm 4: YOLO11s-SS2D (Case C, Dual-Scale P4+P5)"]
+    cells = []
+    for ak in arm_keys:
+        pc = CHECKPOINT_RESULTS[ak]["per_class"]
+        for metric in ("mAP50", "mAP50_95"):
+            vals = [pc[c][metric] for c in ("worker", "forklift", "amr")]
+            cells.append(f"{sum(vals) / 3:.2f}")
+    lines.append("\\textit{3-class macro (excl.\\ \\texttt{pallet\\_truck})}$^{\\ddagger}$ & " + " & ".join(cells) + " \\\\")
     lines.append("\\bottomrule")
-    lines.append("\\multicolumn{9}{l}{\\footnotesize $^{\\dagger}$Notice on rare tail class: \\texttt{pallet\\_truck} contains only 13 validation instances ($0.35\\%$ of total labels), exhibiting high sample variance.} \\\\")
-    lines.append("\\end{tabular}")
+    # Notes go below the tabular so that they do not widen the last column
+    lines.append("\\end{tabular*}")
+    lines.append("\\par\\smallskip")
+    lines.append("\\parbox{\\textwidth}{\\footnotesize $^{\\dagger}$Rare tail class: \\texttt{pallet\\_truck} contains only 13 validation instances ($0.35\\%$ of total labels), exhibiting high sample variance.\\\\")
+    lines.append("$^{\\ddagger}$Supplementary, defined after inspecting the results: mean of the three classes with $n \\geq 45$; not used for model comparison claims.}")
     lines.append("\\end{table*}")
 
     out_file = OUTPUT_DIR / "tab_per_class_results.tex"

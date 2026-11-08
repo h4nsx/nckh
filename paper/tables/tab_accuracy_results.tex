@@ -14,5 +14,6 @@ Arm 2: Case B SS2D (Single-Stage) & 65.46\% & \textbf{71.95\% (Ep. 18)} & 45.15\
 Arm 3: Case B SS2D (Two-Stage Warmup) & 67.10\% & 67.67\% (S2 Ep. 14) & 43.15\% & 0.741 & \textbf{0.651} & 1.0512 \\
 Arm 4: Case C SS2D (Dual-Scale P4+P5) & 67.17\% & 67.17\% (Ep. 20) & 42.76\% & 0.738 & 0.515 & 1.0863 \\
 \bottomrule
+\multicolumn{7}{p{0.96\textwidth}}{\scriptsize Checkpoints are selected on the in-loop validation values by maximizing $0.1\,\text{mAP}_{50} + 0.9\,\text{mAP}_{50-95}$. For Arm 1, epoch 20 (in-loop $\text{mAP}_{50} = 69.75\%$, $\text{mAP}_{50-95} = 45.82\%$) is preferred over epoch 6, where $\text{mAP}_{50}$ peaks at $70.32\%$ but $\text{mAP}_{50-95}$ is only $41.53\%$ (Fig.~\ref{fig:convergence_map}). The best-fitness columns report a re-evaluation of the saved checkpoint after training, which differs slightly from the in-loop values of the same epoch ($69.80\%$ and $45.53\%$ for Arm 1).} \\
 \end{tabular}
 \end{table*}

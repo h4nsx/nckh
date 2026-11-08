@@ -33,14 +33,8 @@ SS2D (Case B) & 98 & 8.796 & 21.2 & 17.89 & 304.0 \\
 \end{tabular}
 \end{table}
 
-The Case B model has $6.72\%$ fewer parameters ($633{,}344$ fewer) and $21.2$ instead of $21.7$ GFLOPs; within Layer 10, the \texttt{WarehouseSS2DBlock} has $357{,}632$ parameters versus $990{,}976$ for \texttt{C2PSA} ($-63.9\%$, Fig.~\ref{fig:arch_comparison}). The checkpoint shrinks from $19.18$ to $17.89$\,MB. These static savings do not carry over to deployment: the exported ONNX file is larger ($38.5$ vs.\ $36.2$\,MB) and runtime memory is higher (Section~\ref{sec:res_edge_deployment}).
-
-\begin{figure}[!t]
-\centering
-\includegraphics[width=\columnwidth]{figures/fig_architectural_comparison.pdf}
-\caption{Footprint of the baseline and YOLO11s-SS2D: (a) model and Layer-10 parameters ($357{,}632$ vs.\ $990{,}976$ in Layer 10); (b) GFLOPs and checkpoint size.}
-\label{fig:arch_comparison}
-\end{figure}
+The Case B model has $6.72\%$ fewer parameters ($633{,}344$ fewer) and $21.2$ instead of $21.7$ GFLOPs; within Layer 10, the \texttt{WarehouseSS2DBlock} has $357{,}632$ parameters versus $990{,}976$ for \texttt{C2PSA} ($-63.9\%$; Table~\ref{tab:layer10_breakdown}). The checkpoint shrinks from $19.18$ to $17.89$\,MB. These static savings do not carry over to deployment: the exported ONNX file is larger ($38.5$ vs.\ $36.2$\,MB) and runtime memory is higher (Section~\ref{sec:res_edge_deployment}).
+% The former footprint bar chart (fig_architectural_comparison) was removed: it repeated Table V.
 
 \subsection{Detection Accuracy and Convergence}
 \label{sec:res_detection}
@@ -58,7 +52,7 @@ The best-fitness checkpoint is selected on the same $100$-frame partition on whi
 \begin{figure}[!t]
 \centering
 \includegraphics[width=\columnwidth]{figures/fig_convergence_map.pdf}
-\caption{Validation accuracy over 20 epochs: (a) $\text{mAP}_{50}$ (\%); (b) $\text{mAP}_{50-95}$ (\%), for the baseline and the single-stage, two-stage, and dual-scale SS2D arms.}
+\caption{Validation accuracy over 20 epochs: (a) $\text{mAP}_{50}$ (\%); (b) $\text{mAP}_{50-95}$ (\%), for the baseline and the single-stage, two-stage, and dual-scale SS2D arms. For Arm 3, epochs 1--5 are stage 1 (frozen backbone) and epochs 6--20 are stage-2 epochs 1--15, so its best-fitness checkpoint (stage-2 epoch 14, Table~\ref{tab:accuracy_results}) appears at epoch 19.}
 \label{fig:convergence_map}
 \end{figure}
 
@@ -77,10 +71,10 @@ Table~\ref{tab:per_class_results} reports per-class accuracy on the validation p
 \input{tables/tab_per_class_results.tex}
 
 \begin{enumerate}
-    \item \textbf{Forklift:} All SS2D arms score above the baseline ($70.1\%$) on the $150$ forklift instances: Arm 2 $79.7\%$, Arm 3 $76.3\%$, Arm 4 $75.2\%\ \text{mAP}_{50}$. This is the largest and most consistent per-class difference. Because the instances come from $100$ sampled frames of two cameras, the number of distinct forklifts is much smaller than $150$, and the difference has not been tested across seeds or with a frame- or track-level bootstrap. We hypothesize that scanning along rows and columns helps with elongated, partially occluded vehicles, but no ablation (e.g., an identity or convolution-only replacement) isolates this.
+    \item \textbf{Forklift:} All SS2D arms score above the baseline ($70.1\%$) on the $150$ forklift instances: Arm 2 $79.7\%$, Arm 3 $76.3\%$, Arm 4 $75.2\%\ \text{mAP}_{50}$. This is the largest and most consistent per-class difference. Because the instances come from $100$ sampled frames of two cameras, the number of distinct forklifts is much smaller than $150$, and the difference has not been tested across seeds or with a frame- or track-level bootstrap. The difference is an unisolated architectural effect: without an identity or convolution-only replacement, it cannot be attributed to the selective scan rather than to the removal of \texttt{C2PSA} (for example, through reduced overfitting on $300$ training frames) or to run-to-run variance.
     \item \textbf{Worker:} The dominant class ($3{,}488$ of $3{,}696$ instances) changes little in $\text{mAP}_{50}$ ($87.9$--$89.3\%$), while all SS2D arms are lower in $\text{mAP}_{50-95}$ ($60.5$--$61.9\%$ vs.\ $63.2\%$).
     \item \textbf{AMR:} All SS2D arms are slightly below the baseline on the $45$ AMR instances ($83.7$--$85.0\%$ vs.\ $87.1\%\ \text{mAP}_{50}$).
-    \item \textbf{Pallet truck:} All models score low ($20.0$--$33.9\%\ \text{mAP}_{50}$). With only $13$ validation instances ($0.35\%$ of labels), missing one or two objects shifts the AP substantially, so we do not interpret differences on this class.
+    \item \textbf{Pallet truck:} All models score low ($20.0$--$33.9\%\ \text{mAP}_{50}$). With only $13$ validation instances ($0.35\%$ of labels), missing one or two objects shifts the AP substantially, so we do not interpret differences on this class. For reference, Table~\ref{tab:per_class_results} also lists a supplementary average over the three remaining classes; it was defined after inspecting the results, so we report it descriptively only. On these classes the SS2D arms are $0.5$ to $2.5$ points above the baseline in $\text{mAP}_{50}$, while in $\text{mAP}_{50-95}$ Arms 3 and 4 remain about $1$ point below it and Arm 2 is about $1$ point above it.
 \end{enumerate}
 
 \subsubsection{Qualitative Comparison}
@@ -91,43 +85,68 @@ Fig.~\ref{fig:qualitative_comparison} shows predictions on two dense validation 
 Table~\ref{tab:edge_runtime} reports ONNX Runtime measurements on the x86 host and on a Raspberry Pi~4 Model B Rev 1.2 (Broadcom BCM2711, quad-core Cortex-A72 at 1.5\,GHz, aarch64), using the protocol of Section~\ref{sec:exp_export}. Because the selective scan is written in standard PyTorch operators, the model exports to ONNX and runs on both devices without custom plugins.
 
 \begin{table*}[!t]
-\caption{ONNX Runtime Forward-Pass Latency and Resident Memory ($640 \times 640$, Batch Size 1, FP32, CPU Execution Provider). Throughput $= 1000/\text{median}$. RSS Is Measured after the Timed Loop. Host: Intel Core i7-7600U; Pi~4: Cortex-A72 at 1.5\,GHz.}
+\caption{ONNX Runtime Forward-Pass Latency and Memory ($640 \times 640$, Batch Size 1, FP32, CPU Execution Provider). Calls: Timed Calls; FPS $= 1000/\text{median}$; Rel.\ $=$ Median Relative to the Baseline on the Same Device and Thread Count. Memory: Peak RSS (High-Water Mark) on the Pi~4, RSS after the Timed Loop on the x86 Host.}
 \label{tab:edge_runtime}
 \centering
 \footnotesize
-\begin{tabular}{llccccc}
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{llcccccc}
 \toprule
-\textbf{Model} & \textbf{Device} & \textbf{ONNX Size (MB)} & \textbf{RSS (MiB)} & \textbf{Median (ms)} & \textbf{Mean $\pm$ SD (ms)} & \textbf{Throughput (FPS)} \\
+\textbf{Model} & \textbf{Device (threads)} & \textbf{Calls} & \textbf{Memory (MiB)} & \textbf{Median (ms)} & \textbf{Mean $\pm$ SD (ms)} & \textbf{Rel.} & \textbf{FPS} \\
 \midrule
-YOLO11s (baseline) & x86 host & 36.2 & 285.1 & 228.95 & 244.72 $\pm$ 33.5 & 4.37 \\
-YOLO11s-SS2D (Case B, $P_5$) & x86 host & 38.5 & 395.7 & 301.26 & 304.01 $\pm$ 8.5 & 3.32 \\
-YOLO11s-SS2D (Case C, $P_4{+}P_5$) & x86 host & 47.1 & 401.3 & 699.33 & 694.58 $\pm$ 12.1 & 1.43 \\
+YOLO11s (baseline) & x86 host (default) & 100 & 285.1 & 228.95 & 244.72 $\pm$ 33.5 & 1.00 & 4.37 \\
+YOLO11s-SS2D (Case B, $P_5$) & x86 host (default) & 100 & 395.7 & 301.26 & 304.01 $\pm$ 8.5 & 1.32 & 3.32 \\
+YOLO11s-SS2D (Case C, $P_4{+}P_5$) & x86 host (default) & 100 & 401.3 & 699.33 & 694.58 $\pm$ 12.1 & 3.05 & 1.43 \\
 \midrule
-YOLO11s (baseline) & Pi 4 & 36.2 & 231.5 & 1166.70 & 1169.73 $\pm$ 24.7 & 0.86 \\
-YOLO11s-SS2D (Case B, $P_5$) & Pi 4 & 38.5 & 371.9 & 1392.43 & 1398.19 $\pm$ 28.0 & 0.72 \\
-YOLO11s-SS2D (Case C, $P_4{+}P_5$) & Pi 4 & 47.1 & 714.9 & 1954.21 & 1965.07 $\pm$ 29.7 & 0.51 \\
+YOLO11s (baseline) & Pi 4 (1) & 100 & 233.2 & 3360.50 & 3360.15 $\pm$ 5.2 & 1.00 & 0.30 \\
+YOLO11s-SS2D (Case B, $P_5$) & Pi 4 (1) & 100 & 373.5 & 3641.94 & 3641.25 $\pm$ 6.2 & 1.08 & 0.27 \\
+YOLO11s-SS2D (Case C, $P_4{+}P_5$) & Pi 4 (1) & 100 & 716.5 & 4178.68 & 4178.96 $\pm$ 3.5 & 1.24 & 0.24 \\
+\midrule
+YOLO11s (baseline) & Pi 4 (4) & 30 & 233.3 & 1106.76 & 1110.09 $\pm$ 7.3 & 1.00 & 0.90 \\
+YOLO11s-SS2D (Case B, $P_5$) & Pi 4 (4) & 30 & 373.7 & 1365.54 & 1368.26 $\pm$ 6.2 & 1.23 & 0.73 \\
+YOLO11s-SS2D (Case C, $P_4{+}P_5$) & Pi 4 (4) & 30 & 718.3 & 1927.71 & 1929.04 $\pm$ 7.7 & 1.74 & 0.52 \\
 \bottomrule
 \end{tabular}
 \end{table*}
-% TODO(authors): the unused tables/tab_hardware_benchmark.tex lists 46.62 MB for the Case C ONNX file
-% (47.1 MB here); confirm the correct size from the file on disk.
 
-% TODO(authors): the former Fig. 5 (memory bar chart) was removed because its labels (MB, "62.8% below
-% 1 GB") contradict the MiB / 1 GiB convention. Either regenerate it with scripts/generate_paper_charts.py,
-% or (recommended) replace it with a per-operator-type latency breakdown, sequential vs. chunked scan.
-
-On the Pi, the Case B process occupies $371.9$\,MiB, $63.7\%$ below a $1$\,GiB budget, and Case C $714.9$\,MiB. This RSS is sampled after the timed loop; the process peak, typically reached while the session is created, has not been measured and may be higher. Forward-pass throughput on the Cortex-A72 is $0.72$\,FPS for Case B and $0.51$\,FPS for Case C, versus $0.86$\,FPS for the baseline. These rates are far from real-time ($\geq 30$\,FPS) and exclude preprocessing and NMS; the CPU results therefore establish memory feasibility and operator portability, not real-time capability.
+On the Pi, the peak memory of the Case B process is $373.7$\,MiB, $63.5\%$ below a $1$\,GiB budget; Case C peaks at $718.3$\,MiB and the baseline at $233.3$\,MiB. These peaks include session creation and agree with the RSS read after the timed loop to within $0.1$\,MiB. With four threads, forward-pass throughput on the Cortex-A72 is $0.73$\,FPS for Case B and $0.52$\,FPS for Case C, versus $0.90$\,FPS for the baseline. These rates are far from real-time ($\geq 30$\,FPS) and exclude preprocessing and NMS; the CPU results therefore establish operator portability and that the models fit a $1$\,GiB memory budget, not real-time capability.
 
 \subsubsection{Why the Cheaper Model Is Slower}
-Despite fewer parameters ($8.796$ vs.\ $9.429$\,M) and FLOPs ($21.2$ vs.\ $21.7$ GFLOPs), the forward latency of Case B is higher than that of the baseline on both devices: $+24.2\%$ in mean and $+31.6\%$ in median on x86, and $+19.5\%$ in mean ($1398.19$ vs.\ $1169.73$\,ms) and $+19.3\%$ in median on the Cortex-A72. Inspection of the exported graphs and the ONNX Runtime execution profiler suggest the following explanation:
+Despite fewer parameters ($8.796$ vs.\ $9.429$\,M) and FLOPs ($21.2$ vs.\ $21.7$ GFLOPs), Case B is slower than the baseline in every setting: by $31.6\%$ in median on x86, and on the Cortex-A72 by $8.4\%$ with one thread ($3641.94$ vs.\ $3360.50$\,ms) and $23.4\%$ with four threads ($1365.54$ vs.\ $1106.76$\,ms). Table~\ref{tab:graph_profile} and the measurements suggest the following explanation.
 \begin{enumerate}
-    \item \textbf{Graph unrolling:} The baseline exports to $320$ ONNX nodes, in which convolutions ($88$ nodes) and matrix multiplications account for $68.6\%$ of execution time. Exporting the sequential four-direction scan unrolls its loop over $L = 400$ steps into $14{,}767$ nodes ($4{,}800$ \texttt{Gather}, $3{,}289$ \texttt{Mul}, $3{,}212$ \texttt{Unsqueeze}, $1{,}621$ \texttt{Add}, and $1{,}600$ \texttt{ReduceSum}).
-    \item \textbf{Per-operator overhead:} Thousands of small operators each incur dispatch overhead and materialize intermediate tensors. This is consistent with the higher latency, with the $+60.6\%$ RSS ($371.9$ vs.\ $231.5$\,MiB), and with the analytical result that the scan's arithmetic is small (Table~\ref{tab:mixing_cost}). The attribution is inferred from graph structure and profiler output; we have not measured hardware counters, and it has not yet been tested by a controlled intervention such as a chunked scan with far fewer nodes. In Case C, the scan at $P_4$ runs over $L = 1{,}600$ tokens, quadrupling the sequential length at that stage and raising latency to $1965$\,ms ($1.41\times$ Case B).
-    \item \textbf{Implication:} The CPU penalty appears to stem from how the recurrence is expressed in the graph rather than from the cost of the SSM itself. Chunked or parallel associative scans~\cite{blelloch1990prefix, dao2024mamba2}, which can be written with standard ONNX operators, would shorten the sequential chain; their effect on latency and memory remains to be measured.
+    \item \textbf{Graph unrolling:} The baseline exports to $320$ ONNX nodes. Exporting the sequential four-direction scan unrolls its loop over $L = 400$ steps into $14{,}767$ nodes ($4{,}800$ \texttt{Gather}, $3{,}289$ \texttt{Mul}, $3{,}212$ \texttt{Unsqueeze}, $1{,}621$ \texttt{Add}, and $1{,}600$ \texttt{ReduceSum}); ONNX Runtime's graph optimizer removes only $70$ of them. Case C, which adds a scan over $L = 1{,}600$ tokens at $P_4$, has $90{,}201$ nodes ($72{,}385$ after optimization).
+    \item \textbf{Time moves outside the convolutions:} Convolution kernel time per call is nearly the same in the three models ($905$, $872$, and $877$\,ms), but its share of kernel time falls from $78.4\%$ (baseline) to $49.7\%$ (Case B) and $22.5\%$ (Case C), while the small element-wise and indexing operators of the scan take $34.9\%$ and $68.4\%$. The profiler adds a per-node cost (mean profiled call $1161$, $1973$, and $4943$\,ms vs.\ the unprofiled medians above), so these shares overstate the scan's share, especially for Case C; the near-constant convolution time is the more robust observation. Together with the analytical result that the scan's arithmetic is small (Table~\ref{tab:mixing_cost}), this indicates that the extra latency comes from the number of small operators rather than from arithmetic.
+    \item \textbf{Poor multi-core scaling:} Going from one to four threads speeds up the baseline by $3.04\times$ but Case B by only $2.67\times$ and Case C by $2.17\times$, so the gap to the baseline widens with the thread count ($1.08 \to 1.23$ for Case B, $1.24 \to 1.74$ for Case C). This is consistent with a long chain of small, dependent operators that leave little work to parallelize within each operator. Case B also uses $60.2\%$ more peak memory than the baseline ($373.7$ vs.\ $233.3$\,MiB), consistent with materializing intermediate tensors for each operator.
+    \item \textbf{Implication:} The CPU penalty appears to stem from how the recurrence is expressed in the graph rather than from the cost of the SSM itself. These links are correlational: we have not measured hardware counters, and they have not yet been tested by a controlled intervention such as a chunked scan with far fewer nodes. Chunked or parallel associative scans~\cite{blelloch1990prefix, dao2024mamba2}, which can be written with standard ONNX operators, would shorten the sequential chain; their effect on latency and memory remains to be measured.
 \end{enumerate}
-% TODO(authors): commit the ORT profiler JSON and node-count logs behind the numbers above,
-% and state whether node counts are taken before or after ORT graph optimization.
+
+\begin{table}[!t]
+\caption{ONNX Graph Size and Operator Profile on the Pi~4 (Four Threads, ONNX Runtime Profiler, Five Profiled Calls)}
+\label{tab:graph_profile}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{2.5pt}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Model} & \textbf{Nodes} & \textbf{ORT nodes} & \textbf{MiB} & \textbf{Conv ms} & \textbf{Conv/scan \%} \\
+\midrule
+Baseline & 320 & 236 & 36.2 & 905 & 78.4 / $<2.5$ \\
+Case B & 14{,}767 & 14{,}697 & 38.6 & 872 & 49.7 / 34.9 \\
+Case C & 90{,}201 & 72{,}385 & 46.6 & 877 & 22.5 / 68.4 \\
+\bottomrule
+\multicolumn{6}{p{0.95\columnwidth}}{\scriptsize ORT nodes: after ONNX Runtime graph optimization. MiB: ONNX file size. Conv ms: convolution kernel time per profiled call. Conv/scan \%: share of summed kernel time taken by convolutions and by the scan operators, i.e., \texttt{Mul}, \texttt{Squeeze}, \texttt{Unsqueeze}, \texttt{Add}, \texttt{ReduceSum}, \texttt{Gather}, and \texttt{Split}; for the baseline, only \texttt{Split} and \texttt{Add} ($2.0\%$) appear among its ten most expensive operator types, and each remaining type takes at most $0.1\%$. The ARM clock was not logged during profiling.}
+\end{tabular}
+\end{table}
+
+\subsection{Design Lessons for Hybrid CNN--SSM Detectors on Edge CPUs}
+\label{sec:lessons}
+The measurements above point to three practical lessons for engineers who replace attention with selective scans in small detectors.
+\begin{enumerate}
+    \item \textbf{Fewer FLOPs can mean a slower model.} At $P_5$ ($L = 400$), attention is already cheap, and the replacement saves parameters mainly by narrowing channels (Table~\ref{tab:layer10_breakdown}). Exported as an unrolled loop, however, the scan multiplies the graph from $320$ to $14{,}767$ nodes, and the model is slower and uses more memory on CPU (Table~\ref{tab:edge_runtime}); the gap widens with the thread count. Our data link these observations by correlation, not yet by intervention, but they suffice to show that FLOPs alone are a poor guide: node count, the export form of the recurrence, and latency at the deployed thread count should be reported alongside FLOPs.
+    \item \textbf{Comparisons need identical warm starts.} When a COCO head is adapted to a new class count, the class-agnostic box-regression branch must be kept for every arm; otherwise the modified model starts from a higher loss ($6.276$ vs.\ $2.758$) and the comparison is biased against it (Section~\ref{sec:res_discussion}).
+    \item \textbf{A zero-initialized convolution ahead of batch normalization is not an identity initialization.} It holds only at step $0$; afterwards batch normalization rescales the branch to full scale (Eq.~\eqref{eq:zero_wout}). Zero-$\gamma$ initialization (Eq.~\eqref{eq:zero_gamma}) avoids this by construction; we propose it for future warm-start integration, although its effect on detector training remains to be measured.
+\end{enumerate}
 
 \subsection{Limitations}
 \label{sec:limitations}
-The results above should be read with the following limitations. (i) All accuracy results come from a single training seed, a 20-epoch budget, and a single $100$-frame validation facility that also served for checkpoint selection; no held-out test facility was evaluated and no significance testing was performed. (ii) The dataset is synthetic (NVIDIA Omniverse), covers two facilities, and consecutive sampled frames are highly correlated; transfer to real warehouses is untested. (iii) The \texttt{pallet\_truck} class has only $13$ validation instances, so its per-class results are not interpreted. (iv) The reported SS2D models were trained with a zero-initialized output convolution preceding batch normalization; the zero-$\gamma$ initialization of Section~\ref{sec:mamba_integration} has not yet been re-evaluated end-to-end. (v) No ablation separates the contribution of the selective scan from that of removing \texttt{C2PSA} (e.g., an identity or convolution-only replacement), and the simplifications relative to standard Mamba blocks (Section~\ref{sec:mamba_integration}) are not ablated. (vi) Edge measurements cover only the forward pass on two CPUs with FP32 ONNX Runtime at the default thread count; preprocessing, NMS, peak (high-water-mark) memory, GPU/NPU accelerators, quantized models, and energy were not measured.
+The results above should be read with the following limitations. (i) All accuracy results come from a single training seed, a 20-epoch budget, and a single $100$-frame validation facility that also served for checkpoint selection; no held-out test facility was evaluated and no significance testing was performed. (ii) The dataset is synthetic (NVIDIA Omniverse), covers two facilities, and consecutive sampled frames are highly correlated; transfer to real warehouses is untested. (iii) The \texttt{pallet\_truck} class has only $13$ validation instances, so its per-class results are not interpreted. (iv) The reported SS2D models were trained with a zero-initialized output convolution preceding batch normalization; the zero-$\gamma$ initialization of Section~\ref{sec:mamba_integration} has not yet been re-evaluated end-to-end. (v) No ablation separates the contribution of the selective scan from that of removing \texttt{C2PSA} (e.g., an identity or convolution-only replacement), and the simplifications relative to standard Mamba blocks (Section~\ref{sec:mamba_integration}) are not ablated. (vi) Edge measurements cover only the forward pass on two CPUs with FP32 ONNX Runtime; preprocessing, NMS, session-creation time (which we observed to reach tens of minutes for Case C on the Pi but did not time), GPU/NPU accelerators, quantized models, and energy were not measured. Without active cooling, four-thread runs on the Pi were limited to $30$ timed calls to avoid thermal clock reduction, and x86 memory is reported after the timed loop rather than as a peak.

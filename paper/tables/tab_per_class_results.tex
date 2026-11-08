@@ -5,7 +5,7 @@
 \centering
 \footnotesize
 \setlength{\tabcolsep}{3pt}
-\begin{tabular}{lcccccccc}
+\begin{tabular*}{\textwidth}{@{\extracolsep{\fill}}lcccccccc}
 \toprule
 \textbf{Target Category} & \multicolumn{2}{c}{\textbf{Arm 1: Baseline}} & \multicolumn{2}{c}{\textbf{Arm 2: Single-Stage}} & \multicolumn{2}{c}{\textbf{Arm 3: Two-Stage}} & \multicolumn{2}{c}{\textbf{Arm 4: Dual-Scale}} \\
 \cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9}
@@ -17,7 +17,10 @@
 \texttt{amr} (Mobile Robot, $n=45$) & \textbf{87.1} & \textbf{64.7} & 84.9 & 62.6 & 83.7 & 57.5 & 85.0 & 61.7 \\
 \midrule
 \textbf{Global Macro Metric} & 69.80 & \textbf{45.53} & \textbf{71.95} & 45.15 & 67.67 & 43.15 & 67.17 & 42.76 \\
+\textit{3-class macro (excl.\ \texttt{pallet\_truck})}$^{\ddagger}$ & 82.13 & 53.24 & 84.64 & 54.29 & 82.61 & 52.13 & 82.91 & 52.15 \\
 \bottomrule
-\multicolumn{9}{l}{\footnotesize $^{\dagger}$Notice on rare tail class: \texttt{pallet\_truck} contains only 13 validation instances ($0.35\%$ of total labels), exhibiting high sample variance.} \\
-\end{tabular}
+\end{tabular*}
+\par\smallskip
+\parbox{\textwidth}{\footnotesize $^{\dagger}$Rare tail class: \texttt{pallet\_truck} contains only 13 validation instances ($0.35\%$ of total labels), exhibiting high sample variance.\\
+$^{\ddagger}$Supplementary, defined after inspecting the results: mean of the three classes with $n \geq 45$; not used for model comparison claims.}
 \end{table*}
