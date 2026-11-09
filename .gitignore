@@ -28,30 +28,17 @@ datasets/
 *.tar.gz
 *.zip
 
-# Ultralytics runs & weights
-runs/*
-!runs/detect/
-runs/detect/*
-!runs/detect/runs/
-runs/detect/runs/*
-!runs/detect/runs/two_stage_protocol_study/
-runs/detect/runs/two_stage_protocol_study/*
-!runs/detect/runs/two_stage_protocol_study/arm1_baseline_control/
-!runs/detect/runs/two_stage_protocol_study/arm2_case_b_single_stage/
-!runs/detect/runs/two_stage_protocol_study/arm3_stage2_finetune/
-!runs/detect/runs/two_stage_protocol_study/arm4_case_c_dual_scale/
-runs/detect/runs/two_stage_protocol_study/*/*
-!runs/detect/runs/two_stage_protocol_study/*/weights/
-runs/detect/runs/two_stage_protocol_study/*/weights/*
-!runs/detect/runs/two_stage_protocol_study/arm1_baseline_control/weights/best.pt
-!runs/detect/runs/two_stage_protocol_study/arm2_case_b_single_stage/weights/best.pt
-!runs/detect/runs/two_stage_protocol_study/arm3_stage2_finetune/weights/best.pt
-!runs/detect/runs/two_stage_protocol_study/arm4_case_c_dual_scale/weights/best.pt
+# Allow runs directory
+!runs/
+!runs/**
 
-*.pt
-*.onnx
+# Ignore large standalone root model weights and models/ pt files
+yolo11s.pt
+yolo11s.onnx
+models/*.pt
+
+# Global extension ignore (except inside runs/)
 *.engine
-!runs/detect/runs/two_stage_protocol_study/*/weights/best.pt
 
 # LaTeX compilation temporaries
 paper/*.aux
