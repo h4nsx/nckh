@@ -38,3 +38,11 @@ texput.log
 gpu_training_package/*.tar.gz
 models/*.onnx
 onnxruntime_profile*.json
+
+# LNCS build temporaries
+paper_lncs/*.aux
+paper_lncs/*.log
+paper_lncs/*.bbl
+paper_lncs/*.blg
+paper_lncs/*.out
+paper_lncs/*.synctex.gz

@@ -57,7 +57,7 @@ CHECKPOINT_RESULTS = {
         "latency_rpi4": 1398.19,
         "rss_rpi4": 371.9,
         "per_class": {
-            "worker": {"mAP50": 89.35, "mAP50_95": 61.93},
+            "worker": {"mAP50": 89.351, "mAP50_95": 61.93},
             "forklift": {"mAP50": 79.71, "mAP50_95": 38.33},
             "pallet_truck": {"mAP50": 33.87, "mAP50_95": 17.74},
             "amr": {"mAP50": 84.87, "mAP50_95": 62.61},
@@ -94,7 +94,7 @@ CHECKPOINT_RESULTS = {
         "rss_rpi4": 714.9,
         "per_class": {
             "worker": {"mAP50": 88.52, "mAP50_95": 60.90},
-            "forklift": {"mAP50": 75.25, "mAP50_95": 33.84},
+            "forklift": {"mAP50": 75.251, "mAP50_95": 33.84},
             "pallet_truck": {"mAP50": 19.97, "mAP50_95": 14.58},
             "amr": {"mAP50": 84.95, "mAP50_95": 61.72},
         }

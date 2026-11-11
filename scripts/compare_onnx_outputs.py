@@ -26,11 +26,12 @@ def main():
     parser.add_argument("candidate")
     parser.add_argument("--imgsz", type=int, default=640)
     parser.add_argument("--trials", type=int, default=3)
-    parser.add_argument("--atol", type=float, default=1e-3, help="Max allowed absolute difference")
+    parser.add_argument("--rtol", type=float, default=1e-4,
+                        help="Max allowed max|diff| / max|reference| (outputs include pixel box coordinates)")
     args = parser.parse_args()
 
     rng = np.random.default_rng(0)
-    worst = 0.0
+    worst = 0.0  # worst relative difference
     for i in range(args.trials):
         # Image-like inputs in [0, 1], as produced by the letterbox preprocessing
         x = rng.random((1, 3, args.imgsz, args.imgsz), dtype=np.float32)
@@ -39,10 +40,10 @@ def main():
             sys.exit(f"[FAIL] output shapes differ: {a.shape} vs {b.shape}")
         diff = float(np.max(np.abs(a - b)))
         rel = diff / (float(np.max(np.abs(a))) + 1e-12)
-        worst = max(worst, diff)
+        worst = max(worst, rel)
         print(f"trial {i}: max |diff| = {diff:.3e} (relative {rel:.3e})")
-    print("[PASS]" if worst <= args.atol else "[FAIL]", f"worst max |diff| = {worst:.3e}, atol = {args.atol}")
-    sys.exit(0 if worst <= args.atol else 1)
+    print("[PASS]" if worst <= args.rtol else "[FAIL]", f"worst relative diff = {worst:.3e}, rtol = {args.rtol}")
+    sys.exit(0 if worst <= args.rtol else 1)
 
 
 if __name__ == "__main__":

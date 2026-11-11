@@ -1,0 +1,29 @@
+=================================================================
+PROFILING ONNX GRAPH: yolo11s_ss2d_arm3.onnx
+=================================================================
+Total Graph Nodes: 14771
+Operator Distribution:
+  - Gather         :   4800 nodes ( 32.5%)
+  - Mul            :   3293 nodes ( 22.3%)
+  - Unsqueeze      :   3212 nodes ( 21.7%)
+  - Add            :   1621 nodes ( 11.0%)
+  - ReduceSum      :   1600 nodes ( 10.8%)
+  - Conv           :     84 nodes (  0.6%)
+  - Sigmoid        :     77 nodes (  0.5%)
+  - Concat         :     24 nodes (  0.2%)
+  - Reshape        :     15 nodes (  0.1%)
+  - Split          :     12 nodes (  0.1%)
+Nodes after ORT graph optimization: 14701
+
+Saved detailed ORT profile log to: results/edge/caseb_saurieng_20261110_0644/profiles/ort_profile_yolo11s_ss2d_arm3_2026-11-10_07-23-55_748.json
+
+Operator Time Breakdown (Top 8):
+  - Conv           :  4327.09 ms ( 50.0%)
+  - Mul            :   929.53 ms ( 10.7%)
+  - QuickGelu      :   733.82 ms (  8.5%)
+  - Squeeze        :   485.36 ms (  5.6%)
+  - Unsqueeze      :   463.32 ms (  5.4%)
+  - Add            :   379.26 ms (  4.4%)
+  - ReduceSum      :   290.64 ms (  3.4%)
+  - Split          :   251.50 ms (  2.9%)
+[SAVED] results/edge/caseb_saurieng_20261110_0644/profiles/yolo11s_ss2d_arm3_t4_profile.json

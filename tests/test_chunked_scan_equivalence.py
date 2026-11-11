@@ -36,6 +36,22 @@ def test_chunked_matches_sequential():
             assert torch.allclose(a, b, atol=1e-7), f"Gradient mismatch at {H}x{W}, chunk={chunk}"
         print(f"  [PASS] {H}x{W}, chunk={chunk}: max forward diff = {max_diff:.2e}")
 
+        # Scripted-loop form (exported as one ONNX Loop node): same recurrence, same result
+        scan.chunk_size = -1
+        with torch.no_grad():
+            loop_diff = (y_seq.detach() - scan(x)).abs().max().item()
+        assert loop_diff < 1e-12, f"Loop-form mismatch at {H}x{W}: {loop_diff}"
+
+        # Parallel associative scan: same recurrence, log2(L) steps (forward and backward)
+        scan.chunk_size = -2
+        y_par = scan(x)
+        g_par = torch.autograd.grad(y_par.square().sum(), [x] + list(scan.parameters()))
+        par_diff = (y_seq - y_par).abs().max().item()
+        assert par_diff < 1e-8, f"Parallel-scan mismatch at {H}x{W}: {par_diff}"
+        for a, b in zip(g_seq, g_par):
+            assert torch.allclose(a, b, atol=1e-7), f"Parallel-scan gradient mismatch at {H}x{W}"
+        print(f"  [PASS] {H}x{W}, parallel scan: max forward diff = {par_diff:.2e}")
+
 
 def test_ablation_variants():
     """Shape contract and zero-gamma identity for the ablation blocks."""

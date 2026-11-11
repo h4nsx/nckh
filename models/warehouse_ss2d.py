@@ -3,6 +3,18 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+@torch.jit.script
+def _scan_loop(delta_A: torch.Tensor, delta_B_u: torch.Tensor, C: torch.Tensor) -> torch.Tensor:
+    """Sequential recurrence h_t = dA_t * h_{t-1} + dBu_t, y_t = <h_t, C_t>, as a scripted loop.
+    delta_A, delta_B_u: [B, L, D, N]; C: [B, L, N]; returns [B, L, D]."""
+    h = torch.zeros_like(delta_B_u[:, 0])
+    ys = torch.zeros_like(delta_B_u[:, :, :, 0])
+    for t in range(delta_A.size(1)):
+        h = delta_A[:, t] * h + delta_B_u[:, t]
+        ys[:, t] = (h * C[:, t].unsqueeze(1)).sum(dim=-1)
+    return ys
+
+
 class PurePyTorch2DSelectiveScan(nn.Module):
     """
     Pure PyTorch 4-direction 2D Selective Scan (v2 - Spatially Aligned).
@@ -14,7 +26,9 @@ class PurePyTorch2DSelectiveScan(nn.Module):
     3. Direction 3: Column-major, forward (Left-to-right, top-down)
     4. Direction 4: Column-major, reversed (Right-to-left, bottom-up)
 
-    chunk_size: 0 runs the reference sequential recurrence (one step per token,
+    chunk_size: -2 runs the same recurrence as a parallel associative scan
+    (ceil(log2 L) whole-sequence steps); -1 runs it as one scripted loop (one ONNX Loop);
+    0 runs the reference sequential recurrence (one step per token,
     which unrolls into ~L graph blocks on ONNX export). A positive value runs the
     mathematically equivalent chunked scan, which loops over ceil(L / chunk_size)
     chunks and resolves each chunk in closed form. Parameters are identical, so
@@ -65,6 +79,19 @@ class PurePyTorch2DSelectiveScan(nn.Module):
 
         # Checkpoints pickled before chunk_size existed fall back to the class default
         chunk_size = getattr(self, "chunk_size", self.default_chunk_size)
+        if chunk_size == -2:
+            # Same recurrence evaluated as a parallel (Hillis-Steele) associative scan:
+            # ceil(log2 L) whole-sequence steps instead of L dependent steps (runtime-only
+            # intervention on the graph form; see _parallel_scan).
+            h = self._parallel_scan(delta_A, delta_B_u)
+            y = (h * C.unsqueeze(2)).sum(dim=-1)
+            return y + u * D.view(1, 1, d_model)
+        if chunk_size == -1:
+            # Same sequential recurrence and arithmetic, but as one scripted loop that the
+            # TorchScript-based ONNX exporter emits as a single ONNX Loop node instead of
+            # unrolling it (runtime-only intervention on the graph form; see _scan_loop).
+            y = _scan_loop(delta_A, delta_B_u, C)
+            return y + u * D.view(1, 1, d_model)
         if chunk_size and chunk_size > 0:
             log_A = delta.unsqueeze(-1) * A.view(1, 1, d_model, d_state)  # log(delta_A), <= 0
             y = self._chunked_scan(log_A, delta_B_u, C, chunk_size)
@@ -82,6 +109,28 @@ class PurePyTorch2DSelectiveScan(nn.Module):
         # Skip connection D * u
         y = y + u * D.view(1, 1, d_model)
         return y
+
+    @staticmethod
+    def _parallel_scan(a, b):
+        """
+        Inclusive parallel scan of h_t = a_t * h_{t-1} + b_t (h_0 = 0) over dim 1.
+        Uses the associative operator (a1, b1) o (a2, b2) = (a1 * a2, a2 * b1 + b2) with the
+        Hillis-Steele schedule: at offset k each position combines with position t - k, so
+        after ceil(log2 L) steps b_t holds h_t. Positions t < k combine with the identity
+        element (a = 1, b = 0). Only products of decays in (0, 1] are formed, so the scan is
+        as stable as the sequential recurrence. a, b: [B, L, D, N]; returns h: [B, L, D, N].
+        Work is O(L log L) instead of O(L), but there is no dependency chain of length L.
+        """
+        seq_len = b.shape[1]
+        k = 1
+        while k < seq_len:
+            b_prev = F.pad(b[:, : seq_len - k], (0, 0, 0, 0, k, 0), value=0.0)
+            b = a * b_prev + b
+            if 2 * k < seq_len:  # the decay products are not needed after the last step
+                a_prev = F.pad(a[:, : seq_len - k], (0, 0, 0, 0, k, 0), value=1.0)
+                a = a * a_prev
+            k *= 2
+        return b
 
     @staticmethod
     def _chunked_scan(log_A, bu, C, chunk_size):

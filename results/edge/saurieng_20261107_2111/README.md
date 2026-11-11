@@ -17,3 +17,15 @@ Case C (3.06 GB anonymous RSS); the profiler now parses the trace line by line. 
 re-run with the new profiler so all three profiles use the same method.
 
 `saurieng_20261107_2109/` (only on the Pi) is an aborted start of the first session and contains no results.
+
+## Case B model identity (found 2026-11-09)
+
+SHA-256 comparison with `audit/file_hashes.sha256` (on `main`): `yolo11s_baseline.onnx` is Arm 1 `best.onnx` and
+`yolo11s_case_c.onnx` is Arm 4 `best.onnx`, but `yolo11s_ss2d.onnx` (`be9dc0d5...`) is
+`models/yolo11s_ss2d_full_warmstart.onnx`, a pre-fine-tuning export with an 80-class output `[1, 84, 8400]`
+(`Reports/EDGE_MODEL_CONFIGURATION_AUDIT.md`). It is not a trained four-class model. All Case B values from this
+folder are provisional until Case B is re-measured with `arm3_stage2_finetune/weights/best.onnx`.
+
+Superseded: the Case B rows of this folder are no longer used in the paper. Case B was re-measured with the
+trained Arm 3 export on 2026-11-10 (`../caseb_saurieng_20261110_0644/`). Baseline and Case C from this folder remain
+in use (session 1).

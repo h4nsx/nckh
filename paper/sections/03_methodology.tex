@@ -3,7 +3,7 @@
 
 \subsection{Problem Formulation}
 \label{sec:formulation}
-We formulate warehouse perception as real-time 2D bounding-box detection. Given an RGB frame $\mathbf{X} \in \mathbb{R}^{H \times W \times 3}$ from a stationary or robot-mounted camera, the detector predicts a set $\mathcal{B} = \{(\mathbf{b}_i, c_i, s_i)\}_{i=1}^{M}$, where $\mathbf{b}_i = (x_c, y_c, w, h) \in [0, 1]^4$ are the normalized box center and size, $c_i \in \mathcal{C}$ is the object category, and $s_i \in [0, 1]$ is the confidence score. The class taxonomy is
+We formulate warehouse perception as 2D bounding-box detection. Given an RGB frame $\mathbf{X} \in \mathbb{R}^{H \times W \times 3}$ from a stationary or robot-mounted camera, the detector predicts a set $\mathcal{B} = \{(\mathbf{b}_i, c_i, s_i)\}_{i=1}^{M}$, where $\mathbf{b}_i = (x_c, y_c, w, h) \in [0, 1]^4$ are the normalized box center and size, $c_i \in \mathcal{C}$ is the object category, and $s_i \in [0, 1]$ is the confidence score. The class taxonomy is
 \begin{equation}
     \mathcal{C} = \{\texttt{worker}, \texttt{forklift}, \texttt{pallet\_truck}, \texttt{amr}\}.
 \end{equation}
@@ -124,7 +124,7 @@ Replacing Layer 10 reduces the parameter count and slightly reduces computationa
 \end{itemize}
 % TODO(authors): state whether parameter/GFLOP/layer counts come from the fused or unfused model.info().
 
-Table~\ref{tab:mixing_cost} compares the analytical cost of the two token-mixing cores at stage $P_5$ ($L = 400$). In \texttt{C2PSA}, attention operates on $c = 256$ channels with $h = 4$ heads, key dimension $d_k = 32$, and value dimension $d_v = 64$; the SS2D core operates on $d = d_{\text{inner}} = 256$ channels with state size $s = d_{\text{state}} = 16$ over $K = 4$ directions. Each of these terms is about $1\%$ or less of the roughly $10.8$ GMACs of the full model, so neither core dominates arithmetic cost at this resolution. The decisive difference is the length of the sequential dependency chain: attention has none across tokens, whereas the reference scan has $K L = 1{,}600$ dependent steps (or $K\lceil L/T \rceil$ with a chunk size $T$, a formulation related to the chunked algorithms of Mamba-2~\cite{dao2024mamba2} and to parallel prefix scans~\cite{blelloch1990prefix}). Note also that the profiler used for model-level GFLOPs counts module-level operations (convolutions and linear layers) and may not account for the element-wise recurrence.
+Table~\ref{tab:mixing_cost} compares the analytical cost of the two token-mixing cores at stage $P_5$ ($L = 400$). In \texttt{C2PSA}, attention operates on $c = 256$ channels with $h = 4$ heads, key dimension $d_k = 32$, and value dimension $d_v = 64$; the SS2D core operates on $d = d_{\text{inner}} = 256$ channels with state size $s = d_{\text{state}} = 16$ over $K = 4$ directions. Each of these terms is about $1\%$ or less of the roughly $10.8$ GMACs of the full model, so neither core dominates arithmetic cost at this resolution. The decisive difference is the length of the sequential dependency chain: attention has none across tokens, whereas the reference scan runs $K = 4$ independent chains of $L = 400$ dependent steps each ($K L = 1{,}600$ steps in total; with a chunk size $T$, each chain has $\lceil L/T \rceil$ chunk steps, a formulation related to the chunked algorithms of Mamba-2~\cite{dao2024mamba2} and to parallel prefix scans~\cite{blelloch1990prefix}). Note also that the profiler used for model-level GFLOPs counts module-level operations (convolutions and linear layers) and may not account for the element-wise recurrence.
 
 \begin{table}[!t]
 \caption{Analytical Cost of the Token-Mixing Core at Stage $P_5$ ($L = 400$), Excluding Shared $1\times1$ Projections}
@@ -138,7 +138,7 @@ Table~\ref{tab:mixing_cost} compares the analytical cost of the two token-mixing
 \midrule
 PSA attention ($QK^{\top}$, $AV$) & $h L^2 (d_k + d_v)$ & $61.4$\,M & $1$ \\
 SS2D parameter projection & $K L d (2s + d)$ & $118.0$\,M & $1$ \\
-SS2D recurrence and readout & $\approx 2 K L d s$ & $13.1$\,M & $1{,}600$ \\
+SS2D recurrence and readout & $\approx 2 K L d s$ & $13.1$\,M & $4 \times 400$ \\
 \bottomrule
 \end{tabular}
 \end{table}

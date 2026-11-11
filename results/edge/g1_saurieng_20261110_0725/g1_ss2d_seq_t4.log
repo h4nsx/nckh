@@ -1,0 +1,18 @@
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: g1_ss2d_seq.onnx
+=================================================================
+
+1. Warming up (3 iterations)...
+2. Timing forward pass over 20 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            g1_ss2d_seq.onnx  (14767 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 4
+Forward median:   1311.31 ms  (P95 1326.05 ms, 0.76 FPS)
+RSS idle / end:   47.9 / 373.6 MiB
+Peak RSS (HWM):   373.6 MiB
+----------------------------------------
+[SAVED] results/edge/g1_saurieng_20261110_0725/g1_ss2d_seq_t4.json

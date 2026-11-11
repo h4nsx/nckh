@@ -1,0 +1,18 @@
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_ss2d_arm3.onnx
+=================================================================
+
+1. Warming up (10 iterations)...
+2. Timing forward pass over 100 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_ss2d_arm3.onnx  (14771 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 1
+Forward median:   3374.10 ms  (P95 3380.67 ms, 0.30 FPS)
+RSS idle / end:   47.8 / 373.1 MiB
+Peak RSS (HWM):   373.1 MiB
+----------------------------------------
+[SAVED] results/edge/caseb_saurieng_20261110_0644/yolo11s_ss2d_arm3_t1.json
