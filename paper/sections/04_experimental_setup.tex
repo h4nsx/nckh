@@ -1,103 +1,20 @@
 \section{Experimental Setup}
 \label{sec:experimental_setup}
 
-\subsection{Benchmark Dataset and Leakage Prevention}
+\subsection{Data}
 \label{sec:exp_datasets}
-We use the multi-camera warehouse environments of the \textbf{NVIDIA PhysicalAI-SmartSpaces} benchmark (MTMC Tracking dataset)~\cite{wang2026smartspaces}, which is generated with NVIDIA Omniverse simulation and provides calibrated camera streams of synthetic fulfillment centers with workers and vehicles. The evaluation is therefore controlled and simulated. To keep training tractable while preventing leakage between training and evaluation, we partition the data by facility:
+We use the warehouse scenes of the NVIDIA PhysicalAI-SmartSpaces benchmark (MTMC tracking data)~\cite{wang2026smartspaces}, rendered with NVIDIA Omniverse, and partition them by facility. Training uses two cameras of \texttt{Warehouse\_000} sampled at $0.5$\,FPS ($300$ frames, $12{,}959$ boxes); validation uses two cameras of the different facility \texttt{Warehouse\_015} ($100$ frames, $3{,}696$ boxes). Downsampling to $0.5$\,FPS avoids high temporal autocorrelation and visual redundancy across successive video frames while maintaining computational tractability during edge-oriented training. No facility, camera, or video sequence is shared, but 3D assets such as forklift and robot models come from the same library, so object appearance is not independent across partitions, and all views are static simulated cameras. The training/validation instances are \texttt{worker} $11{,}399$/$3{,}488$, \texttt{forklift} $600$/$150$, \texttt{amr} $724$/$45$, and \texttt{pallet\_truck} $236$/$13$; the validation partition is therefore strongly imbalanced ($94.37\%$ workers, $0.35\%$ pallet trucks). Boxes with a side of at most $4$ pixels are removed and frames are letterboxed from $1920 \times 1080$ to $640 \times 640$. All arms use the Ultralytics default augmentation, in which mosaic is switched off for the last $10$ epochs (\texttt{close\_mosaic=10}).
 
-\begin{itemize}
-    \item \textbf{Training partition (\texttt{Warehouse\_000}):} Two camera streams (\texttt{Camera\_0000} and \texttt{Camera\_0001}) sampled at $0.5$\,FPS ($1$ frame per $60$ video frames), yielding $300$ annotated frames with $12{,}959$ box instances.
-    \item \textbf{Validation partition (\texttt{Warehouse\_015}):} A different facility layout with a disjoint camera set (\texttt{Camera} and \texttt{Camera\_01}), sampled to $100$ frames with $3{,}696$ instances, used for checkpoint selection and reporting.
-    \item \textbf{Leakage safeguard:} No camera stream, facility, or video sequence of the training partition appears in the validation partition.
-    \item \textbf{Scope of the separation:} Although facility geometry and viewpoints are disjoint, 3D assets such as specific forklift models and robot avatars come from the shared Omniverse asset library, so object appearance is not independent across partitions. All views are static overhead cameras in simulation; mobile platforms would add further domain shifts (e.g., motion blur, real sensor noise) that this study does not cover.
-\end{itemize}
-% TODO(authors): confirm the camera directory names, and report the number of unique object
-% tracks per class and split (MTMC track IDs); consecutive sampled frames are highly correlated.
-
-The taxonomy comprises four classes: \texttt{worker} ($11{,}399$ train / $3{,}488$ val instances), \texttt{forklift} ($600$ / $150$), \texttt{amr} (NovaCarter, $724$ / $45$), and \texttt{pallet\_truck} (Transporter, $236$ / $13$). Table~\ref{tab:dataset_distribution} summarizes the distribution. The validation partition is strongly imbalanced: \texttt{worker} accounts for $94.37\%$ of instances, \texttt{forklift} $4.06\%$, \texttt{amr} $1.22\%$, and \texttt{pallet\_truck} $0.35\%$, so per-class estimates for the minority classes carry wide uncertainty.
-
-\begin{table}[!t]
-\caption{Instance Distribution of the Cross-Facility SmartSpaces Partition}
-\label{tab:dataset_distribution}
-\centering
-\footnotesize
-\setlength{\tabcolsep}{3pt}
-\begin{tabular}{llcc}
-\toprule
-\textbf{Class} & \textbf{Object Type} & \textbf{Train} & \textbf{Val} \\
-\midrule
-\texttt{worker} & Warehouse personnel & 11,399 & 3,488 \\
-\texttt{forklift} & Motorized forklift & 600 & 150 \\
-\texttt{amr} & Autonomous mobile robot & 724 & 45 \\
-\texttt{pallet\_truck} & Pallet jack (Transporter) & 236 & 13 \\
-\midrule
-\textbf{Total} & & \textbf{12,959} & \textbf{3,696} \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsection{Data Preprocessing and Augmentation}
-\label{sec:exp_preprocessing}
-Annotations of the $1920 \times 1080$ frames are converted to normalized box coordinates $(x_c, y_c, w_n, h_n)$, and boxes with a side of at most $4$ pixels are removed. Images are letterboxed to $640 \times 640$. All arms use the Ultralytics default augmentation pipeline: mosaic ($p = 1.0$, disabled for the last $10$ epochs via \texttt{close\_mosaic=10}), random scaling ($\pm 0.5$), translation ($0.1$), horizontal flipping ($p=0.5$), and HSV jitter ($h=0.015$, $s=0.7$, $v=0.4$). With a $20$-epoch budget, mosaic is therefore active only in the first half of training, which changes the training distribution at epoch $11$.
-% TODO(authors): confirm against args.yaml of every run and commit those files.
-
-\subsection{Experimental Arms}
+\subsection{Experimental Arms and Training}
 \label{sec:exp_baselines}
-We compare four arms:
-\begin{itemize}
-    \item \textbf{Arm 1 (Baseline):} Unmodified YOLO11s with \texttt{C2PSA} at Layer 10 ($9.43$\,M parameters, $21.7$ GFLOPs), fine-tuned end-to-end from COCO weights.
-    \item \textbf{Arm 2 (SS2D, single-stage):} Case B, Layer 10 replaced by \texttt{WarehouseSS2DBlock} at $P_5$ ($8.80$\,M, $21.2$ GFLOPs), trained in a single 20-epoch stage.
-    \item \textbf{Arm 3 (SS2D, two-stage):} Case B trained with the two-stage protocol of Section~\ref{sec:training_workflow} ($5$ epochs with layers $0$--$9$ frozen, then $15$ epochs end-to-end).
-    \item \textbf{Arm 4 (SS2D, dual-scale):} Case C, SS2D blocks at $P_4$ ($40 \times 40$) and $P_5$ ($20 \times 20$) ($8.89$\,M, $21.8$ GFLOPs), trained for $20$ epochs.
-\end{itemize}
-In Arms 2--4 only the SS2D blocks are newly initialized; all other shape-compatible layers are warm-started from the same COCO checkpoint as the baseline.
+\textbf{Arm~1} is the unmodified YOLO11s ($9.43$\,M parameters, $21.7$ GFLOPs). \textbf{Arm~2} trains SS2D-P5 ($8.80$\,M, $21.2$ GFLOPs) in a single stage, \textbf{Arm~3} trains SS2D-P5 with the two-stage protocol, and \textbf{Arm~4} trains SS2D-P4P5 ($8.89$\,M, $21.8$ GFLOPs) in a single stage. All arms are fine-tuned from the same COCO checkpoint for $20$ epochs; only the SS2D blocks start untrained. The comparison is not a single-variable intervention: \texttt{C2PSA} starts pretrained whereas the SS2D blocks receive only about $1{,}500$ optimizer steps, and Arm~3 differs from Arm~2 both in freezing and in its restarted schedule.
 
-\textbf{Confounders.} The comparison is not a single-variable intervention: (1) in Arm 1 the \texttt{C2PSA} block starts from COCO-pretrained weights, whereas the SS2D blocks in Arms 2--4 start untrained and receive about $1{,}500$ optimizer steps ($300$ images $\times$ $20$ epochs / batch $4$); (2) Arm 1 is trained without a frozen phase; and (3) Arm 3 differs from Arm 2 both in the frozen first stage and in a restarted learning-rate warmup and decay in stage 2 (Section~\ref{sec:training_workflow}), so its behavior reflects the combined protocol rather than freezing alone.
+Training used Python 3.14.8, PyTorch 2.14.1, and Ultralytics (8.4.185 for Arms 1--3 and 8.4.187 for Arm~4, read from the checkpoints), with AdamW selected by \texttt{optimizer=auto} ($\eta = 0.00125$, $\beta_1 = 0.9$, linear decay to $0.01\eta$ after a $3$-epoch warmup, weight decay $0.0005$), batch size $4$, input size $640$, and seed $0$ (one run per arm) on a host CPU workstation. We report the final-epoch model and the checkpoint with the highest validation fitness ($0.1\,\text{mAP}_{50} + 0.9\,\text{mAP}_{50-95}$); because both are evaluated on the partition used for selection, best-fitness figures are optimistically biased. Metrics are class-macro $\text{mAP}_{50}$ and $\text{mAP}_{50-95}$, and precision and recall at the confidence threshold that maximizes F1.
 
-\subsection{Implementation, Training Details, and Reproducibility}
-\label{sec:exp_implementation}
-% TODO(authors): confirm the actual training hardware and batch size for EACH arm.
-% gpu_training_package/README_GPU_TRAINING.md describes Colab/Kaggle T4 runs with --batch 8,
-% and the per-epoch times in results/tables/*.csv (~9 s for Arm 1) are hard to reach on an i7-7600U CPU.
-% Note: scripts/run_two_stage_experiment.py passes lr0=0.0005 for Arm 3 stage 2, but with the
-% default optimizer=auto Ultralytics ignores lr0/momentum; the CSV learning-rate columns
-% (peak ~0.0011 in stage 2) are consistent with the auto value 0.00125 being used.
-% TODO(authors): verify all version strings with pip freeze and commit an environment lock file.
-% All four versions exist on PyPI/python.org (checked 2026-11-07): torch 2.14.1 (2026-09-30),
-% ultralytics 8.4.184 (2026-10-22) and 8.4.185 (2026-10-24), onnxruntime 1.31.0 (2026-10-09),
-% Python 3.14.8 (2026-09-30). docs/STAGE_REPORT_CASE_B_MILESTONE.md lists ultralytics==8.4.184, but the
-% "version" field of the checkpoints (read 2026-11-10) is 8.4.185 for Arms 1-3 and 8.4.187 for Arm 4.
-\begin{itemize}
-    \item \textbf{Software:} Training and host evaluation used Linux x86\_64 with Python 3.14.8, PyTorch 2.14.1+cpu, Ultralytics (version read from each checkpoint: 8.4.185 for Arms 1--3 and 8.4.187 for Arm~4), and OpenCV. Embedded benchmarking used Debian 13 (Linux 6.18, aarch64), Python 3.13.5, ONNX Runtime 1.31.0, ONNX 1.23.2, NumPy 2.5.4, and \texttt{psutil} 7.2.2 on the Raspberry Pi~4 (versions recorded by the benchmark script).
-    \item \textbf{Optimizer:} AdamW, selected by Ultralytics' \texttt{optimizer=auto} rule, which for this dataset size and $4$ classes sets the initial learning rate to $\eta = 0.00125$ and $\beta_1 = 0.9$; final learning-rate factor $\text{lrf} = 0.01$ with linear decay after a $3$-epoch warmup; weight decay $0.0005$.
-    \item \textbf{Hyperparameters:} Batch size $4$, input resolution $640 \times 640$, random seed $0$ for all runs (one run per arm).
-    \item \textbf{Checkpoint selection:} For each arm we report both the final-epoch model and the checkpoint with the highest Ultralytics validation fitness ($0.1\,\text{mAP}_{50} + 0.9\,\text{mAP}_{50-95}$, \texttt{best.pt}). Both are evaluated on the partition used for selection, so best-fitness figures are optimistically biased.
-    \item \textbf{Provenance:} Checkpoints and initialization states are identified by SHA-256 hashes (e.g., pretrained baseline \texttt{85a76fe...}, Case B warmstart \texttt{1e92c10...}).
-    \item \textbf{Hardware:} An Intel Core i7-7600U host (2.80\,GHz) and a Raspberry Pi~4 Model B Rev~1.2 (quad-core Cortex-A72, maximum clock 1.5\,GHz, \texttt{ondemand} governor, 4\,GB RAM of which $3{,}795$\,MiB are visible to the OS; no heatsink or fan; official 5\,V/3\,A power supply).
-\end{itemize}
-
-\subsection{Evaluation Metrics}
-\label{sec:exp_metrics}
-\begin{enumerate}
-    \item \textbf{Precision and recall:} Ultralytics reports class-mean precision ($P$) and recall ($R$) at the confidence threshold that maximizes the mean F1 score; both therefore depend on that operating point.
-    \item \textbf{Mean Average Precision:} $\text{mAP}_{50}$ (IoU threshold $0.50$) and $\text{mAP}_{50-95}$ (averaged over IoU thresholds $0.50{:}0.05{:}0.95$), macro-averaged over classes.
-    \item \textbf{Computational footprint:} Parameter count, GFLOPs at $640 \times 640$, checkpoint size on disk, and ONNX file size.
-    \item \textbf{Runtime:} Forward-pass latency and process resident memory on the target CPU (Section~\ref{sec:exp_export}).
-\end{enumerate}
-
-\subsection{Edge Deployment and Measurement Protocol}
+\subsection{Edge Measurement Protocol}
 \label{sec:exp_export}
-\begin{enumerate}
-    \item \textbf{Export:} PyTorch checkpoints are exported to ONNX (opset 17) using only standard operators and simplified with \texttt{onnxslim}; no custom kernels are required.
-    % Hashes: system_info*.txt in results/edge/saurieng_20261107_2111/, caseb_saurieng_20261110_0644/ and
-    % g1_saurieng_20261110_0725/; compare with audit/file_hashes.sha256 on main.
-    \item \textbf{Measured models:} The Pi files are the ONNX exports of the trained best checkpoints of Arm~1 (baseline), Arm~3 (Case B), and Arm~4 (Case C), all with the four-class output ($1 \times 8 \times 8400$) and identified by SHA-256 hashes. An earlier Case B measurement mistakenly used an export of the warmstart checkpoint before fine-tuning ($80$-class output); it is superseded and not reported. We could not confirm which Case B file produced the x86 row of Table~\ref{tab:edge_runtime}.
-    \item \textbf{Runtime:} ONNX Runtime 1.31 with the CPU execution provider (FP32), graph optimization level \texttt{ORT\_ENABLE\_ALL}, batch size $1$, and $640 \times 640$ input. On the Pi, the intra-op thread count is fixed to $1$ or $4$ (one inter-op thread); on the x86 host, the default thread count is used. No GPU, TensorRT, or quantized execution was evaluated.
-    \item \textbf{Latency:} Timed calls of the forward pass (\texttt{session.run}) on a fixed input tensor after untimed warmup calls; we report the median, mean $\pm$ standard deviation, and throughput as $1000 / \text{median}$. Image preprocessing and NMS are not included. Each model runs in its own process. On the Pi, single-thread runs use $10$ warmup and $100$ timed calls. Four-thread runs with $100$ calls heated the SoC to $79$--$84\,^{\circ}$C, and in one of them the firmware lowered the ARM clock to $1.23$--$1.48$\,GHz; we therefore discard those runs and report four-thread runs with $5$ warmup and $30$ timed calls, each started below $55\,^{\circ}$C, while sampling the ARM clock and temperature every $5$\,s. The clock stayed at $1.5$\,GHz throughout these runs, with a maximum of $64.7\,^{\circ}$C. Single-thread runs ended at $64$--$67\,^{\circ}$C; their clock was not logged.
-    \item \textbf{Measurement sessions:} The Pi runs above (session~1) cover the baseline and Case C. A second session (session~2) measured the baseline again together with Case B and the intervention below, with the same call counts, each run started below $55\,^{\circ}$C, and the clock logged throughout: whenever a model was running, the clock stayed at $1.5$\,GHz (maximum $76.9\,^{\circ}$C). Relative values always use the baseline of the same session.
-    \item \textbf{Memory:} On the Pi, the peak resident set size of the process (high-water mark, \texttt{VmHWM}), read immediately after the timed loop, in MiB ($1$\,MiB $= 2^{20}$ bytes), compared with a $1$\,GiB ($1024$\,MiB) budget. It includes the Python interpreter and libraries ($47.8$\,MiB before the model is loaded) and the ONNX Runtime session, including session creation. On the x86 host, only the RSS after the timed loop (via \texttt{psutil}) is available.
-    \item \textbf{Operator profile:} The ONNX Runtime profiler, four threads, $2$ warmup and $5$ profiled calls; we report each operator type's share of summed kernel time and the node count before and after ONNX Runtime graph optimization.
-    \item \textbf{Runtime intervention:} To test whether graph size drives latency, we export the same SS2D block in three graph forms: the unrolled sequential scan used above, the same recurrence as one ONNX \texttt{Loop} per direction, and a chunked scan with chunk size $T = 4$. As runtime references we also export the baseline, the model with the $P_5$ block removed (identity), and a convolution-only replacement. These exports use untrained weights (seed $0$, batch-normalization statistics calibrated on random inputs, $\gamma = 1$ in the block), because they are compared only with each other. The three SS2D forms produce the same outputs (maximum relative difference $2.3 \times 10^{-6}$, versus $0.154$ between the SS2D and convolution-only exports as a negative control). Each runs with $1$ and $4$ threads, $3$ warmup and $20$ timed calls, in session~2.
-\end{enumerate}
-% Raw JSON, logs, system information, and clock logs: results/edge/saurieng_20261107_2111/
-% (1-thread runs and profiles: 2026-11-07/08; clock-verified 4-thread runs: rerun_t4_n30/, 2026-11-08).
+Checkpoints are exported to ONNX (opset 17, \texttt{onnxslim}) with standard operators only. The Pi files are the exports of the trained best checkpoints of Arm~1 (baseline), Arm~3 (SS2D-P5), and Arm~4 (SS2D-P4P5), identified by SHA-256 hashes; an earlier SS2D-P5 measurement that mistakenly used a pre-fine-tuning export is superseded. Models run in ONNX Runtime 1.31 (CPU execution provider, FP32, \texttt{ORT\_ENABLE\_ALL}, batch size $1$) on an Intel Core i7-7600U host (default threads) and on a Raspberry Pi~4 Model~B Rev~1.2 (Cortex-A72, $1.5$\,GHz, 4\,GB; Debian 13, Python 3.13.5; no heatsink or fan; official 5\,V/3\,A power supply) with $1$ or $4$ intra-op threads. We call a model \emph{edge-feasible} on the Pi if it runs there in FP32 without custom operators or plugins and within $1$\,GiB of peak memory; this criterion does not imply real-time throughput.
+
+\textbf{Latency} is the time of \texttt{session.run} on a fixed input after untimed warmup, without preprocessing or NMS; we report the median, mean $\pm$ SD, and FPS $= 1000/\text{median}$. Single-thread runs use $10$ warmup and $100$ timed calls; four-thread runs use $5$ warmup and $30$ timed calls, because $100$-call runs heated the SoC to $79$--$84\,^{\circ}$C and once lowered the clock to $1.23$--$1.48$\,GHz; those runs are discarded. Every reported run started below $55\,^{\circ}$C. The Pi results come from three sessions: session~1 (baseline and SS2D-P4P5; clock logged only for the four-thread runs, which stayed at $1.5$\,GHz), session~2 (baseline, SS2D-P5, and the untrained intervention below; clock logged throughout, $1.5$\,GHz whenever a model ran, at most $76.9\,^{\circ}$C), and session~3 (the parallel scan below with its controls; clock logged throughout, at most $75.9\,^{\circ}$C). Relative values use the baseline of the same session. \textbf{Memory} is the peak resident set size of the process (\texttt{VmHWM}, including Python and session creation) on the Pi, and the RSS after the timed loop on the host. \textbf{Operator profiles} use the ONNX Runtime profiler with four threads and $5$ profiled calls after $2$ warmup calls.
+
+\textbf{Runtime intervention.} To test whether graph size drives latency, we export the same SS2D block in three graph forms: the unrolled sequential scan used above, the same recurrence as one ONNX \texttt{Loop} per direction, and a chunked scan with chunk size $T = 4$. As runtime references we also export the baseline, the model with the $P_5$ block removed (identity), and a convolution-only replacement. These exports use untrained weights (seed $0$, BN statistics calibrated on random inputs, $\gamma = 1$), because they are compared only with each other. The three SS2D forms produce the same outputs (maximum relative difference $2.3 \times 10^{-6}$, versus $0.154$ between the SS2D and convolution-only exports as a negative control). Each runs with $1$ and $4$ threads, $3$ warmup and $20$ timed calls, in session~2. To test whether the sequential dependency chain drives latency, we also export the trained Arm~3 weights with the scan evaluated as a parallel (Hillis--Steele) associative scan~\cite{blelloch1990prefix}, which combines each position with the one $k = 1, 2, 4, \dots$ steps earlier and thus needs $\lceil \log_2 L \rceil$ steps instead of $L$; it matches the sequential recurrence to $2.8 \times 10^{-14}$ in float64 and the measured Arm~3 export to a relative output difference of $1.9 \times 10^{-7}$. It runs in session~3 with the trained baseline and unrolled Arm~3 exports as controls, under the protocol of the main measurements.

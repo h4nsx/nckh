@@ -1,29 +1,13 @@
-\section{Conclusion and Future Work}
+\section{Conclusion}
 \label{sec:conclusion}
+\textbf{RQ1.} Replacing \texttt{C2PSA} with a plugin-free 2D selective scan removes $63.9\%$ of the Layer-10 parameters and $6.72\%$ of the model at $21.2$ instead of $21.7$ GFLOPs, but does not preserve overall accuracy in our single-seed experiments: all SS2D variants have lower $\text{mAP}_{50-95}$, and the baseline has the highest final-epoch $\text{mAP}_{50}$. The higher forklift accuracy of the SS2D variants ($75.3$--$79.7\%$ vs.\ $70.1\%$) remains to be attributed. \textbf{RQ2.} Two-stage training gave mixed results (higher final-epoch but lower best-fitness accuracy than single-stage training, with a shifted operating point). The zero-initialized output convolution preserves identity only at step $0$; whether zero-$\gamma$ initialization makes a dedicated protocol unnecessary requires re-training. \textbf{RQ3.} The model runs on a Raspberry Pi~4 without plugins and within $1$\,GiB ($373.6$\,MiB), but it is slower than the baseline ($1314$ vs.\ $1117$\,ms with four threads, $+18\%$; $+6\%$ with one thread). The overhead follows how the scan is executed, not its arithmetic or graph size: an ONNX \texttt{Loop} with $367$ nodes, a chunked scan, and a parallel associative scan with $619$ nodes and no sequential chain were all slower than the unrolled scan with $14{,}767$ nodes (the parallel scan by $58\%$ with four threads), while removing \texttt{C2PSA} altogether saved only $2$--$5\%$.
 
-\subsection{Answers to the Research Questions}
-\label{sec:concl_summary}
-We examined whether replacing the deepest attention block of YOLO11s with a plugin-free 2D selective scan is a viable path for multi-class warehouse detection on resource-constrained hardware.
+Future work will re-train all arms with zero-$\gamma$ initialization over multiple seeds, with trained identity and convolution-only ablations and a held-out test facility; measure fused scan kernels and an SSD-style block with scalar decays, also on accelerators and with quantization; and evaluate on real warehouse footage.
 
-\textbf{RQ1 (accuracy and complexity).} The replacement removes $63.9\%$ of the Layer-10 parameters ($357{,}632$ vs.\ $990{,}976$) and $6.72\%$ of the model ($8.80$ vs.\ $9.43$\,M), at $21.2$ instead of $21.7$ GFLOPs. It does not preserve overall accuracy in our single-seed experiments: all SS2D variants have lower $\text{mAP}_{50-95}$ than the baseline, and the baseline has the highest $\text{mAP}_{50}$ at the final epoch. The SS2D variants score higher on forklifts ($75.3$--$79.7\%$ vs.\ $70.1\%\ \text{mAP}_{50}$), but whether this reflects the selective scan, the removal of \texttt{C2PSA}, or run-to-run variance remains to be established.
+\begin{credits}
+\subsubsection{\ackname} Anonymized for double-blind review. The authors thank the Ultralytics developers and the NVIDIA PhysicalAI-SmartSpaces contributors for making their detectors and benchmark available.
 
-\textbf{RQ2 (optimization).} Two-stage training gave mixed results relative to single-stage training: a higher final-epoch $\text{mAP}_{50}$ ($67.10\%$ vs.\ $65.46\%$) but a lower best-fitness $\text{mAP}_{50}$ and $\text{mAP}_{50-95}$, together with a shift of the precision--recall operating point. All reported models zero-initialize the output convolution ahead of batch normalization, which preserves identity only at step $0$: batch normalization then rescales the branch to full scale, a plausible but untested contributor to the early instability that motivated two-stage training. We have implemented zero-$\gamma$ initialization as a correction; whether it makes a dedicated protocol unnecessary requires re-training. Transferring all shape-compatible pretrained head tensors lowered the initial box loss of the SS2D arms from $6.276$ to $2.758$ and is needed for a fair comparison.
+\subsubsection{\discintname} The authors have no competing interests to declare that are relevant to the content of this article.
+\end{credits}
 
-\textbf{RQ3 (embedded deployment).} The model exports to ONNX without plugins and runs on a Raspberry Pi~4 with a peak memory of $373.6$\,MiB, well below $1$\,GiB, but it is slower and uses more memory than the baseline ($1314$ vs.\ $1117$\,ms median with four threads, $+18\%$; $+6\%$ with one thread; $373.6$ vs.\ $233.4$\,MiB). Analytical costs show that the scan's arithmetic is small; convolution time stays nearly constant while the scan's small operators take a growing share of time and scale poorly across cores. A runtime intervention showed that the number of graph nodes is not the cause: an ONNX \texttt{Loop} with $367$ nodes and a chunked scan were both slower than the unrolled scan with $14{,}767$ nodes, while removing \texttt{C2PSA} altogether saved only $2$--$5\%$. The overhead follows the long chain of small sequential operations of the scan. Fewer FLOPs therefore did not translate into lower CPU latency, and CPU deployment demonstrates operator portability rather than real-time operation.
-
-\subsection{Future Research Directions}
-\label{sec:future_work}
-\begin{itemize}
-    \item \textbf{Re-training and statistical evaluation:} Re-training all arms with zero-$\gamma$ initialization over multiple seeds, with identity and convolution-only ablations and a standard Mamba-style variant (gating and step-size initialization), on a held-out test facility, with significance tests and frame- or track-level confidence intervals for per-class results.
-    \item \textbf{Plugin-free parallel scans:} The ONNX \texttt{Loop} and small-chunk forms tested here were slower than the unrolled scan; parallel associative scans built from standard ONNX operators, larger fused kernels, and runtimes with lower per-operator overhead remain to be measured for latency and peak memory on CPUs and on accelerators (GPU/NPU, FP16/INT8), while preserving the plugin-free property.
-    \item \textbf{Real-world data and temporal context:} Evaluating on real warehouse footage, and extending the scan across video frames to propagate object state over time for multi-camera tracking.
-\end{itemize}
-
-\section*{Code and Data Availability}
-% TODO(authors): replace with the public (or anonymized) repository URL once the repository is opened,
-% and add the SmartSpaces dataset license/terms of use.
-The model code, configuration files, per-epoch training logs, table-generation scripts, and benchmarking scripts used in this study will be released publicly upon acceptance. The NVIDIA PhysicalAI-SmartSpaces dataset is available from its maintainers~\cite{wang2026smartspaces}.
-
-\section*{Acknowledgments}
-% TODO(authors): add the grant/project number if assigned, and compute resources (e.g., GPU type and hours).
-This research is funded by Ho Chi Minh City Open University. The authors thank the Ultralytics developers and the NVIDIA PhysicalAI-SmartSpaces contributors for making their detectors and benchmark available.
+\subsubsection{Code Availability} The code and evaluation artifacts will be made publicly available at \url{https://github.com/h4nsx/nckh} upon publication.

@@ -1,5 +1,3 @@
-% TODO(authors): confirm against the official TAIMMA 2027 template/CFP (class options, page limit,
-% author block, copyright notice). IEEE conference style is assumed here.
 \documentclass[conference]{IEEEtran}
 
 % --- Core Typography & Encoding ---
@@ -16,23 +14,17 @@
 \usepackage[caption=false,font=footnotesize,labelfont=sf,textfont=sf]{subfig}
 \usepackage[hidelinks]{hyperref}
 
-% --- Working Metadata ---
-\title{Replacing Self-Attention with 2D Selective State Spaces in YOLO11s for Warehouse Object Detection: An Edge-Feasibility Study}
+% Springer LNCS environment compatibility in IEEEtran
+\newenvironment{credits}{\section*{Declarations}}{}
+\providecommand{\ackname}{Acknowledgment}
+\providecommand{\discintname}{Competing Interests}
 
-% TODO(authors): full official name and city of "College of Technology II"; optionally the second
-% author's faculty and ORCID.
+% --- Working Metadata ---
+\title{Why a Cheaper Block Runs Slower: Replacing Self-Attention with 2D Selective Scans in YOLO11s on an Embedded CPU}
+
 \author{
-\IEEEauthorblockN{Vo Tuan Hung}
-\IEEEauthorblockA{\textit{Department of Computer Science and Automation Engineering}\\
-\textit{College of Technology II}\\
-votuanhung1205.work@gmail.com\\
-ORCID: 0009-0005-8730-7930}
-\and
-\IEEEauthorblockN{Huynh Tan Phat\textsuperscript{*}}
-\IEEEauthorblockA{\textit{Ho Chi Minh City Open University}\\
-Ho Chi Minh City, Vietnam\\
-phat.ht@ou.edu.vn\\
-\textsuperscript{*}Corresponding author}
+\IEEEauthorblockN{Anonymous Author(s)}
+\IEEEauthorblockA{Paper under double-blind review}
 }
 
 \begin{document}
@@ -40,7 +32,7 @@ phat.ht@ou.edu.vn\\
 \maketitle
 
 \begin{abstract}
-Selective state space models (SSMs) offer global context with linear complexity, but their cost in lightweight detectors on embedded CPUs is poorly characterized. We replace the $P_5$ self-attention block (\texttt{C2PSA}) of YOLO11s with a plugin-free, four-direction 2D selective scan built from standard PyTorch operators, and compare single-stage, two-stage, and dual-scale variants with YOLO11s on a cross-facility partition of the synthetic NVIDIA PhysicalAI-SmartSpaces warehouse benchmark (300 training and 100 validation frames; one seed, 20 epochs). The replacement removes $63.9\%$ of the block's parameters ($6.72\%$ of the model; $21.7 \to 21.2$ GFLOPs), mainly by narrowing channels. Accuracy is mixed: the baseline leads at the final epoch in $\text{mAP}_{50}$ and in $\text{mAP}_{50-95}$, while the SS2D variants score higher on forklifts, a difference not yet tested for significance. On a Raspberry Pi~4 (Cortex-A72, FP32 ONNX Runtime), the SS2D model is $18\%$ slower with four threads ($1314$ vs.\ $1117$\,ms median forward latency; $6\%$ with one thread) and has a higher peak memory ($373.6$ vs.\ $233.4$\,MiB) despite fewer FLOPs. Operator profiling and a runtime intervention indicate that the cost lies in the scan's long chain of small sequential operators rather than in its arithmetic or graph size: expressing the same scan with $40\times$ fewer nodes (ONNX \texttt{Loop}) or as a chunked scan made the model slower, not faster. We summarize three design lessons for hybrid CNN--SSM detectors on edge CPUs and identify a pitfall in zero-initializing a convolution ahead of batch normalization, for which we propose zero-$\gamma$ initialization.
+\input{sections/00_abstract}
 \end{abstract}
 
 \begin{IEEEkeywords}
