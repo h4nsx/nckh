@@ -1,55 +1,30 @@
 \section{Related Work}
 \label{sec:related_work}
 
-This section reviews the core literature establishing our research context, organized into five thematic domains: YOLO-based detection evolution, visual state space models, hybrid CNN--Mamba architectures, edge deployment methodologies, and warehouse perception benchmarks.
+\subsection{YOLO Detectors and Visual State Space Models}
+Since the single-stage formulation of YOLO~\cite{redmon2016yolo}, the family has moved to anchor-free heads and, in YOLO11, to \texttt{C3k2} blocks and the \texttt{C2PSA} block, which wraps the partial self-attention module introduced in YOLOv10~\cite{wang2024yolov10}; YOLO26 adds NMS-free inference~\cite{sapkota2026ultralytics}. Apart from \texttt{C2PSA}, small YOLO11 models rely entirely on local convolutions. Selective SSMs such as Mamba~\cite{gu2023mamba} use input-dependent state transitions with cost linear in sequence length, and visual variants such as Vision Mamba~\cite{zhu2024visionmamba} and VMamba~\cite{liu2024vmamba} flatten 2D feature maps along several scan directions (the four-way cross-scan, SS2D, of VMamba). The linear scaling matters most at high resolution; at the deepest stage of a detector its benefit is an empirical question.
 
-\subsection{YOLO-Based Object Detection Evolution}
-\label{sec:rel_yolo}
-Single-stage object detectors originated with the unified regression formulation of YOLO \cite{redmon2016yolo}, which mapped image pixels directly to spatial bounding box coordinates and class conditional probabilities. Over the past decade, the YOLO family has evolved significantly \cite{sapkota2026ultralytics}. YOLOv5 established a modular anchor-based PyTorch architecture using Cross Stage Partial (CSP) networks and Path Aggregation Necks (PANet). YOLOv8 transitioned to an anchor-free design with a decoupled head, Distribution Focal Loss (DFL), and Task-Aligned Assigner (TAL) for dynamic label assignment. YOLO11 introduced C3k2 building blocks and cross-stage spatial attention (C2PSA) to optimize gradient pathways across model scales. Most recently, YOLO26 and YOLO27 have explored end-to-end NMS-free inference through dual-label assignment and scale-adaptive architectures \cite{sapkota2026ultralytics}. However, standard lightweight YOLO variants (e.g., YOLOv8n/s, YOLO11n/s) rely exclusively on local convolutions, which struggle to capture long-range contextual dependencies across visually complex, cluttered scenes without inflating latency.
-
-\subsection{Mamba and State-Space Models for Visual Perception}
-\label{sec:rel_mamba}
-To overcome the quadratic computational scaling $O(N^2)$ of self-attention in Vision Transformers (ViTs), Selective State Space Models (SSMs) such as Mamba have emerged as an efficient sequence-modeling alternative operating with linear complexity $O(N)$ \cite{bao2026visionmamba}. While continuous state space models define 1D differential equations mapped through zero-order hold discretization, visual adaptations (e.g., Vision Mamba, VMamba, VSS-SpatioNet) translate 2D spatial feature maps into 1D token sequences using multi-directional scanning strategies (such as 4-way cross-scan SS2D) \cite{xiang2025vss, bao2026visionmamba}. These mechanisms enable global receptive fields with linear computational and memory scaling, making them promising building blocks for high-resolution visual processing.
-
-\subsection{Hybrid CNN--Mamba Detection Architectures}
-\label{sec:rel_hybrid}
-Hybrid models combining CNNs and state-space layers seek to merge local convolutional inductive bias with long-range receptive fields. In general-domain detection, Mamba-YOLO \cite{wang2025mambayolo} integrated State Space Models into the YOLO framework via custom local and regional gating blocks (LSBlock, RGBlock) to achieve linear token complexity on MS COCO and PASCAL VOC. Similarly, MambaNeXt-YOLO \cite{lei2025mambanext} paired ConvNeXt stages with an SS2D Mamba block and an adaptive ResGate fusion mechanism. However, these formulations relied on custom C++/CUDA kernel extensions (\texttt{mamba\_ssm}), precluding out-of-the-box ONNX deployment on embedded micro-architectures lacking NVCC toolchains. In specialized modalities, Xray-YOLO-Mamba \cite{zhao2025xraymamba} and Hybrid-YOLO \cite{chen2024hybridyolo} demonstrated that selective state-space processing can resolve severe visual overlap. 
-
-Crucially, in the context of recent YOLO attention bottlenecks, Chan et~al.\ proposed MambaPSA \cite{chan2026mambapsa}, investigating a Mamba-based replacement for the C2PSA attention block in YOLO26 and assessing CPU throughput. Concurrently, Yu and Wang introduced MambaOut \cite{yu2024mambaout}, demonstrating that while visual SSMs may be redundant for simple image classification, long-sequence dense perception tasks (such as detection and segmentation) genuinely benefit from state-space context.
-
-To clearly position our work against existing hybrid detectors, Table~\ref{tab:lit_comparison} contrasts architectural integration choices, operator dependencies, parameter footprints, and edge validation targets.
+\subsection{Hybrid CNN--Mamba Detectors}
+Table~\ref{tab:lit_comparison} lists the hybrid detectors closest to this work. Mamba YOLO~\cite{wang2025mambayolo} builds an SSM-based backbone (ODMamba) with a multi-branch RG Block and reports GPU inference on COCO. MambaNeXt-YOLO~\cite{lei2025mambanext} combines convolutions and Mamba in a MambaNeXt block, evaluates on PASCAL VOC, and reports deployment on Jetson Xavier NX and Orin NX devices. Closest to our work, MambaPSA~\cite{chan2026mambapsa} replaces \texttt{C2PSA} in YOLO26 with a Mamba-based block and reports PASCAL VOC accuracy and CPU throughput. Xray-YOLO-Mamba~\cite{zhao2025xraymamba} applies selective SSMs to X-ray images. Our study differs in domain (cross-facility warehouse detection), in hardware (an embedded ARM CPU), and in its operator-level analysis of deployment cost; it does not propose a fundamentally different block. MambaOut~\cite{yu2024mambaout} argues that SSMs are unnecessary for ImageNet classification but may remain useful for dense tasks, which motivates convolution-only controls; we include such controls as untrained runtime references only (Section~\ref{sec:res_edge}).
 
 \begin{table*}[!t]
-\caption{Systematic Comparison of Hybrid CNN--Mamba Object Detection Architectures}
+\caption{Hybrid CNN--Mamba detectors closest to this work, as described by their authors.}
 \label{tab:lit_comparison}
 \centering
-\small
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{lcccccc}
+\footnotesize
+\setlength{\tabcolsep}{3pt}
+\begin{tabularx}{\textwidth}{>{\raggedright\arraybackslash}p{2.3cm} >{\raggedright\arraybackslash}p{2.1cm} >{\raggedright\arraybackslash}X >{\raggedright\arraybackslash}p{2.9cm}}
 \toprule
-\textbf{Model Architecture} & \textbf{Target Domain} & \textbf{SSM Insertion Stage} & \textbf{Kernel / Operator Dependency} & \textbf{Params (M)} & \textbf{GFLOPs} & \textbf{Physical Hardware Validation} \\
+\textbf{Model} & \textbf{Evaluation data} & \textbf{SSM placement} & \textbf{Reported deployment} \\
 \midrule
-Mamba-YOLO \cite{wang2025mambayolo} & Generic Vision (COCO/VOC) & ODMamba Multi-Branch Backbone & VMamba Selective Scan & 8.20 & 26.5 & High-End Desktop GPU \\
-MambaNeXt-YOLO \cite{lei2025mambanext} & Generic VOC & Early Backbone (ConvNeXt) & Custom C++/CUDA (\texttt{mamba\_ssm}) & 7.10 & 22.4 & NVIDIA Jetson Orin NX (FP16 TensorRT) \\
-Hybrid-YOLO \cite{chen2024hybridyolo} & Underwater / COCO & Shallow Backbone Stages & Custom C++/CUDA Selective Scan & 3.20 & 9.8 & Host PC Simulation (x86 GPU) \\
-MambaPSA \cite{chan2026mambapsa} & Generic VOC & Backbone $P_5$ Neck (C2PSA) & PyTorch / CUDA SSM & 8.90 & 24.1 & Intel Core i7 CPU (17--20 FPS) \\
+Mamba YOLO~\cite{wang2025mambayolo} & MS COCO & ODMamba backbone with RG Blocks & Desktop GPU (RTX 4090) \\
+MambaNeXt-YOLO~\cite{lei2025mambanext} & PASCAL VOC & MambaNeXt blocks; fusion pyramid & Jetson Xavier NX, Orin NX \\
+MambaPSA~\cite{chan2026mambapsa} & PASCAL VOC & Replaces \texttt{C2PSA} in YOLO26 & CPU (17 to 20 FPS) \\
 \midrule
-\textbf{YOLO11s-SS2D (Ours)} & \textbf{Smart Logistics Warehouses} & \textbf{Stage $P_5$ (and $P_4$) Context} & \textbf{Zero-Plugin Pure PyTorch / Native ONNX} & \textbf{8.80} & \textbf{21.2} & \textbf{Physical Raspberry Pi 4 ARM Silicon} \\
+This work & Synthetic warehouse, cross-facility & $P_5$ (and $P_4$), replaces \texttt{C2PSA} in YOLO11s & Raspberry Pi~4 CPU, ONNX Runtime \\
 \bottomrule
-\end{tabular}%
-}
+\end{tabularx}
 \end{table*}
 
-While prior hybrid CNN--Mamba detectors report efficiency primarily via parameter count, FLOPs, or GPU throughput on natural images, two critical questions relevant to warehouse edge perception remain open: (1) how selective-scan mechanisms behave under a rigorous facility-disjoint warehouse partition where elongated perspective aisles and visual occlusions challenge standard spatial attention, and (2) what actually determines the measured latency and physical memory footprint of plugin-free selective scans on embedded ARM CPUs, where FLOP counts are poor latency predictors \cite{mittal2024lightweightsurvey}. Our work specifically addresses these dual systems and domain questions.
-
-\subsection{Lightweight Object Detection and Edge Deployment}
-\label{sec:rel_edge}
-Deploying deep learning detectors to edge platforms requires balancing algorithmic complexity with physical hardware constraints \cite{mittal2024lightweightsurvey, capra2022edgehardware}. As surveyed by Mittal \cite{mittal2024lightweightsurvey}, parameter counts and FLOPs alone are insufficient predictors of on-device latency: Memory Access Cost (MAC) and operator fragmentation (launching numerous small, non-fused kernels) frequently dominate runtime. In a comparative evaluation of runtime frameworks across edge platforms, Ratul et~al.\ \cite{ratul2024accelerating} demonstrated that ONNX Runtime and TensorRT significantly outperform standard PyTorch by fusing operators and streamlining memory transfers. Recent edge-tailored detectors such as LEAF-YOLO \cite{quang2024leafyolo} and Edge-YOLO \cite{li2023edgeyolo} further demonstrate that operator graph simplicity and memory access efficiency are vital for real-time edge execution.
-
-\subsection{Warehouse Perception and Industrial Benchmarks}
-\label{sec:rel_warehouse}
-Industrial automation and logistics present severe visual perception challenges, including extreme object scale variation (from small manual jacks to massive motorized forklifts and high racks), dense structural occlusions, and variable lighting \cite{tan2024multiscale}. Investigating specialized warehouse environments, Yang et~al.\ \cite{yang2024freezerwarehouse} highlighted that high-density stacking and heavy visual overlap severely degrade conventional convolutional feature maps, necessitating focused attention or selective spatial context. Furthermore, large-scale benchmarks such as NVIDIA PhysicalAI-SmartSpaces \cite{wang2026smartspaces} provide vital multi-camera tracking and 3D perception environments across diverse warehouse facilities. Deploying edge gateways in such environments requires detectors that capture room-scale aisle context while operating strictly within constrained embedded memory envelopes.
-
-\subsection{Summary and Research Gap Synthesis}
-\label{sec:rel_gap}
-Prior hybrid CNN--Mamba detectors have been evaluated almost exclusively on generic natural images (PASCAL VOC, MS COCO) or remote sensing datasets \cite{wang2025mambayolo, lei2025mambanext, chen2024hybridyolo, chan2026mambapsa}. No prior study has systematically investigated the feasibility and deployment boundaries of hybrid YOLO-Mamba architectures for multi-class warehouse logistics detection under physical single-board embedded ARM computing constraints. This study addresses that defensible gap by designing, evaluating, and benchmarking a hybrid detector against standard YOLO baselines with rigorous ablation and operator-level deployment profiling.
+\subsection{Edge Deployment and Warehouse Perception}
+Parameter counts and FLOPs are poor predictors of on-device latency: memory access cost and the fragmentation of a model into many small, non-fused operators often dominate runtime~\cite{ma2018shufflenetv2,mittal2024lightweightsurvey}, and runtimes such as ONNX Runtime and TensorRT gain much of their speed from operator fusion~\cite{ratul2024accelerating}. In warehouses, Yang et~al.~\cite{yang2024freezerwarehouse} designed a lightweight detector for food freezer warehouses, and the NVIDIA PhysicalAI-SmartSpaces benchmark~\cite{wang2026smartspaces} provides multi-camera data from many synthetic facilities, which enables cross-facility evaluation. We are not aware of prior work that evaluates a selective-scan replacement for the YOLO attention block on multi-class warehouse detection with measurements on a single-board ARM computer.

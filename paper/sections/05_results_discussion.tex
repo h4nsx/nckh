@@ -1,139 +1,152 @@
 \section{Results and Discussion}
 \label{sec:results}
 
+\subsection{Detection Accuracy}
+\label{sec:res_detection}
+Table~\ref{tab:accuracy_results} summarizes accuracy after identical 20-epoch budgets, and Fig.~\ref{fig:convergence_map} shows the validation curves. Two views must be distinguished. At the \emph{final epoch}, the baseline leads with $69.75\%\ \text{mAP}_{50}$, ahead of Arm~4 ($67.17\%$), Arm~3 ($67.10\%$), and Arm~2 ($65.46\%$), and with $45.83\%\ \text{mAP}_{50-95}$ versus $41.56$--$43.17\%$. At the \emph{best-fitness checkpoint}, Arm~2 reaches $71.95\%$ (epoch 18) versus $69.80\%$ for the baseline (epoch 20), but this checkpoint is selected on the same $100$ frames on which it is reported, so the figure is optimistically biased. All SS2D arms have lower $\text{mAP}_{50-95}$ under either view. Validation $\text{mAP}_{50}$ also changes by up to $14$ points between consecutive epochs after epoch $5$, and by up to $33$ points in the first epochs of Arm~4, which exceeds the $+2.15$-point gap between Arm~2 and the baseline; switching off mosaic at epoch $11$ may contribute. With a single seed, differences between arms cannot be distinguished from run-to-run variance.
+
+\begin{table*}[!t]
+\caption{Accuracy on the validation partition (single seed). Best-fitness checkpoints are selected on the same partition and are therefore optimistically biased; P and R refer to them, the box loss to the final epoch. Arm~3 epochs are counted within stage~2.}
+\label{tab:accuracy_results}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{2.6pt}
+\begin{tabular}{lccccccc}
+\toprule
+ & \multicolumn{2}{c}{\textbf{Final epoch}} & \multicolumn{2}{c}{\textbf{Best fitness}} & & & \textbf{Final val.} \\
+\cmidrule(lr){2-3} \cmidrule(lr){4-5}
+\textbf{Arm} & $\textbf{mAP}_{50}$ & $\textbf{mAP}_{50-95}$ & $\textbf{mAP}_{50}$ (ep.) & $\textbf{mAP}_{50-95}$ & \textbf{P} & \textbf{R} & \textbf{box loss} \\
+\midrule
+1: Baseline & \textbf{69.75} & \textbf{45.83} & 69.80 (20) & \textbf{45.53} & \textbf{0.818} & 0.572 & \textbf{1.0196} \\
+2: SS2D, single-stage & 65.46 & 41.56 & \textbf{71.95} (18) & 45.15 & 0.744 & 0.576 & 1.0688 \\
+3: SS2D, two-stage & 67.10 & 43.17 & 67.67 (14) & 43.15 & 0.741 & \textbf{0.651} & 1.0512 \\
+4: SS2D, dual-scale & 67.17 & 42.73 & 67.17 (20) & 42.76 & 0.738 & 0.515 & 1.0863 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
 \begin{figure*}[!t]
 \centering
-\includegraphics[width=0.98\textwidth]{figures/fig_qualitative_comparison.pdf}
-\caption{Qualitative object detection comparison on SmartSpaces facility-disjoint validation scenes: (Column 1) Ground truth annotations; (Column 2) Arm 1: Baseline YOLO11s Control; (Column 3) Arm 2: SS2D P5 Single-Stage; (Column 4) Arm 3: SS2D P5 Two-Stage Warmup. Subtitles report total predictions, verified true positives (TP at $\text{IoU}\ge 0.5$), and standard recall ($\text{TP}/\text{GT} \le 100\%$). In Scene 1, baseline YOLO11s achieves higher precision and fewer false alarms, whereas Arm 2 and Arm 3 trade off precision to discover difficult, low-contrast vehicle boundaries.}
+\includegraphics[width=\textwidth]{figures/fig_convergence_map_wide.pdf}
+\caption{Validation (a) $\text{mAP}_{50}$ and (b) $\text{mAP}_{50-95}$ over 20 epochs. For Arm~3, epochs 1--5 are stage~1 and epochs 6--20 are stage-2 epochs 1--15, so its best-fitness checkpoint (stage-2 epoch 14) appears at epoch 19.}
+\label{fig:convergence_map}
+\end{figure*}
+
+Two-stage training (Arm~3) has the highest recall ($0.651$ vs.\ $0.572$ for the baseline) but lower precision ($0.741$ vs.\ $0.818$). Because both are reported at the F1-maximizing threshold, this is mainly a shift of the operating point: the derived F1 is $0.693$ vs.\ $0.673$, and $0.683$ vs.\ $0.673$ at the final epoch. The dual-scale model (Arm~4) is close to Arm~3, so adding a $P_4$ block brings no measurable benefit here at a substantial runtime cost. In an initial version of the SS2D pipeline, adapting the COCO head to four classes also re-initialized the $42$ class-agnostic box-regression tensors, raising the initial box loss to $6.276$; transferring all shape-compatible tensors, as Ultralytics does for the baseline, lowers it to $2.758$, and all reported SS2D models use this correction.
+
+\begin{table*}[!t]
+\caption{Per-class $\text{mAP}_{50}$ / $\text{mAP}_{50-95}$ (\%) of the best-fitness checkpoints on the validation partition (also used for checkpoint selection).}
+\label{tab:per_class_results}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lcccc}
+\toprule
+\textbf{Class (val.\ instances)} & \textbf{Arm 1} & \textbf{Arm 2} & \textbf{Arm 3} & \textbf{Arm 4} \\
+\midrule
+\texttt{worker} ($3{,}488$) & 89.2 / \textbf{63.2} & \textbf{89.4} / 61.9 & 87.9 / 60.5 & 88.5 / 60.9 \\
+\texttt{forklift} ($150$) & 70.1 / 31.8 & \textbf{79.7} / 38.3 & 76.3 / \textbf{38.4} & 75.3 / 33.8 \\
+\texttt{pallet\_truck}$^{\dagger}$ ($13$) & 32.8 / \textbf{22.4} & \textbf{33.9} / 17.7 & 22.9 / 16.2 & 20.0 / 14.6 \\
+\texttt{amr} ($45$) & \textbf{87.1} / \textbf{64.7} & 84.9 / 62.6 & 83.7 / 57.5 & 85.0 / 61.7 \\
+\midrule
+Macro (4 classes) & 69.80 / \textbf{45.53} & \textbf{71.95} / 45.15 & 67.67 / 43.15 & 67.17 / 42.76 \\
+\bottomrule
+\multicolumn{5}{p{0.92\textwidth}}{\scriptsize $^{\dagger}$Only $13$ validation instances ($0.35\%$ of labels); not interpreted.} \\
+\end{tabular}
+\end{table*}
+
+Per class (Table~\ref{tab:per_class_results}), all SS2D arms score above the baseline on the $150$ forklift instances ($75.3$--$79.7\%$ vs.\ $70.1\%\ \text{mAP}_{50}$), the largest and most consistent difference. These instances come from $100$ frames of two cameras, so the number of distinct forklifts is much smaller, the difference has not been tested across seeds or with a frame- or track-level bootstrap, and without trained identity or convolution-only replacements it cannot be attributed to the selective scan rather than to the removal of \texttt{C2PSA} or to variance. Workers change little in $\text{mAP}_{50}$ ($87.9$--$89.4\%$) but are lower in $\text{mAP}_{50-95}$ for all SS2D arms, and AMRs are slightly lower ($83.7$--$85.0\%$ vs.\ $87.1\%$). Fig.~\ref{fig:qualitative_comparison} illustrates the mixed picture on one dense frame (\texttt{f000360}, chosen as a representative high-density aisle scene containing worker and mobile machinery interactions): the baseline finds $46$ of $57$ objects with $2$ false positives, Arm~2 finds $42$ with $8$, and Arm~3 finds $44$ with $4$.
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig_qualitative_f000360.jpg}
+\caption{Predictions on validation frame \texttt{f000360} (\texttt{Warehouse\_015}, \texttt{Camera\_01}): ground truth, Arm~1, Arm~2, and Arm~3, with the number of predictions, true positives at $\text{IoU} \ge 0.5$, and recall.}
 \label{fig:qualitative_comparison}
 \end{figure*}
 
-\subsection{Architectural Efficiency and Complexity Comparison}
-\label{sec:res_main}
-We first evaluate the parameter footprint, computational complexity, and storage impact of replacing the standard \texttt{C2PSA} self-attention block with our proposed \texttt{WarehouseSS2DBlock} at stage $P_5$. Table~\ref{tab:main_results} presents the measured empirical values across both configurations.
+\subsection{Edge Deployment}
+\label{sec:res_edge}
+Static savings do not carry over to deployment. The SS2D-P5 checkpoint is smaller ($17.89$ vs.\ $19.18$\,MB), but its ONNX file is larger ($38.5$ vs.\ $36.2$\,MiB), and Table~\ref{tab:edge_runtime} shows that on the Cortex-A72 it is slower than the baseline by $5.7\%$ with one thread and $17.6\%$ with four threads. Its peak memory on the Pi is $373.6$\,MiB, $63.5\%$ below a $1$\,GiB budget but $60.1\%$ above the baseline ($233.4$\,MiB); SS2D-P4P5 peaks at $718.3$\,MiB. With four threads the Pi reaches $0.76$\,FPS for SS2D-P5, $0.52$\,FPS for SS2D-P4P5, and $0.90$\,FPS for the baseline, excluding preprocessing and NMS; the CPU results therefore establish operator portability and fit within $1$\,GiB, not real-time capability.
 
-\begin{table}[!t]
-\caption{Architectural and Complexity Comparison on SmartSpaces Benchmark}
-\label{tab:main_results}
-\centering
-\small
-\resizebox{\columnwidth}{!}{%
-\setlength{\tabcolsep}{3pt}
-\begin{tabular}{lcccccc}
-\toprule
-\textbf{Model Architecture} & \textbf{Layer 10 Type} & \textbf{Layers} & \textbf{Params (M)} & \textbf{GFLOPs} & \textbf{Weights (MB)} & \textbf{Mean CPU Latency (ms)} \\
-\midrule
-YOLO11s Baseline & \texttt{C2PSA} & 100 & 9.429 & 21.7 & 19.18 & 244.7 \\
-\textbf{YOLO11s-SS2D (Case B, P5)} & \textbf{\texttt{WarehouseSS2DBlock}} & \textbf{98} & \textbf{8.796} & \textbf{21.2} & \textbf{17.89} & \textbf{304.0} \\
-\midrule
-\textit{Delta / Reduction} & -- & \textit{-2} & \textbf{-6.72\%} & \textbf{-2.30\%} & \textbf{-6.73\%} & \textit{+24.2\% (mean)} \\
-\bottomrule
-\end{tabular}%
-}
-\end{table}
-
-As shown in Table~\ref{tab:main_results} and illustrated in Figure~\ref{fig:arch_comparison}, the proposed hybrid architecture achieves a \textbf{$6.72\%$ overall parameter reduction} ($633,344$ fewer parameters on warehouse detection) and lowers computational complexity from $21.7$ to $21.2\text{ GFLOPs}$. Specifically at the component level, the \texttt{WarehouseSS2DBlock} contains $357,632$ parameters compared to $990,976$ parameters for the baseline \texttt{C2PSA} block---a \textbf{$63.9\%$ parameter reduction within the attention stage}. Checkpoint storage on disk is reduced from $19.18\text{ MB}$ to $17.89\text{ MB}$, benefiting memory-constrained embedded edge devices.
-
-\begin{figure}[!t]
-\centering
-\includegraphics[width=\columnwidth]{figures/fig_architectural_comparison.pdf}
-\caption{Architectural footprint comparison between Baseline YOLO11s and the proposed YOLO11s-SS2D: (a) Overall and Layer 10 parameter footprint, demonstrating a $63.9\%$ parameter drop within the attention block ($357,632$ vs. $990,976$); (b) Computational complexity (GFLOPs) and disk storage savings.}
-\label{fig:arch_comparison}
-\end{figure}
-
-\subsection{Detection Performance and Convergence Dynamics}
-\label{sec:res_detection}
-Table~\ref{tab:accuracy_results} summarizes multi-arm convergence performance evaluated across identical 20-epoch budgets on the SmartSpaces Warehouse benchmark.
-
-\input{tables/tab_accuracy_results.tex}
-
-As detailed in Table~\ref{tab:accuracy_results} and Figure~\ref{fig:convergence_map}, a key empirical distinction emerges between final epoch convergence and peak checkpoint performance:
-\begin{itemize}
-    \item \textbf{Final Epoch Convergence ($65.46\%$--$67.17\%\text{ mAP}_{50}$):} At the conclusion of the 20-epoch training schedule, Baseline YOLO11s finishes at $69.75\%$, Arm 3 (Case B Two-Stage) converges to $67.10\%$, and Arm 4 (Case C Dual-Scale) achieves $67.17\%$. Single-stage training (Arm 2) drops to $65.46\%$ at epoch 20 due to stochastic optimization variance under small mini-batch training ($B=4$) on 300 frames. Notably, the gap between Arm 3 ($67.10\%$) and Arm 4 ($67.17\%$) is merely $0.07\text{ pp}$, which is statistically indistinguishable and within typical epoch-to-epoch fluctuations ($\approx 3$--$5\text{ pp}$, as visible in Figure~\ref{fig:convergence_map}).
-    \item \textbf{Peak Checkpoint Accuracy ($71.95\%\text{ mAP}_{50}$):} When checkpointing the best model states based on validation fitness, Arm 2 achieves a peak validation accuracy of \textbf{$71.95\%\text{ mAP}_{50}$} at epoch 18 (surpassing Baseline's peak of $69.80\%$ at epoch 6), while Arm 4 peaks at $67.17\%$ (global epoch 20) and Arm 3 peaks at $67.67\%$ (Stage 2 fine-tuning epoch 14, corresponding to global epoch 19 of the 5+15 schedule). 
-\end{itemize}
-Clarifying this difference ensures complete transparency: the $67.10\%$--$67.17\%$ range reflects unselected final 20-epoch convergence across multi-stage and dual-scale architectures, whereas $71.95\%$ represents the maximum achievable checkpoint accuracy captured during fine-tuning. Because checkpoint selection on the validation partition can introduce optimistic selection bias, we report both in Table~\ref{tab:accuracy_results}.
- 
-\begin{figure}[!t]
-\centering
-\includegraphics[width=\columnwidth]{figures/fig_convergence_map.pdf}
-\caption{Validation detection accuracy convergence curves over 20 epochs on SmartSpaces Warehouse: (a) Validation $\text{mAP}_{50}$ (\%); (b) Validation $\text{mAP}_{50-95}$ (\%), illustrating the performance of Baseline YOLO11s against Single-Stage, Two-Stage Case B, and Dual-Scale Case C YOLO11s-SS2D.}
-\label{fig:convergence_map}
-\end{figure}
-
-\subsection{Discussion: Diagnostic Analysis and Full Warmstart Resolution}
-\label{sec:res_discussion}
-Comparing the four experimental arms provides critical empirical insights into hybrid CNN-SSM optimization dynamics:
-
-\subsubsection{Diagnostic Analysis of Detection Head Randomization}
-In our diagnostic evaluation (EXP-04), we investigated the empirical lag observed during initial un-warmstarted trials. When adapting a novel hybrid architecture from YAML definitions and transferring COCO weights ($80 \to 4$ classes), naive checkpoint loading scripts can inadvertently discard or fail to match the detection head (Layer 23). While dropping weights is expected for the class-specific classification branch (\texttt{cv3}), unguided surgery pipelines risk resetting all $42$ pretrained bounding box regression convolutional layers (\texttt{cv2}) to random Gaussian initialization. In our initial implementation, this pipeline oversight caused the initial bounding box regression loss to surge to $\mathcal{L}_{\text{box}} = 6.276$.
-
-\subsubsection{Resolution via Full Warmstart Transfer}
-To safeguard pipeline integrity, our surgical warmstart procedure explicitly implements tensor-level name-and-shape matching. It preserves all $42$ class-agnostic box regression weight tensors alongside the $336$ backbone and neck layers, while zero-initializing the norm affine parameters ($\gamma_0 = \mathbf{0}, \beta_0 = \mathbf{0}$). Empirical verification confirmed that under this verified warmstart protocol, initial box loss immediately commences at a low, stable level ($\mathcal{L}_{\text{box}} = 2.758$), eliminating gradient shock and ensuring an equitable foundation against the baseline control.
-
-\subsubsection{Convergence Dynamics: Single-Scale vs. Dual-Scale Architecture}
-As demonstrated in Table~\ref{tab:accuracy_results} and Figure~\ref{fig:convergence_map}, the Two-Stage training protocol (Arm 3) achieved the highest macro recall ($64.53\%$, precision $0.725$) among all configurations, outperforming Baseline YOLO11s ($57.22\%$, precision $0.818$) by $+7.31$ percentage points (pp) absolute, while trading off overall 4-class $\text{mAP}_{50}$ ($67.10\%$ vs. $69.75\%$). This corresponds to an operating-point shift towards recall: F1 remains virtually unchanged ($0.683$ for Arm 3 vs. $0.673$ for Baseline), accompanied by an expected precision drop ($-9.3\text{ pp}$) and a reduction in strict multi-threshold $\text{mAP}_{50-95}$ ($43.17\%$ vs. $45.82\%$). Arm 4 (Case C: Dual-Scale SS2D placed at both $P_4$ and $P_5$ feature scales) achieved \textbf{$67.17\%\text{ mAP}_{50}$} and $42.73\%\text{ mAP}_{50-95}$, closely tracking Arm 3 while providing selective state-space modeling across intermediate warehouse target scales.
-
-\subsubsection{Per-Class Breakdown and Safety-Critical Vehicle Detection}
-To evaluate category-specific representations, Table~\ref{tab:per_class_results} presents the quantitative detection performance across all four warehouse classes on the held-out cross-facility validation split:
-
-\input{tables/tab_per_class_results.tex}
-
-As summarized in Table~\ref{tab:per_class_results}, the category-level evaluation highlights key empirical observations:
-\begin{enumerate}
-    \item \textbf{Forklift Perception (+6.1 pp Gain in Arm 3, +9.6 pp in Arm 2):} Both Arm 2 ($79.7\%\text{ mAP}_{50}$), Arm 3 ($76.3\%$), and Arm 4 ($75.2\%$) outperform Arm 1 Baseline Control ($70.1\%$). In warehouse operations, motorized forklifts present high collision risks. The 4-direction state-space recurrence along warehouse aisles appears to capture elongated vehicle geometries effectively, yielding significant recall improvements on heavy equipment.
-    \item \textbf{Personnel Safety Localization ($88.5\%\text{ mAP}_{50}$ in Arm 4):} Arm 4 achieves competitive worker localization ($88.5\%\text{ mAP}_{50}$ and $60.9\%\text{ mAP}_{50-95}$), closely matching baseline control ($89.2\%$) across all $3{,}488$ validation instances while maintaining balanced false-positive suppression.
-    \item \textbf{Autonomous Mobile Robots (AMRs):} Across all arms, mobile robot perception remains resilient ($83.7\%$--$87.1\%\text{ mAP}_{50}$), with Arm 4 attaining $85.0\%\text{ mAP}_{50}$ and $61.7\%\text{ mAP}_{50-95}$, confirming that intermediate $P_4$ state-space modeling successfully preserves low-profile robotic targets.
-    \item \textbf{The Pallet Truck Metric Artifact and 3-Class Macro Comparison:} All evaluated architectures exhibit lower precision and recall on \texttt{pallet\_truck} ($20.0\%$--$33.9\%\text{ mAP}_{50}$). These metrics must be interpreted with extreme caution: manual pallet jacks constitute only $13$ instances in the $3{,}696$-instance validation set ($0.35\%$ of total annotations), compared to $3{,}488$ worker annotations. Because standard macro averaging weights each category equally ($25\%$), this single $n=13$ tail class disproportionately drags down the 4-class global mAP of Arms 3 and 4. When evaluating the \textbf{3-Class Macro $\text{mAP}_{50}$ (excluding pallet truck)}, the apparent global penalty vanishes: Baseline YOLO11s achieves $82.13\%$, while Arm 2 achieves \textbf{$84.64\%$ ($+2.51\text{ pp}$)}, Arm 3 achieves \textbf{$82.61\%$ ($+0.48\text{ pp}$)}, and Arm 4 achieves \textbf{$82.91\%$ ($+0.78\text{ pp}$)}. This demonstrates that for the well-supported logistics classes (\texttt{worker}, \texttt{forklift}, \texttt{amr}), SS2D models consistently maintain or improve $\text{mAP}_{50}$ over baseline control.
-\end{enumerate}
-
-\subsubsection{Qualitative Visual Inference Comparison}
-Figure~\ref{fig:qualitative_comparison} illustrates detection performance across complex warehouse scenes with dense clusters, visual clutter, and variable lighting. In Scene 1, Baseline YOLO11s exhibits high precision with fewer false alarms, whereas Arm 2 and Arm 3 trade off precision to detect difficult, occluded target boundaries, generating additional candidate proposals in congested zones.
-
-\subsection{Edge Deployment and Hardware Verification}
-\label{sec:res_edge_deployment}
-To validate whether the state-space formulation is viable for real-world automated logistics edge hardware, we conducted physical export and runtime benchmarks using ONNX Runtime v1.31.
-
-\begin{figure}[!t]
-\centering
-\includegraphics[width=0.78\columnwidth]{figures/fig_edge_memory_footprint.pdf}
-\caption{Inference process physical memory footprint (peak RSS) of the exported YOLO11s-SS2D model compared against the 1024 MB (1.0 GiB) memory ceiling of embedded edge computing gateways.}
-\label{fig:edge_memory}
-\end{figure}
-
-\begin{table}[!t]
-\caption{Edge Hardware Export and Empirical Runtime Profile ($640 \times 640$, Batch Size = 1)}
+\begin{table*}[!t]
+\caption{ONNX Runtime forward-pass latency and memory ($640 \times 640$, batch size 1, FP32). Mem.: peak RSS on the Pi, RSS after the timed loop on the host. Rel.: median relative to the baseline of the same device, session, and thread count.}
 \label{tab:edge_runtime}
 \centering
-\small
-\resizebox{\columnwidth}{!}{%
+\footnotesize
 \setlength{\tabcolsep}{3pt}
+\begin{tabular}{llccccc}
+\toprule
+\textbf{Model} & \textbf{Device (threads)} & \textbf{Mem.\ (MiB)} & \textbf{Median (ms)} & \textbf{Mean $\pm$ SD (ms)} & \textbf{Rel.} & \textbf{FPS} \\
+\midrule
+Baseline & x86 host (default) & 285.1 & 228.95 & 244.72 $\pm$ 33.5 & 1.00 & 4.37 \\
+SS2D-P4P5 & x86 host (default) & 401.3 & 699.33 & 694.58 $\pm$ 12.1 & 3.05 & 1.43 \\
+\midrule
+\multicolumn{7}{l}{\textit{Pi~4, session~2 (100 calls with 1 thread, 30 with 4)}} \\
+Baseline & Pi 4 (1) & 233.2 & 3192.88 & 3194.63 $\pm$ 5.0 & 1.00 & 0.31 \\
+SS2D-P5 & Pi 4 (1) & 373.1 & 3374.10 & 3374.58 $\pm$ 3.6 & 1.06 & 0.30 \\
+Baseline & Pi 4 (4) & 233.4 & 1117.27 & 1120.62 $\pm$ 7.5 & 1.00 & 0.90 \\
+SS2D-P5 & Pi 4 (4) & 373.6 & 1314.26 & 1316.11 $\pm$ 4.8 & 1.18 & 0.76 \\
+\midrule
+\multicolumn{7}{l}{\textit{Pi~4, session~1 (100 calls with 1 thread, 30 with 4)}} \\
+Baseline & Pi 4 (1) & 233.2 & 3360.50 & 3360.15 $\pm$ 5.2 & 1.00 & 0.30 \\
+SS2D-P4P5 & Pi 4 (1) & 716.5 & 4178.68 & 4178.96 $\pm$ 3.5 & 1.24 & 0.24 \\
+Baseline & Pi 4 (4) & 233.3 & 1106.76 & 1110.09 $\pm$ 7.3 & 1.00 & 0.90 \\
+SS2D-P4P5 & Pi 4 (4) & 718.3 & 1927.71 & 1929.04 $\pm$ 7.7 & 1.74 & 0.52 \\
+\bottomrule
+\multicolumn{7}{p{0.95\textwidth}}{\scriptsize An x86 measurement of SS2D-P5 is omitted because the checkpoint behind its file could not be confirmed. The single-thread baseline median differs by $5.0\%$ between the two Pi sessions (the clock of the session-1 single-thread runs was not logged) and the four-thread median by $0.9\%$.} \\
+\end{tabular}
+\end{table*}
+
+\textbf{Why the cheaper model is slower.} Table~\ref{tab:graph_profile} points to the scan's many small operators. (1)~Exporting the four-direction scan unrolls its loop over $L = 400$ steps into $14{,}771$ ONNX nodes ($4{,}800$ \texttt{Gather}, $3{,}293$ \texttt{Mul}, $3{,}212$ \texttt{Unsqueeze}, $1{,}621$ \texttt{Add}, $1{,}600$ \texttt{ReduceSum}), versus $320$ for the baseline; ONNX Runtime removes only $70$ of them. SS2D-P4P5 has $90{,}201$ nodes. (2)~Convolution time per call is nearly constant ($905$, $865$, and $877$\,ms), but its share of kernel time falls from $78.4\%$ to $50.0\%$ (SS2D-P5) and $22.5\%$ (SS2D-P4P5), while the scan's element-wise and indexing operators take $35.1\%$ and $68.4\%$. The profiler adds a per-node cost (mean profiled call $1161$, $1951$, and $4943$\,ms), so these shares overstate the scan; the constant convolution time is the more robust observation. With the small analytical cost of the scan (Section~\ref{sec:complexity}), this indicates that the extra latency comes from the operators executed per call rather than from arithmetic. (3)~Going from one to four threads speeds up the baseline by $2.86\times$ but SS2D-P5 by only $2.57\times$ (session~2), and the baseline by $3.04\times$ but SS2D-P4P5 by $2.17\times$ (session~1), consistent with a long chain of small dependent operators that leave little work to parallelize.
+
+\begin{table*}[!t]
+\caption{ONNX graph size and operator profile on the Pi (four threads, five profiled calls). Conv/scan: share of summed kernel time taken by convolutions and by the scan operators (\texttt{Mul}, \texttt{Squeeze}, \texttt{Unsqueeze}, \texttt{Add}, \texttt{ReduceSum}, \texttt{Gather}, \texttt{Split}).}
+\label{tab:graph_profile}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{3.4pt}
+\begin{tabular}{lccccc}
+\toprule
+\textbf{Model} & \textbf{Nodes} & \textbf{After ORT opt.} & \textbf{ONNX (MiB)} & \textbf{Conv (ms/call)} & \textbf{Conv / scan (\%)} \\
+\midrule
+Baseline & 320 & 236 & 36.2 & 905 & 78.4 / $<2.5$ \\
+SS2D-P5 & 14{,}771 & 14{,}701 & 38.5 & 865 & 50.0 / 35.1 \\
+SS2D-P4P5 & 90{,}201 & 72{,}385 & 46.6 & 877 & 22.5 / 68.4 \\
+\bottomrule
+\multicolumn{6}{p{0.92\textwidth}}{\scriptsize Baseline and SS2D-P4P5 profiled in session~1 without a clock log, SS2D-P5 in session~2 at $1.5$\,GHz.} \\
+\end{tabular}
+\end{table*}
+
+\textbf{Runtime intervention.} These observations are correlational, so we changed the graph form of the scan while keeping its computation fixed (Table~\ref{tab:g1_intervention}). First, removing the $P_5$ block entirely lowers latency by only $2.4\%$ (one thread) and $5.3\%$ (four threads), and the convolution-only block costs about the same, whereas the SS2D block adds $17.0\%$ and $22.2\%$ over the identity model. Second, fewer nodes did not mean lower latency: one ONNX \texttt{Loop} per direction shrinks the graph from $14{,}767$ to $367$ nodes but makes the model $2.2\times$ and $4.5\times$ slower than the unrolled scan, because its $37$--$38$-node body runs $400$ times per direction, about $60{,}000$ node executions per call. The chunked scan cuts the graph by $43\%$ but adds computation within each chunk and is $4.4\%$ and $14.0\%$ slower. Third, removing the dependency chain did not help either: a parallel associative scan~\cite{blelloch1990prefix} evaluates the same recurrence in $\lceil \log_2 L \rceil = 9$ whole-sequence steps with $619$ nodes, yet with the trained Arm~3 weights it is $18\%$ (one thread) and $58\%$ (four threads) slower than the unrolled export, and its one-to-four-thread speed-up drops to $1.94\times$ (baseline $3.01\times$, unrolled $2.60\times$). Its convolutions still take about $904$\,ms per profiled call, and its \texttt{Mul}, \texttt{Add}, \texttt{Pad}, and \texttt{Slice} operators about $1018$\,ms. Neither node count nor the sequential chain is thus the cause on its own; the two forms pay different costs for the same small arithmetic ($13.1$\,M MACs). The unrolled scan executes a long chain of small dependent operators, whereas the parallel scan repeatedly reads and writes the full $400 \times 256 \times 16$ state of each direction ($\approx 6.5$\,MB per tensor), which together with its weaker thread scaling points to a memory-bandwidth limit. We have not confirmed either mechanism with hardware counters, and fused kernels and the matrix (SSD) form of Mamba-2~\cite{dao2024mamba2}, which requires a scalar decay per head and thus a modified, retrained block, remain untested. With untrained weights the unrolled export runs within $0.2\%$ of the trained SS2D-P5 export with four threads but $6.5\%$ slower with one thread, so the upper block of Table~\ref{tab:g1_intervention} should not be compared with Table~\ref{tab:edge_runtime} in absolute terms. The session-3 baseline is $4.9\%$ (one thread) and $0.5\%$ (four threads) off its session-2 value, so only within-session ratios are interpreted.
+
+\begin{table*}[!t]
+\caption{Runtime intervention on the Pi: median latency in ms; Rel.: relative to the baseline of the same block at the same thread count; MiB: peak RSS with four threads. Upper block: session~2, untrained exports, 3 warmup and 20 timed calls (SD at most $10.8$\,ms). Lower block: session~3, trained Arm~1 and Arm~3 exports, protocol of Table~\ref{tab:edge_runtime}.}
+\label{tab:g1_intervention}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{5pt}
 \begin{tabular}{lcccccc}
 \toprule
-\textbf{Model Architecture} & \textbf{Platform / Device} & \textbf{Artifact} & \textbf{Peak RSS} & \textbf{Median (ms)} & \textbf{Mean (ms)} & \textbf{Throughput} \\
+\textbf{Variant} & \textbf{Nodes} & \textbf{1 thread} & \textbf{Rel.} & \textbf{4 threads} & \textbf{Rel.} & \textbf{MiB} \\
 \midrule
-\multicolumn{7}{l}{\textit{Host Development Environment (x86\_64 Core i7 / ONNX Runtime v1.31)}} \\
-YOLO11s (Baseline Control) & Host CPU & 36.18 MB & 285.1 MB & 228.95 & 244.72 $\pm$ 33.5 & 4.37 FPS \\
-\textbf{YOLO11s-SS2D (Case B, P5)} & \textbf{Host CPU} & \textbf{38.47 MB} & \textbf{395.7 MB} & \textbf{301.26} & \textbf{304.01 $\pm$ 8.5} & \textbf{3.32 FPS} \\
-YOLO11s-SS2D (Case C, P4+P5) & Host CPU & 46.62 MB & 401.3 MB & 699.33 & 694.58 $\pm$ 12.1 & 1.43 FPS \\
+Baseline (\texttt{C2PSA}) & 320 & 3146.7 & 1.00 & 1132.8 & 1.00 & 233.3 \\
+$P_5$ block removed & 292 & 3070.4 & 0.98 & 1072.7 & 0.95 & 229.4 \\
+Convolution-only & 300 & 3105.4 & 0.99 & 1095.9 & 0.97 & 230.5 \\
+SS2D, unrolled & 14{,}767 & 3593.8 & 1.14 & 1311.3 & 1.16 & 373.6 \\
+SS2D, ONNX \texttt{Loop} & 367 & 7778.6 & 2.47 & 5938.4 & 5.24 & 274.0 \\
+SS2D, chunked ($T = 4$) & 8{,}355 & 3752.5 & 1.19 & 1494.7 & 1.32 & 304.3 \\
 \midrule
-\multicolumn{7}{l}{\textit{Physical Embedded Edge Silicon (Raspberry Pi 4 Model B Rev 1.2, Quad-Core Cortex-A72 @ 1.5 GHz, aarch64)}} \\
-YOLO11s (Baseline Control) & Pi 4 ARM & 36.18 MB & 231.5 MB & 1166.70 & 1169.73 $\pm$ 24.7 & 0.86 FPS \\
-\textbf{YOLO11s-SS2D (Case B, P5)} & \textbf{Pi 4 ARM} & \textbf{38.47 MB} & \textbf{371.9 MB} & \textbf{1392.43} & \textbf{1398.19 $\pm$ 28.0} & \textbf{0.72 FPS} \\
-YOLO11s-SS2D (Case C, P4+P5) & Pi 4 ARM & 46.62 MB & 714.9 MB & 1954.21 & 1965.07 $\pm$ 29.7 & 0.51 FPS \\
+\multicolumn{7}{l}{\textit{Trained exports, session~3}} \\
+Baseline (\texttt{C2PSA}) & 320 & 3347.9 & 1.00 & 1111.8 & 1.00 & 233.3 \\
+SS2D, unrolled & 14{,}771 & 3449.0$^{*}$ & 1.03 & 1327.9 & 1.19 & 373.6 \\
+SS2D, parallel scan & 619 & 4072.9 & 1.22 & 2104.0 & 1.89 & 389.4 \\
 \bottomrule
-\end{tabular}%
-}
-\end{table}
+\multicolumn{7}{p{0.92\textwidth}}{\scriptsize $^{*}$One clock sample at $600$\,MHz (at $62.8\,^{\circ}$C) during this run, SD $505$\,ms; all other session-3 runs stayed at $1.5$\,GHz (SD at most $8.9$\,ms).} \\
+\end{tabular}
+\end{table*}
 
-As summarized in Table~\ref{tab:edge_runtime} and Figure~\ref{fig:edge_memory}, the proposed YOLO11s-SS2D exports seamlessly into native ONNX with graph slimming (\texttt{onnxslim}). Because our 2D selective scan is formulated via vectorized PyTorch recurrence rather than proprietary C++/CUDA extensions, it requires zero custom plugins on target hardware. 
+\subsection{Design Lessons and Limitations}
+\label{sec:limitations}
+Three lessons follow for replacing attention with selective scans in small detectors. (1)~\emph{Fewer FLOPs can mean a slower model}, and neither shrinking the graph nor parallelizing the scan necessarily helps on a CPU; latency and peak memory should be measured at the deployed thread count, and alternative export forms of the recurrence compared directly. (2)~\emph{Comparisons need identical warm starts}: the class-agnostic box-regression branch must be transferred for every arm. (3)~\emph{A zero-initialized convolution ahead of BN is not an identity initialization}; zero-$\gamma$ initialization (Eq.~\eqref{eq:zero_gamma}) avoids the problem by construction, although its effect on detector training remains to be measured.
 
-To validate edge viability on physical silicon, we deployed both the baseline and state-space architectures onto a \textbf{Raspberry Pi 4 Model B Rev 1.2} (Quad-Core Broadcom BCM2711 ARM Cortex-A72 @ 1.5\,GHz, aarch64). During physical on-device inference, total process physical memory consumption of YOLO11s-SS2D (Case B) remained at \textbf{$371.9\text{ MB}$}, operating \textbf{$63.7\%$ beneath the $1024\text{ MB}$ memory ceiling} ($62.8\%$ under $1000\text{ MB}$). Even the multi-scale Case C model maintained a modest memory footprint of $714.9\text{ MB}$, well within standard 2\,GB--4\,GB edge SBC limits. Crucially, as reported in Table~\ref{tab:edge_runtime}, steady-state neural network model forward execution (\texttt{session.run}) on the Cortex-A72 CPU yields approximately \textbf{$0.72\text{ FPS}$ ($1398.19\text{ ms}$)} for Case B and $0.51\text{ FPS}$ ($1965.07\text{ ms}$) for Case C, excluding host image decoding, resizing, and non-maximum suppression (NMS) post-processing. We explicitly clarify that this forward execution rate does \textit{not} demonstrate real-time visual inference ($>30\text{ FPS}$); rather, it demonstrates that the zero-plugin ONNX model satisfies embedded memory budgets without memory leak or kernel crash, whereas real-time throughput requires execution on edge platforms with parallel GPU/NPU prefix-scan engines.
-
-\subsubsection{Scientific Investigation of the Accuracy--Efficiency Trade-off}
-A critical empirical finding confirmed consistently across both x86\_64 host and physical ARM64 hardware in Table~\ref{tab:edge_runtime} is that despite possessing fewer parameters ($8.796\text{ M}$ vs. $9.429\text{ M}$) and lower theoretical complexity ($21.2\text{ GFLOPs}$ vs. $21.7\text{ GFLOPs}$), the steady-state CPU latency of Case B is higher than Baseline YOLO11s ($+24.2\%$ mean latency on x86 / $+31.6\%$ median, $+19.5\%$ on ARM Cortex-A72: $1398.19\text{ ms}$ vs. $1169.73\text{ ms}$), and its deployed ONNX file is slightly larger ($38.47\text{ MB}$ vs. $36.18\text{ MB}$) due to the constant parameter tensors in the unrolled scan graph. Profiling the component-level ONNX operator execution graph with the ONNX Runtime execution profiler empirically uncovers the exact systems mechanism:
-\begin{enumerate}
-    \item \textbf{Graph Unrolling and Operator Proliferation:} In Baseline YOLO11s, the entire neural network compiles into a compact graph of only \textbf{$320$ ONNX nodes}, where 2D convolutions ($88$ nodes) and parallel matrix multiplications (\texttt{MatMul}) dominate execution, consuming $68.6\%$ of execution time on highly optimized parallel BLAS/oneDNN threadpools. Conversely, exporting the pure-PyTorch 4-directional selective scan unrolls the recurrent sequence loop across $L=400$ steps into \textbf{$14{,}767$ individual ONNX nodes} ($4{,}800$ \texttt{Gather}, $3{,}289$ \texttt{Mul}, $3{,}212$ \texttt{Unsqueeze}, $1{,}621$ \texttt{Add}, and $1{,}600$ \texttt{ReduceSum} operators). 
-    \item \textbf{Memory-Bandwidth and Operator Dispatch Bottlenecks:} On CPU execution engines, launching thousands of fragmented scalar and vector operators incurs substantial interpreter and kernel dispatch overhead, alongside memory bandwidth contention from intermediate activation buffers. This operator fragmentation accounts for the $+60.6\%$ increase in physical memory RSS ($371.9\text{ MB}$ vs. $231.5\text{ MB}$) and elevated latency on CPU silicon. In Case C ($P_4 + P_5$), unrolling recurrence over the $L=1600$ token grid expands the sequential node graph fourfold, driving CPU inference to $1965\text{ ms}$ ($1.4\times$ latency over Case B, despite a $5\times$ increase in state tokens, indicating that runtime is bounded by operator dispatch latency rather than token arithmetic).
-    \item \textbf{Comparison with Prior Art (MambaPSA):} In prior literature, MambaPSA~\cite{chan2026mambapsa} reported $17\text{--}20\text{ FPS}$ on an Intel Core i7 host CPU. This substantial performance gap compared to our measured $3.32\text{ FPS}$ stems directly from deployment formulation: MambaPSA evaluated in-memory PyTorch / fused execution leveraging optimized native routines, whereas our evaluation targets a fully unrolled, zero-dependency standalone ONNX runtime graph. While standalone ONNX eliminates external toolchain dependencies on ARM SBCs, it serializes recurrent loops into thousands of individual graph nodes. Future work will investigate CPU-friendly scan formulations, such as chunked associative scans or ONNX \texttt{Loop}/\texttt{Scan} control-flow operators, to mitigate node proliferation.
-\end{enumerate}
+The results have clear limitations. All accuracy results come from one seed, a 20-epoch budget, and one $100$-frame validation facility that also served for checkpoint selection, without a held-out test facility or significance testing. The data are synthetic, cover two facilities, and consecutive frames are highly correlated. The reported SS2D models use the initialization of Eq.~\eqref{eq:zero_wout}. Identity and convolution-only replacements were measured for runtime only, so no trained ablation separates the scan from the removal of \texttt{C2PSA}, and the simplifications relative to Mamba are not ablated. Edge measurements cover only the forward pass on two CPUs in FP32; preprocessing, NMS, session-creation time (tens of minutes for SS2D-P4P5 on the Pi, not timed), accelerators, quantization, and energy were not measured. The Pi results come from three sessions, and most intervention variants use untrained exports.

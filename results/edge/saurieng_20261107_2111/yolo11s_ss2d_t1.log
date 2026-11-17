@@ -1,0 +1,18 @@
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_ss2d.onnx
+=================================================================
+
+1. Warming up (10 iterations)...
+2. Timing forward pass over 100 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_ss2d.onnx  (14767 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 1
+Forward median:   3641.94 ms  (P95 3649.83 ms, 0.27 FPS)
+RSS idle / end:   47.8 / 373.5 MiB
+Peak RSS (HWM):   373.5 MiB
+----------------------------------------
+[SAVED] results/edge/saurieng_20261107_2111/yolo11s_ss2d_t1.json

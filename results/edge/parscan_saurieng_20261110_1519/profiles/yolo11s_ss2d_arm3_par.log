@@ -1,0 +1,29 @@
+=================================================================
+PROFILING ONNX GRAPH: yolo11s_ss2d_arm3_par.onnx
+=================================================================
+Total Graph Nodes: 619
+Operator Distribution:
+  - Mul            :    165 nodes ( 26.7%)
+  - Conv           :     84 nodes ( 13.6%)
+  - Sigmoid        :     77 nodes ( 12.4%)
+  - Slice          :     74 nodes ( 12.0%)
+  - Pad            :     68 nodes ( 11.0%)
+  - Add            :     57 nodes (  9.2%)
+  - Concat         :     20 nodes (  3.2%)
+  - Unsqueeze      :     16 nodes (  2.6%)
+  - Reshape        :     15 nodes (  2.4%)
+  - Split          :     12 nodes (  1.9%)
+Nodes after ORT graph optimization: 541
+
+Saved detailed ORT profile log to: results/edge/parscan_saurieng_20261110_1519/profiles/ort_profile_yolo11s_ss2d_arm3_par_2026-11-10_16-11-10_897.json
+
+Operator Time Breakdown (Top 8):
+  - Conv           :  4522.21 ms ( 41.1%)
+  - Mul            :  2270.07 ms ( 20.7%)
+  - Add            :  1117.01 ms ( 10.2%)
+  - Pad            :   885.15 ms (  8.1%)
+  - Slice          :   820.40 ms (  7.5%)
+  - QuickGelu      :   740.92 ms (  6.7%)
+  - Concat         :   163.86 ms (  1.5%)
+  - Softmax        :   111.96 ms (  1.0%)
+[SAVED] results/edge/parscan_saurieng_20261110_1519/profiles/yolo11s_ss2d_arm3_par_t4_profile.json

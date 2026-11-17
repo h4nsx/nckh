@@ -102,9 +102,9 @@ def generate_edge_deployment_chart():
         'Pi 4 Baseline Control\n(BCM2711 ARM Cortex-A72)',
         'Pi 4 YOLO11s-SS2D\n(BCM2711 ARM Cortex-A72)',
         'Host x86 CPU\n(YOLO11s-SS2D Case B)',
-        'Edge Embedded Budget\n(1024 MB Gateway Limit)'
+        'Edge Embedded Budget\n(1 GiB = 1024 MiB)'
     ]
-    rss_values = [231.5, 371.9, 395.7, 1024.0] # Peak RSS in MB
+    rss_values = [231.5, 371.9, 395.7, 1024.0]  # RSS after the timed loop, MiB (not the true peak; see benchmark_edge_device.py)
     colors = ['#4575b4', '#313695', '#74add1', '#d73027']
 
     y_pos = np.arange(len(categories))
@@ -113,26 +113,26 @@ def generate_edge_deployment_chart():
     ax.set_yticks(y_pos)
     ax.set_yticklabels(categories, fontsize=9.5)
     ax.invert_yaxis()  # labels read top-to-bottom
-    ax.set_xlabel('Peak Physical Process Memory RSS (MB)', fontsize=10.5, fontweight='bold')
-    ax.set_title('Physical Edge Memory Footprint vs. Embedded Hardware Ceiling', fontsize=11, fontweight='bold')
+    ax.set_xlabel('Process Resident Memory after Timed Loop (MiB)', fontsize=10.5, fontweight='bold')
+    ax.set_title('Resident Memory vs. a 1 GiB Embedded Budget', fontsize=11, fontweight='bold')
     ax.set_xlim(0, 1200)
     ax.grid(axis='x', linestyle='--', alpha=0.5)
 
-    # Add vertical line for 1GB boundary
+    # Vertical line for the 1 GiB (1024 MiB) budget
     ax.axvline(1024, color='#d73027', linestyle='--', linewidth=1.8, alpha=0.8)
 
     # Value annotations
     for bar in bars:
         width = bar.get_width()
-        label = f"{width:.1f} MB"
+        label = f"{width:.1f} MiB"
         if width == 1024.0:
-            label += " (Target Ceiling)"
+            label += " (budget)"
         elif width == 371.9:
-            label += " (-63.7% margin)"
+            label += " (63.7% headroom)"
         elif width == 231.5:
-            label += " (-77.4% margin)"
+            label += " (77.4% headroom)"
         elif width == 395.7:
-            label += " (-61.4% margin)"
+            label += " (61.4% headroom)"
         ax.annotate(label,
                     xy=(width, bar.get_y() + bar.get_height() / 2),
                     xytext=(6, 0), textcoords="offset points",

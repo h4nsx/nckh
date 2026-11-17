@@ -18,21 +18,27 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 
+# Sized for a single IEEE column (3.5 in) so that text stays >= 7 pt in print.
+# TrueType font embedding (fonttype 42) avoids Type 3 fonts, which IEEE PDF eXpress rejects.
 plt.rcParams.update({
     'font.family': 'serif',
-    'font.size': 11,
-    'axes.labelsize': 12,
-    'axes.titlesize': 13,
-    'xtick.labelsize': 10,
-    'ytick.labelsize': 10,
-    'legend.fontsize': 10,
-    'figure.titlesize': 14,
-    'figure.autolayout': True,
+    'font.serif': ['Times New Roman', 'Times', 'Nimbus Roman', 'DejaVu Serif'],
+    'mathtext.fontset': 'stix',
+    'font.size': 8,
+    'axes.labelsize': 8,
+    'axes.titlesize': 8,
+    'xtick.labelsize': 7,
+    'ytick.labelsize': 7,
+    'legend.fontsize': 7,
+    'pdf.fonttype': 42,
+    'ps.fonttype': 42,
     'savefig.dpi': 300
 })
 
-BASE_DIR = "runs/detect/runs/two_stage_protocol_study"
-OUTPUT_DIR = "paper/figures"
+BASE_DIR = os.environ.get("RUNS_DIR", "runs/detect/runs/two_stage_protocol_study")
+OUTPUT_DIR = os.environ.get("OUTPUT_DIR", "paper/figures")
+# FIG_LAYOUT=wide: side-by-side panels for the 12.2 cm LNCS text width
+WIDE = os.environ.get("FIG_LAYOUT") == "wide"
 
 def find_arm_csv(pattern):
     matches = glob.glob(os.path.join(BASE_DIR, pattern, "results.csv"))
@@ -57,6 +63,8 @@ def plot_convergence():
     csv_arm3_s2 = find_arm_csv("arm3_stage2_finetune")
 
     csv_arm4 = find_arm_csv("arm4_case_c_dual_scale")
+    if csv_arm4 is None and os.path.exists("results/tables/arm4_case_c_dual_results.csv"):
+        csv_arm4 = "results/tables/arm4_case_c_dual_results.csv"
 
     # Combine arm 3 stages if both exist
     df_arm1 = load_clean_df(csv_arm1)
@@ -79,10 +87,10 @@ def plot_convergence():
         df_arm3 = df_arm3_s1
 
     available_data = {}
-    if df_arm1 is not None: available_data['Arm 1: Baseline YOLO11s'] = (df_arm1, '#2b5c8f', '-')
-    if df_arm2 is not None: available_data['Arm 2: Case B (Single-Stage)'] = (df_arm2, '#d95f02', '--')
-    if df_arm3 is not None: available_data['Arm 3: Case B (Two-Stage Protocol)'] = (df_arm3, '#1b9e77', '-.')
-    if df_arm4 is not None: available_data['Arm 4: Case C (Dual-Scale P4+P5)'] = (df_arm4, '#7570b3', ':')
+    if df_arm1 is not None: available_data['Arm 1: baseline'] = (df_arm1, '#2b5c8f', '-')
+    if df_arm2 is not None: available_data['Arm 2: SS2D, single-stage'] = (df_arm2, '#d95f02', '--')
+    if df_arm3 is not None: available_data['Arm 3: SS2D, two-stage'] = (df_arm3, '#1b9e77', '-.')
+    if df_arm4 is not None: available_data['Arm 4: SS2D, dual-scale'] = (df_arm4, '#7570b3', ':')
 
     if not available_data:
         print(f"[!] No results.csv found under {BASE_DIR} yet.")
@@ -97,7 +105,10 @@ def plot_convergence():
         print(f"  * {name}")
 
     # --- Plot 1: Detection Accuracy (mAP50 & mAP50-95) ---
-    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10.5, 4.2))
+    if WIDE:
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(4.75, 2.35))
+    else:
+        fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(3.5, 4.2), sharex=True)
 
     for label, (df, color, ls) in available_data.items():
         epochs = df['epoch'] if 'epoch' in df.columns else np.arange(1, len(df) + 1)
@@ -110,19 +121,18 @@ def plot_convergence():
         if map50_95 is not None:
             ax2.plot(epochs, map50_95 * 100.0, label=label, color=color, linestyle=ls, linewidth=2.0)
 
-    ax1.set_title('(a) Validation mAP@50 (%)')
-    ax1.set_xlabel('Epoch')
-    ax1.set_ylabel('mAP@50 (%)')
+    ax1.set_ylabel(r'(a) mAP$_{50}$ (%)')
     ax1.grid(True, linestyle='--', alpha=0.5)
-    ax1.legend(loc='lower right')
-
-    ax2.set_title('(b) Validation mAP@50-95 (%)')
     ax2.set_xlabel('Epoch')
-    ax2.set_ylabel('mAP@50:95 (%)')
+    ax2.set_ylabel(r'(b) mAP$_{50-95}$ (%)')
     ax2.grid(True, linestyle='--', alpha=0.5)
-    ax2.legend(loc='lower right')
-
-    plt.tight_layout()
+    for ax in ((ax1, ax2) if WIDE else (ax2,)):
+        ax.set_xticks(range(2, 21, 2) if WIDE else range(1, 21))
+        ax.set_xlim(0.5, 20.5)
+        ax.set_xlabel('Epoch')
+    handles, labels = ax1.get_legend_handles_labels()
+    fig.legend(handles, labels, loc='upper center', ncol=2, frameon=False, bbox_to_anchor=(0.5, 1.0))
+    fig.tight_layout(rect=(0, 0, 1, 0.84 if WIDE else 0.9))
     map_fig_path = os.path.join(OUTPUT_DIR, "fig_convergence_map.pdf")
     plt.savefig(map_fig_path, format="pdf", bbox_inches="tight")
     plt.savefig(os.path.join(OUTPUT_DIR, "fig_convergence_map.png"), format="png", bbox_inches="tight")
