@@ -12,7 +12,16 @@
 \usepackage{tabularx}
 \usepackage{multirow}
 \usepackage[caption=false,font=footnotesize,labelfont=sf,textfont=sf]{subfig}
-\usepackage[hidelinks]{hyperref}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  citecolor=blue,
+  urlcolor=blue,
+  bookmarksnumbered=true,
+  bookmarksopen=true
+}
+\setcounter{tocdepth}{2}
 
 % Springer LNCS environment compatibility in IEEEtran
 \newenvironment{credits}{\section*{Declarations}}{}
