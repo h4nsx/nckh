@@ -1,0 +1,18 @@
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: g1_baseline.onnx
+=================================================================
+
+1. Warming up (3 iterations)...
+2. Timing forward pass over 20 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            g1_baseline.onnx  (320 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 1
+Forward median:   3146.73 ms  (P95 3149.34 ms, 0.32 FPS)
+RSS idle / end:   47.8 / 233.2 MiB
+Peak RSS (HWM):   233.2 MiB
+----------------------------------------
+[SAVED] results/edge/g1_saurieng_20261110_0725/g1_baseline_t1.json

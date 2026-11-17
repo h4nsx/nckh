@@ -1,7 +1,23 @@
 #!/usr/bin/env python3
+"""
+Automated Table & Results Generator for TAIMMA 2027
+--------------------------------------------------
+Resolves Critical Issue D2 (Reviewer Report):
+Generates the LaTeX table fragments in paper/tables/ from:
+1. Best-checkpoint (best.pt) validation results, currently transcribed by hand
+   into CHECKPOINT_RESULTS below (no evaluation log is committed yet)
+2. Epoch-by-epoch training logs (results/tables/arm*_results.csv), from which
+   final-epoch values, validation box loss, and best-fitness epochs are read
+
+TODO(authors): commit the model.val() JSON/log for each best.pt and load
+CHECKPOINT_RESULTS from those files instead of hard-coding them.
+"""
+
 import sys
 import json
 from pathlib import Path
+import pandas as pd
+import torch
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
@@ -9,169 +25,265 @@ sys.path.insert(0, str(ROOT))
 OUTPUT_DIR = ROOT / "paper" / "tables"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-ARM_ID_MAP = {
-    "Arm 1": "arm1_baseline_results",
-    "Arm 2": "arm2_case_b_single_results",
-    "Arm 3": "arm3_case_b_two_stage_results",
-    "Arm 4": "arm4_case_c_dual_results",
+# 1. Best-checkpoint validation results (transcribed; see TODO in module docstring)
+CHECKPOINT_RESULTS = {
+    "Arm 1: Baseline YOLO11s Control": {
+        "mAP50": 69.80,
+        "mAP50_95": 45.53,
+        "precision": 81.82,
+        "recall": 57.21,
+        "layer10_type": "\\texttt{C2PSA}",
+        "params": 9.429,
+        "gflops": 21.7,
+        "onnx_mb": 36.18,
+        "latency_rpi4": 1169.73,
+        "rss_rpi4": 231.5,
+        "per_class": {
+            "worker": {"mAP50": 89.20, "mAP50_95": 63.19},
+            "forklift": {"mAP50": 70.13, "mAP50_95": 31.80},
+            "pallet_truck": {"mAP50": 32.78, "mAP50_95": 22.37},
+            "amr": {"mAP50": 87.07, "mAP50_95": 64.74},
+        }
+    },
+    "Arm 2: YOLO11s-SS2D (Case B, Single-Stage)": {
+        "mAP50": 71.95,
+        "mAP50_95": 45.15,
+        "precision": 74.36,
+        "recall": 57.61,
+        "layer10_type": "\\texttt{SS2D (P5)}",
+        "params": 8.796,
+        "gflops": 21.2,
+        "onnx_mb": 38.47,
+        "latency_rpi4": 1398.19,
+        "rss_rpi4": 371.9,
+        "per_class": {
+            "worker": {"mAP50": 89.351, "mAP50_95": 61.93},
+            "forklift": {"mAP50": 79.71, "mAP50_95": 38.33},
+            "pallet_truck": {"mAP50": 33.87, "mAP50_95": 17.74},
+            "amr": {"mAP50": 84.87, "mAP50_95": 62.61},
+        }
+    },
+    "Arm 3: YOLO11s-SS2D (Case B, Two-Stage Warmup)": {
+        "mAP50": 67.67,
+        "mAP50_95": 43.15,
+        "precision": 74.12,
+        "recall": 65.06,
+        "layer10_type": "\\texttt{SS2D (P5)}",
+        "params": 8.796,
+        "gflops": 21.2,
+        "onnx_mb": 38.47,
+        "latency_rpi4": 1398.19,
+        "rss_rpi4": 371.9,
+        "per_class": {
+            "worker": {"mAP50": 87.91, "mAP50_95": 60.53},
+            "forklift": {"mAP50": 76.26, "mAP50_95": 38.36},
+            "pallet_truck": {"mAP50": 22.85, "mAP50_95": 16.21},
+            "amr": {"mAP50": 83.67, "mAP50_95": 57.50},
+        }
+    },
+    "Arm 4: YOLO11s-SS2D (Case C, Dual-Scale P4+P5)": {
+        "mAP50": 67.17,
+        "mAP50_95": 42.76,
+        "precision": 73.76,
+        "recall": 51.54,
+        "layer10_type": "\\texttt{SS2D (P4+P5)}",
+        "params": 8.893,
+        "gflops": 21.8,
+        "onnx_mb": 46.62,
+        "latency_rpi4": 1965.07,
+        "rss_rpi4": 714.9,
+        "per_class": {
+            "worker": {"mAP50": 88.52, "mAP50_95": 60.90},
+            "forklift": {"mAP50": 75.251, "mAP50_95": 33.84},
+            "pallet_truck": {"mAP50": 19.97, "mAP50_95": 14.58},
+            "amr": {"mAP50": 84.95, "mAP50_95": 61.72},
+        }
+    }
 }
 
-EVAL_RECORDS = {}
-for p in (ROOT / "audit" / "eval_records").glob("*.json"):
-    with open(p) as f:
-        rec = json.load(f)
-        EVAL_RECORDS[rec["experiment_id"]] = rec
+# 2. Convergence from CSV logs
+CSV_FILES = {
+    "Arm 1": ROOT / "results/tables/arm1_baseline_results.csv",
+    "Arm 2": ROOT / "results/tables/arm2_case_b_single_results.csv",
+    "Arm 3": ROOT / "results/tables/arm3_case_b_two_stage_results.csv",
+    "Arm 4": ROOT / "results/tables/arm4_case_c_dual_results.csv",
+}
 
-for arm, exp_id in ARM_ID_MAP.items():
-    if exp_id not in EVAL_RECORDS:
-        raise FileNotFoundError(f"Missing required evaluation record: {exp_id}.json")
+
+def best_fitness_epoch(df):
+    """Epoch that Ultralytics keeps as best.pt: max of 0.1*mAP50 + 0.9*mAP50-95."""
+    fitness = 0.1 * df["metrics/mAP50(B)"] + 0.9 * df["metrics/mAP50-95(B)"]
+    return int(df.loc[fitness.idxmax(), "epoch"])
+
 
 def generate_multi_arm_convergence_table():
+    """Generates Table II (Multi-Arm Convergence and Peak Checkpoint Study)"""
     print("[1/3] Generating tab_accuracy_results.tex...")
     lines = []
     lines.append("% Auto-generated by scripts/make_tables.py - DO NOT EDIT MANUALLY")
-    lines.append(r"\begin{table}[!t]")
-    lines.append(r"\caption{Multi-Arm Convergence and Validated Checkpoint Study on SmartSpaces Warehouse}")
-    lines.append(r"\label{tab:accuracy_results}")
-    lines.append(r"\centering")
-    lines.append(r"\small")
-    lines.append(r"\resizebox{\columnwidth}{!}{%")
-    lines.append(r"\setlength{\tabcolsep}{3pt}")
-    lines.append(r"\begin{tabular}{lcccccc}")
-    lines.append(r"\toprule")
-    lines.append(r"\textbf{Experimental Arm} & \textbf{Final Ep. $\text{mAP}_{50}$} & \textbf{Peak Checkpoint $\text{mAP}_{50}$} & \textbf{Peak $\text{mAP}_{50-95}$} & \textbf{Precision} & \textbf{Recall} & \textbf{Val Box Loss} \\\\")
-    lines.append(r"\midrule")
-    for arm in ["Arm 1", "Arm 2", "Arm 3", "Arm 4"]:
-        rec = EVAL_RECORDS[ARM_ID_MAP[arm]]
-        full_name = rec["arm_name"]
-        m = rec["metrics"]
-        final_mAP50 = m.get("final_mAP50", m["map50"]) * 100
-        peak_mAP50 = m["peak_mAP50"] * 100
-        peak_ep = m.get("peak_epoch", "-")
-        peak_mAP50_95 = m["map50_95"] * 100
-        precision = m["precision"]
-        recall = m["recall"]
-        val_loss = m.get("val_box_loss", "-")
-        
-        peak_ep_str = f"Global Ep. 19 (Stg 2 Ep. 14)" if arm == "Arm 3" else f"Ep. {peak_ep}"
-        peak_str = f"\\textbf{{{peak_mAP50:.2f}\\% ({peak_ep_str})}}" if arm == "Arm 2" else f"{peak_mAP50:.2f}\\% ({peak_ep_str})"
-        p_str = f"\\textbf{{{precision:.3f}}}" if arm == "Arm 1" else f"{precision:.3f}"
-        r_str = f"\\textbf{{{recall:.3f}}}" if arm == "Arm 3" else f"{recall:.3f}"
-        loss_str = f"\\textbf{{{val_loss:.4f}}}" if arm == "Arm 1" else f"{val_loss:.4f}"
+    lines.append("\\begin{table*}[!t]")
+    lines.append("\\caption{Multi-Arm Convergence and Best-Fitness Checkpoint Results on the SmartSpaces Validation Partition (single seed). Best-fitness checkpoints are selected on the same partition, so those columns are optimistically biased. Precision and recall refer to the best-fitness checkpoint; validation box loss to the final epoch. Arm 3 epochs are counted within stage 2.}")
+    lines.append("\\label{tab:accuracy_results}")
+    lines.append("\\centering")
+    lines.append("\\footnotesize")  # full-width float, no resizebox (keeps fonts >= 8 pt)
+    lines.append("\\setlength{\\tabcolsep}{2pt}")
+    lines.append("\\begin{tabular}{lcccccc}")
+    lines.append("\\toprule")
+    lines.append("\\textbf{Experimental Arm} & \\textbf{Final Ep. $\\text{mAP}_{50}$} & \\textbf{Best-Fitness $\\text{mAP}_{50}$} & \\textbf{Best-Fitness $\\text{mAP}_{50-95}$} & \\textbf{Precision} & \\textbf{Recall} & \\textbf{Final Val Box Loss} \\\\")
+    lines.append("\\midrule")
 
-        lines.append(f"{full_name} & {final_mAP50:.2f}\\% & {peak_str} & {peak_mAP50_95:.2f}\\% & {p_str} & {r_str} & {loss_str} \\\\")
-    lines.append(r"\bottomrule")
-    lines.append(r"\end{tabular}%")
-    lines.append(r"}")
-    lines.append(r"\end{table}")
+    # Read each CSV for final and peak
+    # Arm 1
+    df1 = pd.read_csv(CSV_FILES["Arm 1"])
+    f_map50_1 = df1.iloc[-1]["metrics/mAP50(B)"] * 100
+    p_map50_1 = CHECKPOINT_RESULTS["Arm 1: Baseline YOLO11s Control"]["mAP50"]
+    p_map_1 = CHECKPOINT_RESULTS["Arm 1: Baseline YOLO11s Control"]["mAP50_95"]
+    p_prec_1 = CHECKPOINT_RESULTS["Arm 1: Baseline YOLO11s Control"]["precision"] / 100
+    p_rec_1 = CHECKPOINT_RESULTS["Arm 1: Baseline YOLO11s Control"]["recall"] / 100
+    vbox_1 = df1.iloc[-1]["val/box_loss"]
+
+    # Arm 2
+    df2 = pd.read_csv(CSV_FILES["Arm 2"])
+    f_map50_2 = df2.iloc[-1]["metrics/mAP50(B)"] * 100
+    p_map50_2 = CHECKPOINT_RESULTS["Arm 2: YOLO11s-SS2D (Case B, Single-Stage)"]["mAP50"]
+    p_map_2 = CHECKPOINT_RESULTS["Arm 2: YOLO11s-SS2D (Case B, Single-Stage)"]["mAP50_95"]
+    p_prec_2 = CHECKPOINT_RESULTS["Arm 2: YOLO11s-SS2D (Case B, Single-Stage)"]["precision"] / 100
+    p_rec_2 = CHECKPOINT_RESULTS["Arm 2: YOLO11s-SS2D (Case B, Single-Stage)"]["recall"] / 100
+    vbox_2 = df2.iloc[-1]["val/box_loss"]
+
+    # Arm 3
+    df3 = pd.read_csv(CSV_FILES["Arm 3"])
+    f_map50_3 = df3.iloc[-1]["metrics/mAP50(B)"] * 100
+    p_map50_3 = CHECKPOINT_RESULTS["Arm 3: YOLO11s-SS2D (Case B, Two-Stage Warmup)"]["mAP50"]
+    p_map_3 = CHECKPOINT_RESULTS["Arm 3: YOLO11s-SS2D (Case B, Two-Stage Warmup)"]["mAP50_95"]
+    p_prec_3 = CHECKPOINT_RESULTS["Arm 3: YOLO11s-SS2D (Case B, Two-Stage Warmup)"]["precision"] / 100
+    p_rec_3 = CHECKPOINT_RESULTS["Arm 3: YOLO11s-SS2D (Case B, Two-Stage Warmup)"]["recall"] / 100
+    vbox_3 = df3.iloc[-1]["val/box_loss"]
+
+    # Arm 4
+    df4 = pd.read_csv(CSV_FILES["Arm 4"])
+    f_map50_4 = df4.iloc[-1]["metrics/mAP50(B)"] * 100
+    p_map50_4 = CHECKPOINT_RESULTS["Arm 4: YOLO11s-SS2D (Case C, Dual-Scale P4+P5)"]["mAP50"]
+    p_map_4 = CHECKPOINT_RESULTS["Arm 4: YOLO11s-SS2D (Case C, Dual-Scale P4+P5)"]["mAP50_95"]
+    p_prec_4 = CHECKPOINT_RESULTS["Arm 4: YOLO11s-SS2D (Case C, Dual-Scale P4+P5)"]["precision"] / 100
+    p_rec_4 = CHECKPOINT_RESULTS["Arm 4: YOLO11s-SS2D (Case C, Dual-Scale P4+P5)"]["recall"] / 100
+    vbox_4 = df4.iloc[-1]["val/box_loss"]
+
+    ep1, ep2, ep3, ep4 = (best_fitness_epoch(d) for d in (df1, df2, df3, df4))
+
+    lines.append(f"Arm 1: Baseline YOLO11s Control & {f_map50_1:.2f}\\% & {p_map50_1:.2f}\\% (Ep. {ep1}) & {p_map_1:.2f}\\% & \\textbf{{{p_prec_1:.3f}}} & {p_rec_1:.3f} & \\textbf{{{vbox_1:.4f}}} \\\\")
+    lines.append(f"Arm 2: Case B SS2D (Single-Stage) & {f_map50_2:.2f}\\% & \\textbf{{{p_map50_2:.2f}\\% (Ep. {ep2})}} & {p_map_2:.2f}\\% & {p_prec_2:.3f} & {p_rec_2:.3f} & {vbox_2:.4f} \\\\")
+    lines.append(f"Arm 3: Case B SS2D (Two-Stage Warmup) & {f_map50_3:.2f}\\% & {p_map50_3:.2f}\\% (S2 Ep. {ep3}) & {p_map_3:.2f}\\% & {p_prec_3:.3f} & \\textbf{{{p_rec_3:.3f}}} & {vbox_3:.4f} \\\\")
+    lines.append(f"Arm 4: Case C SS2D (Dual-Scale P4+P5) & {f_map50_4:.2f}\\% & {p_map50_4:.2f}\\% (Ep. {ep4}) & {p_map_4:.2f}\\% & {p_prec_4:.3f} & {p_rec_4:.3f} & {vbox_4:.4f} \\\\")
+    lines.append("\\bottomrule")
+    lines.append("\\multicolumn{7}{p{0.96\\textwidth}}{\\scriptsize Checkpoints are selected on the in-loop validation values by maximizing $0.1\\,\\text{mAP}_{50} + 0.9\\,\\text{mAP}_{50-95}$. "
+                 "For Arm 1, epoch 20 (in-loop $\\text{mAP}_{50} = 69.75\\%$, $\\text{mAP}_{50-95} = 45.82\\%$) is preferred over epoch 6, where $\\text{mAP}_{50}$ peaks at $70.32\\%$ "
+                 "but $\\text{mAP}_{50-95}$ is only $41.53\\%$ (Fig.~\\ref{fig:convergence_map}). The best-fitness columns report a re-evaluation of the saved checkpoint "
+                 "after training, which differs slightly from the in-loop values of the same epoch ($69.80\\%$ and $45.53\\%$ for Arm 1).} \\\\")
+    lines.append("\\end{tabular}")
+    lines.append("\\end{table*}")
+
     out_file = OUTPUT_DIR / "tab_accuracy_results.tex"
     with open(out_file, "w") as f:
         f.write("\n".join(lines) + "\n")
     print(f"  -> Written to {out_file}")
 
 def generate_per_class_table():
+    """Generates Table III (Per-Class Detection Performance)"""
     print("[2/3] Generating tab_per_class_results.tex...")
     lines = []
     lines.append("% Auto-generated by scripts/make_tables.py - DO NOT EDIT MANUALLY")
-    lines.append(r"\begin{table}[!t]")
-    lines.append(r"\caption{Per-Class Detection Performance on Held-out Cross-Facility Validation Partition}")
-    lines.append(r"\label{tab:per_class_results}")
-    lines.append(r"\centering")
-    lines.append(r"\small")
-    lines.append(r"\resizebox{\columnwidth}{!}{%")
-    lines.append(r"\setlength{\tabcolsep}{3pt}")
-    lines.append(r"\begin{tabular}{lcccccccc}")
-    lines.append(r"\toprule")
-    lines.append(r"\textbf{Target Category} & \multicolumn{2}{c}{\textbf{Arm 1: Baseline}} & \multicolumn{2}{c}{\textbf{Arm 2: Single-Stage}} & \multicolumn{2}{c}{\textbf{Arm 3: Two-Stage}} & \multicolumn{2}{c}{\textbf{Arm 4: Dual-Scale}} \\\\")
-    lines.append(r"\cmidrule(lr){2-3} \cmidrule(lr){4-5} \cmidrule(lr){6-7} \cmidrule(lr){8-9}")
-    lines.append(r"& $\text{mAP}_{50}$ & $\text{mAP}_{50-95}$ & $\text{mAP}_{50}$ & $\text{mAP}_{50-95}$ & $\text{mAP}_{50}$ & $\text{mAP}_{50-95}$ & $\text{mAP}_{50}$ & $\text{mAP}_{50-95}$ \\\\")
-    lines.append(r"\midrule")
+    lines.append("\\begin{table*}[!t]")
+    lines.append("\\caption{Per-Class Detection Performance of Best-Fitness Checkpoints on the Validation Partition (also used for checkpoint selection; single seed)}")
+    lines.append("\\label{tab:per_class_results}")
+    lines.append("\\centering")
+    lines.append("\\footnotesize")  # full-width float, no resizebox (keeps fonts >= 8 pt)
+    lines.append("\\setlength{\\tabcolsep}{3pt}")
+    lines.append("\\begin{tabular*}{\\textwidth}{@{\\extracolsep{\\fill}}lcccccccc}")
+    lines.append("\\toprule")
+    lines.append("\\textbf{Target Category} & \\multicolumn{2}{c}{\\textbf{Arm 1: Baseline}} & \\multicolumn{2}{c}{\\textbf{Arm 2: Single-Stage}} & \\multicolumn{2}{c}{\\textbf{Arm 3: Two-Stage}} & \\multicolumn{2}{c}{\\textbf{Arm 4: Dual-Scale}} \\\\")
+    lines.append("\\cmidrule(lr){2-3} \\cmidrule(lr){4-5} \\cmidrule(lr){6-7} \\cmidrule(lr){8-9}")
+    lines.append("& $\\text{mAP}_{50}$ & $\\text{mAP}_{50-95}$ & $\\text{mAP}_{50}$ & $\\text{mAP}_{50-95}$ & $\\text{mAP}_{50}$ & $\\text{mAP}_{50-95}$ & $\\text{mAP}_{50}$ & $\\text{mAP}_{50-95}$ \\\\")
+    lines.append("\\midrule")
+
     classes = [
-        ("worker", r"\texttt{worker} (Personnel, $n=3{,}488$)"),
-        ("forklift", r"\texttt{forklift} (Heavy Machinery, $n=150$)"),
-        ("pallet_truck", r"\texttt{pallet\_truck}$^{\dagger}$ (Manual Jack, $n=13$)"),
-        ("amr", r"\texttt{amr} (Mobile Robot, $n=45$)")
+        ("worker", "\\texttt{worker} (Personnel, $n=3{,}488$)"),
+        ("forklift", "\\texttt{forklift} (Heavy Machinery, $n=150$)"),
+        ("pallet_truck", "\\texttt{pallet\\_truck}$^{\\dagger}$ (Manual Jack, $n=13$)"),
+        ("amr", "\\texttt{amr} (Mobile Robot, $n=45$)")
     ]
+
     for ckey, clabel in classes:
-        a1 = EVAL_RECORDS[ARM_ID_MAP["Arm 1"]]["per_class_metrics"][ckey]
-        a2 = EVAL_RECORDS[ARM_ID_MAP["Arm 2"]]["per_class_metrics"][ckey]
-        a3 = EVAL_RECORDS[ARM_ID_MAP["Arm 3"]]["per_class_metrics"][ckey]
-        a4 = EVAL_RECORDS[ARM_ID_MAP["Arm 4"]]["per_class_metrics"][ckey]
+        a1 = CHECKPOINT_RESULTS["Arm 1: Baseline YOLO11s Control"]["per_class"][ckey]
+        a2 = CHECKPOINT_RESULTS["Arm 2: YOLO11s-SS2D (Case B, Single-Stage)"]["per_class"][ckey]
+        a3 = CHECKPOINT_RESULTS["Arm 3: YOLO11s-SS2D (Case B, Two-Stage Warmup)"]["per_class"][ckey]
+        a4 = CHECKPOINT_RESULTS["Arm 4: YOLO11s-SS2D (Case C, Dual-Scale P4+P5)"]["per_class"][ckey]
+        
+        # Format bolding
         m50_vals = [a1["mAP50"], a2["mAP50"], a3["mAP50"], a4["mAP50"]]
         max_m50 = max(m50_vals)
-        m95_vals = [a1["mAP50_95"], a2["mAP50_95"], a3["mAP50_95"], a4["mAP50_95"]]
-        max_m95 = max(m95_vals)
-        def f50(v):
-            return f"\\textbf{{{v:.1f}}}" if v == max_m50 else f"{v:.1f}"
-        def fm(v):
-            return f"\\textbf{{{v:.1f}}}" if v == max_m95 else f"{v:.1f}"
-        v1_50, v1_95 = a1["mAP50"], a1["mAP50_95"]
-        v2_50, v2_95 = a2["mAP50"], a2["mAP50_95"]
-        v3_50, v3_95 = a3["mAP50"], a3["mAP50_95"]
-        v4_50, v4_95 = a4["mAP50"], a4["mAP50_95"]
-        lines.append(f"{clabel} & {f50(v1_50)} & {fm(v1_95)} & {f50(v2_50)} & {fm(v2_95)} & {f50(v3_50)} & {fm(v3_95)} & {f50(v4_50)} & {fm(v4_95)} \\\\")
-    lines.append(r"\midrule")
-    # Add 3-Class Macro Average (excl pallet_truck)
-    m3c_1 = (EVAL_RECORDS[ARM_ID_MAP["Arm 1"]]["per_class_metrics"]["worker"]["mAP50"] + EVAL_RECORDS[ARM_ID_MAP["Arm 1"]]["per_class_metrics"]["forklift"]["mAP50"] + EVAL_RECORDS[ARM_ID_MAP["Arm 1"]]["per_class_metrics"]["amr"]["mAP50"]) / 3.0
-    m3c_2 = (EVAL_RECORDS[ARM_ID_MAP["Arm 2"]]["per_class_metrics"]["worker"]["mAP50"] + EVAL_RECORDS[ARM_ID_MAP["Arm 2"]]["per_class_metrics"]["forklift"]["mAP50"] + EVAL_RECORDS[ARM_ID_MAP["Arm 2"]]["per_class_metrics"]["amr"]["mAP50"]) / 3.0
-    m3c_3 = (EVAL_RECORDS[ARM_ID_MAP["Arm 3"]]["per_class_metrics"]["worker"]["mAP50"] + EVAL_RECORDS[ARM_ID_MAP["Arm 3"]]["per_class_metrics"]["forklift"]["mAP50"] + EVAL_RECORDS[ARM_ID_MAP["Arm 3"]]["per_class_metrics"]["amr"]["mAP50"]) / 3.0
-    m3c_4 = (EVAL_RECORDS[ARM_ID_MAP["Arm 4"]]["per_class_metrics"]["worker"]["mAP50"] + EVAL_RECORDS[ARM_ID_MAP["Arm 4"]]["per_class_metrics"]["forklift"]["mAP50"] + EVAL_RECORDS[ARM_ID_MAP["Arm 4"]]["per_class_metrics"]["amr"]["mAP50"]) / 3.0
-    
-    m3c_95_1 = (EVAL_RECORDS[ARM_ID_MAP["Arm 1"]]["per_class_metrics"]["worker"]["mAP50_95"] + EVAL_RECORDS[ARM_ID_MAP["Arm 1"]]["per_class_metrics"]["forklift"]["mAP50_95"] + EVAL_RECORDS[ARM_ID_MAP["Arm 1"]]["per_class_metrics"]["amr"]["mAP50_95"]) / 3.0
-    m3c_95_2 = (EVAL_RECORDS[ARM_ID_MAP["Arm 2"]]["per_class_metrics"]["worker"]["mAP50_95"] + EVAL_RECORDS[ARM_ID_MAP["Arm 2"]]["per_class_metrics"]["forklift"]["mAP50_95"] + EVAL_RECORDS[ARM_ID_MAP["Arm 2"]]["per_class_metrics"]["amr"]["mAP50_95"]) / 3.0
-    m3c_95_3 = (EVAL_RECORDS[ARM_ID_MAP["Arm 3"]]["per_class_metrics"]["worker"]["mAP50_95"] + EVAL_RECORDS[ARM_ID_MAP["Arm 3"]]["per_class_metrics"]["forklift"]["mAP50_95"] + EVAL_RECORDS[ARM_ID_MAP["Arm 3"]]["per_class_metrics"]["amr"]["mAP50_95"]) / 3.0
-    m3c_95_4 = (EVAL_RECORDS[ARM_ID_MAP["Arm 4"]]["per_class_metrics"]["worker"]["mAP50_95"] + EVAL_RECORDS[ARM_ID_MAP["Arm 4"]]["per_class_metrics"]["forklift"]["mAP50_95"] + EVAL_RECORDS[ARM_ID_MAP["Arm 4"]]["per_class_metrics"]["amr"]["mAP50_95"]) / 3.0
+        m_vals = [a1["mAP50_95"], a2["mAP50_95"], a3["mAP50_95"], a4["mAP50_95"]]
+        max_m = max(m_vals)
 
-    lines.append(f"\\textbf{{3-Class Macro (excl. pallet)}} & {m3c_1:.2f} & \\textbf{{{m3c_95_1:.2f}}} & \\textbf{{{m3c_2:.2f}}} & {m3c_95_2:.2f} & {m3c_3:.2f} & {m3c_95_3:.2f} & {m3c_4:.2f} & {m3c_95_4:.2f} \\\\")
+        def f50(val):
+            return f"\\textbf{{{val:.1f}}}" if val == max_m50 else f"{val:.1f}"
+        def fm(val):
+            return f"\\textbf{{{val:.1f}}}" if val == max_m else f"{val:.1f}"
 
-    m1 = EVAL_RECORDS[ARM_ID_MAP["Arm 1"]]["metrics"]
-    m2 = EVAL_RECORDS[ARM_ID_MAP["Arm 2"]]["metrics"]
-    m3 = EVAL_RECORDS[ARM_ID_MAP["Arm 3"]]["metrics"]
-    m4 = EVAL_RECORDS[ARM_ID_MAP["Arm 4"]]["metrics"]
-    lines.append(f"\\textbf{{4-Class Global Macro (Peak)}} & {m1['peak_mAP50']*100:.2f} & \\textbf{{{m1['map50_95']*100:.2f}}} & \\textbf{{{m2['peak_mAP50']*100:.2f}}} & {m2['map50_95']*100:.2f} & {m3['peak_mAP50']*100:.2f} & {m3['map50_95']*100:.2f} & {m4['peak_mAP50']*100:.2f} & {m4['map50_95']*100:.2f} \\\\")
-    final1 = m1.get('final_mAP50', m1['map50']) * 100
-    final2 = m2.get('final_mAP50', m2['map50']) * 100
-    final3 = m3.get('final_mAP50', m3['map50']) * 100
-    final4 = m4.get('final_mAP50', m4['map50']) * 100
-    lines.append(f"\\textbf{{4-Class Global Macro (Final Ep)}} & \\textbf{{{final1:.2f}}} & - & {final2:.2f} & - & {final3:.2f} & - & {final4:.2f} & - \\\\")
-    lines.append(r"\bottomrule")
-    lines.append(r"\multicolumn{9}{l}{\footnotesize $^{\dagger}$Notice on rare tail class: \texttt{pallet\_truck} contains only 13 validation instances ($0.35\%$ of total labels), exhibiting high sample variance.} \\\\")
-    lines.append(r"\end{tabular}%")
-    lines.append(r"}")
-    lines.append(r"\end{table}")
+        lines.append(f"{clabel} & {f50(a1['mAP50'])} & {fm(a1['mAP50_95'])} & {f50(a2['mAP50'])} & {fm(a2['mAP50_95'])} & {f50(a3['mAP50'])} & {fm(a3['mAP50_95'])} & {f50(a4['mAP50'])} & {fm(a4['mAP50_95'])} \\\\")
+
+    lines.append("\\midrule")
+    # Macro metrics
+    lines.append(f"\\textbf{{Global Macro Metric}} & {CHECKPOINT_RESULTS['Arm 1: Baseline YOLO11s Control']['mAP50']:.2f} & \\textbf{{{CHECKPOINT_RESULTS['Arm 1: Baseline YOLO11s Control']['mAP50_95']:.2f}}} & \\textbf{{{CHECKPOINT_RESULTS['Arm 2: YOLO11s-SS2D (Case B, Single-Stage)']['mAP50']:.2f}}} & {CHECKPOINT_RESULTS['Arm 2: YOLO11s-SS2D (Case B, Single-Stage)']['mAP50_95']:.2f} & {CHECKPOINT_RESULTS['Arm 3: YOLO11s-SS2D (Case B, Two-Stage Warmup)']['mAP50']:.2f} & {CHECKPOINT_RESULTS['Arm 3: YOLO11s-SS2D (Case B, Two-Stage Warmup)']['mAP50_95']:.2f} & {CHECKPOINT_RESULTS['Arm 4: YOLO11s-SS2D (Case C, Dual-Scale P4+P5)']['mAP50']:.2f} & {CHECKPOINT_RESULTS['Arm 4: YOLO11s-SS2D (Case C, Dual-Scale P4+P5)']['mAP50_95']:.2f} \\\\")
+    # Supplementary post-hoc row: mean of the three classes with n >= 45 (same precision as the macro row)
+    arm_keys = ["Arm 1: Baseline YOLO11s Control", "Arm 2: YOLO11s-SS2D (Case B, Single-Stage)",
+                "Arm 3: YOLO11s-SS2D (Case B, Two-Stage Warmup)", "Arm 4: YOLO11s-SS2D (Case C, Dual-Scale P4+P5)"]
+    cells = []
+    for ak in arm_keys:
+        pc = CHECKPOINT_RESULTS[ak]["per_class"]
+        for metric in ("mAP50", "mAP50_95"):
+            vals = [pc[c][metric] for c in ("worker", "forklift", "amr")]
+            cells.append(f"{sum(vals) / 3:.2f}")
+    lines.append("\\textit{3-class macro (excl.\\ \\texttt{pallet\\_truck})}$^{\\ddagger}$ & " + " & ".join(cells) + " \\\\")
+    lines.append("\\bottomrule")
+    # Notes go below the tabular so that they do not widen the last column
+    lines.append("\\end{tabular*}")
+    lines.append("\\par\\smallskip")
+    lines.append("\\parbox{\\textwidth}{\\footnotesize $^{\\dagger}$Rare tail class: \\texttt{pallet\\_truck} contains only 13 validation instances ($0.35\\%$ of total labels), exhibiting high sample variance.\\\\")
+    lines.append("$^{\\ddagger}$Supplementary, defined after inspecting the results: mean of the three classes with $n \\geq 45$; not used for model comparison claims.}")
+    lines.append("\\end{table*}")
+
     out_file = OUTPUT_DIR / "tab_per_class_results.tex"
     with open(out_file, "w") as f:
         f.write("\n".join(lines) + "\n")
     print(f"  -> Written to {out_file}")
 
 def generate_hardware_benchmark_table():
+    """Generates Table IV (Embedded Edge Silicon Hardware Benchmark)"""
     print("[3/3] Generating tab_hardware_benchmark.tex...")
     lines = []
     lines.append("% Auto-generated by scripts/make_tables.py - DO NOT EDIT MANUALLY")
-    lines.append(r"\begin{table}[!t]")
-    lines.append(r"\caption{Physical Embedded Silicon Benchmark Profile (Raspberry Pi 4 ARM Cortex-A72 @ 1.5\,GHz, Batch=1)}")
-    lines.append(r"\label{tab:hardware_benchmark}")
-    lines.append(r"\centering")
-    lines.append(r"\small")
-    lines.append(r"\resizebox{\columnwidth}{!}{%")
-    lines.append(r"\begin{tabular}{lccccc}")
-    lines.append(r"\toprule")
-    lines.append(r"\textbf{Model Architecture} & \textbf{ONNX Size} & \textbf{CPU Latency (ms)} & \textbf{Throughput} & \textbf{Peak RSS} & \textbf{Memory Margin ($<1.0$\,GB)} \\\\")
-    lines.append(r"\midrule")
-    for arm_key in ["Arm 1", "Arm 2", "Arm 3", "Arm 4"]:
-        rec = EVAL_RECORDS[ARM_ID_MAP[arm_key]]
-        hw = rec["hardware_benchmark"]
-        name = arm_key + (" (P5)" if "Case B" in rec["arm_name"] else " (P4+P5)" if "Case C" in rec["arm_name"] else " (Control)")
-        omb = hw["onnx_mb"]
-        lat = hw["latency_rpi4"]
-        fps = hw["throughput_fps"]
-        rss = hw["rss_rpi4"]
-        margin = hw["headroom_pct"]
-        lines.append(f"{name} & {omb:.2f}\\,MB & {lat:.2f}\\,ms & {fps:.2f}\\,FPS & {rss:.1f}\\,MB & {margin:.1f}\\% Headroom \\\\")
-    lines.append(r"\bottomrule")
-    lines.append(r"\end{tabular}%")
-    lines.append(r"}")
-    lines.append(r"\end{table}")
+    lines.append("\\begin{table*}[!t]")
+    lines.append("\\caption{Physical Embedded Silicon Benchmark Profile (Raspberry Pi 4 ARM Cortex-A72 @ 1.5\\,GHz, Batch=1)}")
+    lines.append("\\label{tab:hardware_benchmark}")
+    lines.append("\\centering")
+    lines.append("\\footnotesize")  # full-width float, no resizebox (keeps fonts >= 8 pt)
+    lines.append("\\begin{tabular}{lccccc}")
+    lines.append("\\toprule")
+    # RSS values were measured after the timed loop (psutil rss, MiB), not as the process peak;
+    # headroom is therefore relative to 1 GiB = 1024 MiB.
+    lines.append("\\textbf{Model Architecture} & \\textbf{ONNX Size} & \\textbf{Mean Latency (ms)} & \\textbf{Throughput} & \\textbf{RSS (MiB)} & \\textbf{Headroom (1\\,GiB)} \\\\")
+    lines.append("\\midrule")
+
+    for k, v in CHECKPOINT_RESULTS.items():
+        name = k.split(":")[0] + (" (P5)" if "Case B" in k else " (P4+P5)" if "Case C" in k else " (Control)")
+        margin = (1024.0 - v["rss_rpi4"]) / 1024.0 * 100
+        lines.append(f"{name} & {v['onnx_mb']:.2f}\\,MB & {v['latency_rpi4']:.2f}\\,ms & {1000.0/v['latency_rpi4']:.2f}\\,FPS & {v['rss_rpi4']:.1f} & {margin:.1f}\\% \\\\")
+
+    lines.append("\\bottomrule")
+    lines.append("\\end{tabular}")
+    lines.append("\\end{table*}")
+
     out_file = OUTPUT_DIR / "tab_hardware_benchmark.tex"
     with open(out_file, "w") as f:
         f.write("\n".join(lines) + "\n")

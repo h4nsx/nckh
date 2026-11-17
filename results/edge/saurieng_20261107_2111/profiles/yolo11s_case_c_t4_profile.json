@@ -1,0 +1,36 @@
+{
+  "model": "yolo11s_case_c.onnx",
+  "total_nodes": 90201,
+  "nodes_after_ort_optimization": 72385,
+  "intra_op_threads": 4,
+  "warmup_runs": 2,
+  "profiled_runs_requested": 5,
+  "profiled_runs": 5,
+  "mean_model_run_ms": 4942.9198,
+  "top_ops": {
+    "Gather": 24009,
+    "Constant": 17713,
+    "Mul": 16113,
+    "Unsqueeze": 16024,
+    "Add": 8030,
+    "ReduceSum": 8000,
+    "Conv": 87,
+    "Sigmoid": 79,
+    "Reshape": 30,
+    "Concat": 28
+  },
+  "durations_ms": {
+    "Conv": 4386.056,
+    "Mul": 3827.769,
+    "Squeeze": 2439.799,
+    "Unsqueeze": 2256.53,
+    "Add": 1547.798,
+    "ReduceSum": 1357.004,
+    "Gather": 1195.781,
+    "QuickGelu": 738.137,
+    "Split": 725.143,
+    "Concat": 291.445
+  },
+  "kernel_total_ms": 19515.139,
+  "ort_profile_file": "results/edge/saurieng_20261107_2111/profiles/ort_profile_yolo11s_case_c_2026-11-08_06-30-16_660.json"
+}

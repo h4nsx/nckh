@@ -1,0 +1,18 @@
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: g1_convonly.onnx
+=================================================================
+
+1. Warming up (3 iterations)...
+2. Timing forward pass over 20 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            g1_convonly.onnx  (300 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 1
+Forward median:   3105.40 ms  (P95 3108.27 ms, 0.32 FPS)
+RSS idle / end:   47.8 / 230.0 MiB
+Peak RSS (HWM):   230.0 MiB
+----------------------------------------
+[SAVED] results/edge/g1_saurieng_20261110_0725/g1_convonly_t1.json
