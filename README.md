@@ -1,12 +1,13 @@
-# YOLO11s-SS2D: A Lightweight Hybrid YOLO-Mamba Architecture for Multi-Class Warehouse Object Detection: An Edge-Feasibility Study
+# Why a Cheaper Block Runs Slower: Replacing Self-Attention with 2D Selective Scans in YOLO11s on an Embedded CPU
 
-[![Paper PDF](https://img.shields.io/badge/Paper-IEEEtran-blue.svg)](paper/main.pdf)
+[![Paper LNCS PDF](https://img.shields.io/badge/Paper-Springer_LNCS-blue.svg)](paper_lncs/main.pdf)
 [![Architecture](https://img.shields.io/badge/Architecture-YOLO11s--SS2D-orange.svg)](#architecture-overview)
 [![Benchmark](https://img.shields.io/badge/Benchmark-NVIDIA_SmartSpaces-green.svg)](#benchmark--evaluation)
-[![Status](https://img.shields.io/badge/Status-Audited_%26_Verified-success.svg)](Reports/RESULTS_INTEGRITY_GATE.md)
+[![Reproducibility](https://img.shields.io/badge/Reproducibility-Cryptographically_Hashed-success.svg)](audit/REPRODUCIBILITY.md)
 
 > **Official Research Codebase & Artifact Repository**  
-> **Topic:** *A Lightweight Hybrid YOLO-Mamba Architecture for Multi-Class Warehouse Object Detection: An Edge-Feasibility Study*
+> **Target Venue:** TAIMMA 2027 (Springer Lecture Notes in Computer Science)  
+> **Topic:** *Why a Cheaper Block Runs Slower: Replacing Self-Attention with 2D Selective Scans in YOLO11s on an Embedded CPU*
 
 ---
 
@@ -149,20 +150,25 @@ A critical research contribution of this work is investigating the wall-clock ex
 
 ---
 
-## 📄 Academic Paper
+## 📄 Academic Paper & Submission
 
+- **Target Conference:** **TAIMMA 2027** (Springer LNCS)
+- **Paper Title:** *Why a Cheaper Block Runs Slower: Replacing Self-Attention with 2D Selective Scans in YOLO11s on an Embedded CPU*
 - **Authors:** 
-  - **Vo Tuan Hung** (Undergraduate Student, College of Technology II; [votuanhung1205.work@gmail.com](mailto:votuanhung1205.work@gmail.com), ORCID: [0009-0005-8730-7930](https://orcid.org/0009-0005-8730-7930))
-  - **Huynh Tan Phat** (Instructor / Advisor, Ho Chi Minh City Open University)
-- **Manuscript Source:** [`paper/main.tex`](paper/main.tex)
-- **Compiled PDF:** [`paper/main.pdf`](paper/main.pdf)
+  - **Vo Tuan Hung** (Information Technology Department, Song Hung Thuan Co., Ltd.; [votuanhung1205.work@gmail.com](mailto:votuanhung1205.work@gmail.com), ORCID: [0009-0005-8730-7930](https://orcid.org/0009-0005-8730-7930))
+  - **Huynh Tan Phat** (Corresponding Author, Ho Chi Minh City Open University; [phat.ht@ou.edu.vn](mailto:phat.ht@ou.edu.vn))
+- **Primary Submission Manuscript (LNCS):** [`paper_lncs/main.pdf`](paper_lncs/main.pdf) ([Source](paper_lncs/main.tex))
+- **Supplementary Code Archive:** [`submission_code.zip`](submission_code.zip)
+- **Legacy IEEE Draft:** [`paper/main.pdf`](paper/main.pdf)
 
 ### Citation
 ```bibtex
-@article{yolo11s_ss2d_2026,
-  title={A Lightweight Hybrid YOLO-Mamba Architecture for Multi-Class Warehouse Object Detection: An Edge-Feasibility Study},
+@inproceedings{vo2027why,
+  title={Why a Cheaper Block Runs Slower: Replacing Self-Attention with 2D Selective Scans in YOLO11s on an Embedded CPU},
   author={Vo, Tuan Hung and Huynh, Tan Phat},
-  journal={IEEE Transactions on Automation Science and Engineering},
-  year={2026}
+  booktitle={Proceedings of the International Conference on Trends in Artificial Intelligence, Machine Learning and Manufacturing Applications (TAIMMA 2027)},
+  series={Lecture Notes in Computer Science},
+  publisher={Springer},
+  year={2027}
 }
 ```
