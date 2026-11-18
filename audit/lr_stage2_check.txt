@@ -1,0 +1,1 @@
+FAIL: Stage2 learning rate differs (found 0.000411111).

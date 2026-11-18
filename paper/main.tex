@@ -1,4 +1,4 @@
-\documentclass[lettersize,journal]{IEEEtran}
+\documentclass[conference]{IEEEtran}
 
 % --- Core Typography & Encoding ---
 \usepackage[utf8]{inputenc}
@@ -6,37 +6,37 @@
 \usepackage{amsmath,amssymb,amsfonts}
 \usepackage{booktabs}
 \usepackage{graphicx}
-\usepackage[protrusion=true,expansion=true]{microtype}
+\usepackage{microtype}
 \usepackage{cite}
 \usepackage{url}
 \usepackage{tabularx}
 \usepackage{multirow}
 \usepackage[caption=false,font=footnotesize,labelfont=sf,textfont=sf]{subfig}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  citecolor=blue,
+  urlcolor=blue,
+  bookmarksnumbered=true,
+  bookmarksopen=true
+}
+\setcounter{tocdepth}{2}
 
-% --- Booktabs row padding for clean table readability ---
-\renewcommand{\arraystretch}{1.12}
-
-% --- Standard IEEE Float & Bibliography Spacing Tightening ---
-\setlength{\textfloatsep}{8pt plus 1.0pt minus 2.0pt}
-\setlength{\floatsep}{8pt plus 1.0pt minus 2.0pt}
-\setlength{\intextsep}{8pt plus 1.0pt minus 2.0pt}
-\setlength{\dbltextfloatsep}{8pt plus 1.0pt minus 2.0pt}
-\setlength{\dblfloatsep}{8pt plus 1.0pt minus 2.0pt}
-
-% --- Professional Hyperref Setup (Blue Link Text for Citations & Figures) ---
-\usepackage{xcolor}
-\definecolor{ieeeblue}{rgb}{0.0, 0.25, 0.70}
-\usepackage[colorlinks=true,linkcolor=ieeeblue,citecolor=ieeeblue,urlcolor=ieeeblue]{hyperref}
+% Springer LNCS environment compatibility in IEEEtran
+\newenvironment{credits}{\section*{Declarations}}{}
+\providecommand{\ackname}{Acknowledgment}
+\providecommand{\discintname}{Competing Interests}
 
 % --- Working Metadata ---
-\title{A Lightweight Hybrid YOLO-Mamba Architecture for Real-Time Multi-Class Warehouse Object Detection on Edge Devices}
+\title{Why a Cheaper Block Runs Slower: Replacing Self-Attention with 2D Selective Scans in YOLO11s on an Embedded CPU}
 
 \author{
-    Vo~Tuan~Hung
-    and~Huynh~Tan~Phat
-    \thanks{Manuscript received October 25, 2026. This research investigates lightweight edge perception architectures for automated logistics.}
-    \thanks{Vo Tuan Hung is an undergraduate student with the Department of Computer Science and Automation Engineering, College of Technology II (e-mail: \href{mailto:votuanhung1205.work@gmail.com}{votuanhung1205.work@gmail.com}, ORCID: \href{https://orcid.org/0009-0005-8730-7930}{0009-0005-8730-7930}).}
-    \thanks{Huynh Tan Phat is an instructor/advisor with Ho Chi Minh City Open University.}
+\IEEEauthorblockN{Vo Tuan Hung\IEEEauthorrefmark{1}, Huynh Tan Phat\IEEEauthorrefmark{2}}
+\IEEEauthorblockA{\IEEEauthorrefmark{1}Information Technology Department, Song Hung Thuan Co., Ltd., Ho Chi Minh City, Vietnam\\
+Email: votuanhung1205.work@gmail.com}
+\IEEEauthorblockA{\IEEEauthorrefmark{2}Ho Chi Minh City Open University, Ho Chi Minh City, Vietnam\\
+Email: phat.ht@ou.edu.vn (Corresponding Author)}
 }
 
 \begin{document}
@@ -44,17 +44,11 @@
 \maketitle
 
 \begin{abstract}
-\textbf{Objective:} Real-time visual perception in automated warehouses requires multi-class detection across severe perspective disparities, long aisle occlusions, and diverse logistics entities (workers, forklifts, mobile robots, and pallet jacks). While modern single-stage detectors like YOLO11 offer high operational throughput, their deep self-attention blocks (\texttt{C2PSA}) introduce heavy parameter footprints and quadratic memory access bottlenecks on embedded edge gateways. Conversely, Selective State Space Models (Mamba) achieve global receptive field modeling with strictly linear computational complexity $\mathcal{O}(N)$, yet their surgical integration into decoupled lightweight detectors remains largely unexplored.
-
-\textbf{Method:} We propose \textbf{YOLO11s-SS2D}, an edge-optimized hybrid architecture that surgically replaces self-attention bottlenecks with a lightweight, 4-direction 2D Selective State Space block (\texttt{WarehouseSS2DBlock}). The block integrates input-dependent directional projection alignment and zero-initialized residual connections to guarantee identity pass-through at initialization. We evaluate single-scale ($P_5$) and dual-scale ($P_4 + P_5$) configurations against baseline YOLO11s under a zero-leakage cross-facility partitioning protocol on the NVIDIA PhysicalAI-SmartSpaces benchmark.
-
-\textbf{Results:} Architectural profiling demonstrates a \textbf{$6.72\%$ overall parameter reduction} ($8.80\text{ M}$ vs. $9.43\text{ M}$) and a \textbf{$63.9\%$ parameter drop within the contextual stage} ($357{,}632$ vs. $990{,}976$), reducing complexity to $21.2\text{ GFLOPs}$. Evaluated across identical 20-epoch budgets, our hybrid model achieves competitive macro detection ($67.10\%$--$67.17\%\text{ mAP}_{50}$), a superior peak accuracy of \textbf{$71.81\%\text{ mAP}_{50}$}, and a \textbf{$+6.2\%$ boost in safety-critical forklift perception} ($76.3\%\text{ vs. } 70.1\%$).
-
-\textbf{Significance:} To validate on-device viability, we deploy the exported zero-plugin ONNX model onto physical embedded silicon: a \textbf{Raspberry Pi 4 Model B} (Quad-Core ARM Cortex-A72 @ 1.5\,GHz). Steady-state inference consumes only \textbf{$371.9\text{ MB}$ physical RAM (RSS)}, operating \textbf{$62.8\%$ beneath the $1.0\text{ GB}$ embedded hardware envelope} and confirming seamless, plugin-free edge viability.
+\input{sections/00_abstract}
 \end{abstract}
 
 \begin{IEEEkeywords}
-Object detection, YOLO, Mamba, State space models, Lightweight neural networks, Edge AI, Warehouse perception.
+Object detection, YOLO, Mamba, state space models, lightweight neural networks, edge AI, warehouse perception.
 \end{IEEEkeywords}
 
 % --- Main Sections ---
@@ -66,10 +60,7 @@ Object detection, YOLO, Mamba, State space models, Lightweight neural networks, 
 \input{sections/06_conclusion}
 
 % --- References ---
-\bibliographystyle{ieeetr}
-{\small
-\setlength{\itemsep}{0.5pt plus 0.2pt}
+\bibliographystyle{IEEEtran}
 \bibliography{references}
-}
 
 \end{document}

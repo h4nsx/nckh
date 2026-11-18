@@ -1,12 +1,13 @@
-# YOLO11s-SS2D: A Lightweight Hybrid YOLO-Mamba Architecture for Real-Time Multi-Class Warehouse Object Detection
+# Why a Cheaper Block Runs Slower: Replacing Self-Attention with 2D Selective Scans in YOLO11s on an Embedded CPU
 
-[![Paper PDF](https://img.shields.io/badge/Paper-IEEEtran-blue.svg)](paper/main.pdf)
+[![Paper LNCS PDF](https://img.shields.io/badge/Paper-Springer_LNCS-blue.svg)](paper_lncs/main.pdf)
 [![Architecture](https://img.shields.io/badge/Architecture-YOLO11s--SS2D-orange.svg)](#architecture-overview)
 [![Benchmark](https://img.shields.io/badge/Benchmark-NVIDIA_SmartSpaces-green.svg)](#benchmark--evaluation)
-[![Status](https://img.shields.io/badge/Status-Audited_%26_Verified-success.svg)](docs/RESULTS_INTEGRITY_GATE.md)
+[![Reproducibility](https://img.shields.io/badge/Reproducibility-Cryptographically_Hashed-success.svg)](audit/REPRODUCIBILITY.md)
 
 > **Official Research Codebase & Artifact Repository**  
-> **Topic:** *A Lightweight Hybrid YOLO-Mamba Architecture for Real-Time Multi-Class Warehouse Object Detection on Edge Devices*
+> **Target Venue:** TAIMMA 2027 (Springer Lecture Notes in Computer Science)  
+> **Topic:** *Why a Cheaper Block Runs Slower: Replacing Self-Attention with 2D Selective Scans in YOLO11s on an Embedded CPU*
 
 ---
 
@@ -68,24 +69,43 @@ Feature Map X ∈ ℝ^{B × 512 × 20 × 20}
 
 All models were evaluated under identical experimental conditions on the **NVIDIA PhysicalAI-SmartSpaces** zero-leakage cross-facility benchmark ($100$ test frames, $3{,}696$ ground-truth instances):
 
+### 1. Multi-Arm Architecture Comparison ($640 \times 640$, 20 Epochs)
+
 | Metric / Dimension | Baseline YOLO11s | YOLO11s-SS2D (Case B, Single-Stage) | YOLO11s-SS2D (Case B, Two-Stage Warmup) | YOLO11s-SS2D (Case C, Dual-Scale P4+P5) |
 | :--- | :---: | :---: | :---: | :---: |
-| **Attention Layer 10 Type** | `C2PSA` | **`WarehouseSS2DBlock`** | **`WarehouseSS2DBlock`** | `SS2D` $\times 2$ |
+| **Attention Layer 10 Type** | `C2PSA` | **`WarehouseSS2DBlock`** | **`WarehouseSS2DBlock`** | `SS2D` $\times 2$ (P4 + P5) |
 | **Layer 10 Parameter Count** | $990{,}976$ | **$357{,}632$** ($-63.9\%$) | **$357{,}632$** ($-63.9\%$) | $454{,}528$ ($-54.1\%$) |
 | **Total Model Parameters** | $9.429\text{ M}$ | **$8.796\text{ M}$** ($-6.72\%$) | **$8.796\text{ M}$** ($-6.72\%$) | $8.893\text{ M}$ ($-5.69\%$) |
 | **Computational Complexity** | $21.7\text{ GFLOPs}$ | **$21.2\text{ GFLOPs}$** | **$21.2\text{ GFLOPs}$** | $21.8\text{ GFLOPs}$ |
-| **Checkpoint Storage** | $19.18\text{ MB}$ | **$17.89\text{ MB}$** | **$17.89\text{ MB}$** | $18.10\text{ MB}$ |
-| **Peak Detection Accuracy** | $70.83\%\text{ mAP}_{50}$ | **$71.95\%\text{ mAP}_{50}$** | $68.42\%\text{ mAP}_{50}$ | $70.18\%\text{ mAP}_{50}$ |
+| **Checkpoint Storage** | $18.29\text{ MB}$ | **$17.07\text{ MB}$** | **$17.07\text{ MB}$** | $17.26\text{ MB}$ |
+| **Global Macro $\text{mAP}_{50}$** | $69.80\%$ | **$71.95\%$** ($+2.15\%$) | $67.67\%$ | $67.17\%$ |
+| **Global Macro $\text{mAP}_{50-95}$**| **$45.53\%$** | $45.15\%$ | $43.15\%$ | $42.76\%$ |
 | **Safety Recall (Overall)** | $57.21\%$ | $57.61\%$ | **$65.06\%$** ($\mathbf{+7.85\%}$) | $51.54\%$ |
-| **Forklift Detection ($\text{mAP}_{50}$)**| $70.13\%$ | **$79.71\%$** ($\mathbf{+9.58\%}$) | **$76.26\%$** ($\mathbf{+6.13\%}$) | **$75.25\%$** ($\mathbf{+5.12\%}$) |
-| **Worker Precision** | $95.0\%$ | $93.6\%$ | $93.2\%$ | **$96.6\%$** |
+| **Forklift $\text{mAP}_{50}$** | $70.13\%$ | **$79.71\%$** ($\mathbf{+9.58\%}$) | **$76.26\%$** ($\mathbf{+6.13\%}$) | **$75.25\%$** ($\mathbf{+5.12\%}$) |
+| **Forklift $\text{mAP}_{50-95}$** | $31.80\%$ | **$38.33\%$** ($\mathbf{+6.53\%}$) | **$38.36\%$** ($\mathbf{+6.56\%}$) | **$33.84\%$** ($\mathbf{+2.04\%}$) |
+| **Personnel Precision** | $95.0\%$ | $93.6\%$ | $93.2\%$ | **$96.6\%$** |
+
+---
+
+### 2. Physical Embedded Silicon Benchmark Profile ($640 \times 640$, Batch Size = 1)
+
+Benchmarked on **Raspberry Pi 4 Model B Rev 1.2** (Broadcom BCM2711 Quad-Core ARM Cortex-A72 @ 1.5 GHz, 4GB RAM) vs. Host x86_64 Core i7:
+
+| Hardware Platform | Model Architecture | ONNX Size | Mean Latency | Throughput | Peak Process RSS | Safety Headroom ($< 1.0\text{ GB}$) |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: |
+| **Raspberry Pi 4 ARM** | **YOLO11s Baseline Control** | 36.18 MB | $1169.73 \pm 24.7\text{ ms}$ | 0.86 FPS | **231.5 MB** | $76.8\%$ Headroom |
+| **Raspberry Pi 4 ARM** | **YOLO11s-SS2D (Case B, P5)** | 38.47 MB | $1398.19 \pm 28.0\text{ ms}$ | 0.72 FPS | **371.9 MB** | **62.8% Headroom** |
+| **Raspberry Pi 4 ARM** | **YOLO11s-SS2D (Case C, P4+P5)**| 46.62 MB | $1965.07 \pm 29.7\text{ ms}$ | 0.51 FPS | **714.9 MB** | $28.5\%$ Headroom |
+| Host x86_64 Core i7 | YOLO11s Baseline Control | 36.18 MB | $244.72 \pm 33.5\text{ ms}$ | 4.37 FPS | 285.1 MB | $71.5\%$ Headroom |
+| Host x86_64 Core i7 | YOLO11s-SS2D (Case B, P5) | 38.47 MB | $304.01 \pm 8.5\text{ ms}$ | 3.32 FPS | 395.7 MB | $60.4\%$ Headroom |
+
+---
 
 ### Core Insights
-- **Heavy Machinery Sensitivity:** Forklifts benefit the most from continuous 2D state-space modeling ($+6.1\%$ to $+9.6\%$ $\text{mAP}_{50}$ boost). The multi-directional scan resolves elongated masts and roll cages through multi-tier pallet racking.
-- **Worker Safety & False Alarm Suppression:** Case C achieves **$96.6\%$ precision on warehouse personnel**, preventing false triggers of automatic emergency-stop systems.
-- **Optimization Dynamics:** Single-stage training reaches high peak accuracy quickly ($71.95\%$), whereas the Two-Stage Warmup protocol (freezing the CNN backbone for 5 epochs) produces the most balanced per-class representations and the highest overall safety recall ($65.06\%$).
-- **Edge Deployment Headroom:** On physical embedded silicon (**Raspberry Pi 4 Model B Rev 1.2, Quad-Core Cortex-A72 @ 1.5 GHz**), the model operates at **$371.9\text{ MB}$ peak RSS**, running **$62.8\%$ beneath the 1.0 GB physical memory ceiling** of common industrial edge gateways.
-- **Physical Edge Latency Profile:** Steady-state on-device CPU latency measures **$1169.73\text{ ms}$ (Baseline, 0.86 FPS)** vs. **$1398.19\text{ ms}$ (Case B SS2D, 0.72 FPS)**, matching theoretical predictions ($\approx 1.20\times$ factor).
+- **Heavy Machinery Perception (+6.2% $\text{mAP}_{50}$ / +6.56% $\text{mAP}_{50-95}$):** Motorized forklifts benefit substantially from continuous 2D state-space modeling. The 4-direction scan bridges tall warehouse racking and resolves elongated industrial machinery silhouettes under heavy aisle occlusion.
+- **Worker Safety Recall (+7.85% Absolute Gain):** Case B Two-Stage achieves **$65.06\%$ safety recall** on warehouse personnel (vs. $57.21\%$ baseline), drastically reducing missed detections of floor workers.
+- **Embedded Memory Compliance:** Running at **$371.9\text{ MB}$ peak RSS**, Case B operates **$62.8\%$ beneath the 1.0 GB physical memory envelope** of industrial smart camera modules.
+- **Scientific Latency Trade-Off:** The latency ratio on physical ARM silicon ($\approx 1.20\times$) matches the host x86 CPU profile ($\approx 1.24\times$), validating that sequential recurrence incurs a predictable overhead on single-threaded CPUs while remaining viable for edge gateways.
 
 ---
 
@@ -130,20 +150,25 @@ A critical research contribution of this work is investigating the wall-clock ex
 
 ---
 
-## 📄 Academic Paper
+## 📄 Academic Paper & Submission
 
+- **Target Conference:** **TAIMMA 2027** (Springer LNCS)
+- **Paper Title:** *Why a Cheaper Block Runs Slower: Replacing Self-Attention with 2D Selective Scans in YOLO11s on an Embedded CPU*
 - **Authors:** 
-  - **Vo Tuan Hung** (Undergraduate Student, College of Technology II; [votuanhung1205.work@gmail.com](mailto:votuanhung1205.work@gmail.com), ORCID: [0009-0005-8730-7930](https://orcid.org/0009-0005-8730-7930))
-  - **Huynh Tan Phat** (Instructor / Advisor, Ho Chi Minh City Open University)
-- **Manuscript Source:** [`paper/main.tex`](paper/main.tex)
-- **Compiled PDF:** [`paper/main.pdf`](paper/main.pdf)
+  - **Vo Tuan Hung** (Information Technology Department, Song Hung Thuan Co., Ltd.; [votuanhung1205.work@gmail.com](mailto:votuanhung1205.work@gmail.com), ORCID: [0009-0005-8730-7930](https://orcid.org/0009-0005-8730-7930))
+  - **Huynh Tan Phat** (Corresponding Author, Ho Chi Minh City Open University; [phat.ht@ou.edu.vn](mailto:phat.ht@ou.edu.vn))
+- **Primary Submission Manuscript (LNCS):** [`paper_lncs/main.pdf`](paper_lncs/main.pdf) ([Source](paper_lncs/main.tex))
+- **Supplementary Code Archive:** [`submission_code.zip`](submission_code.zip)
+- **Legacy IEEE Draft:** [`paper/main.pdf`](paper/main.pdf)
 
 ### Citation
 ```bibtex
-@article{yolo11s_ss2d_2026,
-  title={A Lightweight Hybrid YOLO-Mamba Architecture for Real-Time Multi-Class Warehouse Object Detection on Edge Devices},
+@inproceedings{vo2027why,
+  title={Why a Cheaper Block Runs Slower: Replacing Self-Attention with 2D Selective Scans in YOLO11s on an Embedded CPU},
   author={Vo, Tuan Hung and Huynh, Tan Phat},
-  journal={IEEE Transactions on Automation Science and Engineering},
-  year={2026}
+  booktitle={Proceedings of the International Conference on Trends in Artificial Intelligence, Machine Learning and Manufacturing Applications (TAIMMA 2027)},
+  series={Lecture Notes in Computer Science},
+  publisher={Springer},
+  year={2027}
 }
 ```

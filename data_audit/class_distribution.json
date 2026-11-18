@@ -1,0 +1,18 @@
+{
+  "train": {
+    "total_images": 300,
+    "total_instances": 12959,
+    "worker": 11399,
+    "forklift": 600,
+    "pallet_truck": 236,
+    "amr": 724
+  },
+  "val": {
+    "total_images": 100,
+    "total_instances": 3696,
+    "worker": 3488,
+    "forklift": 150,
+    "pallet_truck": 13,
+    "amr": 45
+  }
+}

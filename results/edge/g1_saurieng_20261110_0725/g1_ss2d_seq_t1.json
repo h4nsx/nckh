@@ -1,0 +1,34 @@
+{
+  "model": "g1_ss2d_seq.onnx",
+  "onnx_size_mib": 38.464223861694336,
+  "onnx_nodes": 14767,
+  "provider": "CPUExecutionProvider",
+  "intra_op_threads": 1,
+  "cpu_count": 4,
+  "platform": "Linux-6.18.50+rpt-rpi-v8-aarch64-with-glibc2.41",
+  "machine": "aarch64",
+  "onnxruntime": "1.31.0",
+  "input_shape": [
+    1,
+    3,
+    640,
+    640
+  ],
+  "warmup": 3,
+  "runs": 20,
+  "forward_only": {
+    "median_ms": 3593.798561996664,
+    "mean_ms": 3594.027567897865,
+    "std_ms": 4.963197186784796,
+    "p90_ms": 3601.4746737957466,
+    "p95_ms": 3604.152085458918,
+    "fps": 0.27825710950377086
+  },
+  "end_to_end": null,
+  "rss_idle_mib": 47.8515625,
+  "rss_after_load_mib": 182.640625,
+  "rss_end_mib": 373.1171875,
+  "peak_rss_mib": 373.1171875,
+  "rss_end_with_e2e_mib": 373.1171875,
+  "peak_rss_with_e2e_mib": 373.1171875
+}

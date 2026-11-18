@@ -1,0 +1,148 @@
+nohup: ignoring input
+[RUN] yolo11s_baseline threads=1 runs=100  15:20:06
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_baseline.onnx
+=================================================================
+
+1. Warming up (10 iterations)...
+2. Timing forward pass over 100 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_baseline.onnx  (320 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 1
+Forward median:   3347.87 ms  (P95 3354.19 ms, 0.30 FPS)
+RSS idle / end:   47.9 / 233.2 MiB
+Peak RSS (HWM):   233.2 MiB
+----------------------------------------
+[SAVED] results/edge/parscan_saurieng_20261110_1519/yolo11s_baseline_t1.json
+[RUN] yolo11s_ss2d_arm3 threads=1 runs=100  15:32:26
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_ss2d_arm3.onnx
+=================================================================
+
+1. Warming up (10 iterations)...
+2. Timing forward pass over 100 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_ss2d_arm3.onnx  (14771 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 1
+Forward median:   3449.01 ms  (P95 4232.17 ms, 0.29 FPS)
+RSS idle / end:   47.8 / 373.1 MiB
+Peak RSS (HWM):   373.1 MiB
+----------------------------------------
+[SAVED] results/edge/parscan_saurieng_20261110_1519/yolo11s_ss2d_arm3_t1.json
+[RUN] yolo11s_ss2d_arm3_par threads=1 runs=100  15:45:18
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_ss2d_arm3_par.onnx
+=================================================================
+
+1. Warming up (10 iterations)...
+2. Timing forward pass over 100 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_ss2d_arm3_par.onnx  (619 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 1
+Forward median:   4072.93 ms  (P95 4078.83 ms, 0.25 FPS)
+RSS idle / end:   47.8 / 389.0 MiB
+Peak RSS (HWM):   389.0 MiB
+----------------------------------------
+[SAVED] results/edge/parscan_saurieng_20261110_1519/yolo11s_ss2d_arm3_par_t1.json
+[RUN] yolo11s_baseline threads=4 runs=30  15:56:48
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_baseline.onnx
+=================================================================
+
+1. Warming up (5 iterations)...
+2. Timing forward pass over 30 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_baseline.onnx  (320 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 4
+Forward median:   1111.82 ms  (P95 1128.46 ms, 0.90 FPS)
+RSS idle / end:   47.9 / 233.3 MiB
+Peak RSS (HWM):   233.3 MiB
+----------------------------------------
+[SAVED] results/edge/parscan_saurieng_20261110_1519/yolo11s_baseline_t4.json
+[RUN] yolo11s_ss2d_arm3 threads=4 runs=30  16:00:29
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_ss2d_arm3.onnx
+=================================================================
+
+1. Warming up (5 iterations)...
+2. Timing forward pass over 30 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_ss2d_arm3.onnx  (14771 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 4
+Forward median:   1327.94 ms  (P95 1338.23 ms, 0.75 FPS)
+RSS idle / end:   47.8 / 373.6 MiB
+Peak RSS (HWM):   373.6 MiB
+----------------------------------------
+[SAVED] results/edge/parscan_saurieng_20261110_1519/yolo11s_ss2d_arm3_t4.json
+[RUN] yolo11s_ss2d_arm3_par threads=4 runs=30  16:06:14
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_ss2d_arm3_par.onnx
+=================================================================
+
+1. Warming up (5 iterations)...
+2. Timing forward pass over 30 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_ss2d_arm3_par.onnx  (619 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 4
+Forward median:   2103.98 ms  (P95 2114.23 ms, 0.48 FPS)
+RSS idle / end:   47.8 / 389.4 MiB
+Peak RSS (HWM):   389.4 MiB
+----------------------------------------
+[SAVED] results/edge/parscan_saurieng_20261110_1519/yolo11s_ss2d_arm3_par_t4.json
+[PROFILE] yolo11s_ss2d_arm3_par  16:11:10
+=================================================================
+PROFILING ONNX GRAPH: yolo11s_ss2d_arm3_par.onnx
+=================================================================
+Total Graph Nodes: 619
+Operator Distribution:
+  - Mul            :    165 nodes ( 26.7%)
+  - Conv           :     84 nodes ( 13.6%)
+  - Sigmoid        :     77 nodes ( 12.4%)
+  - Slice          :     74 nodes ( 12.0%)
+  - Pad            :     68 nodes ( 11.0%)
+  - Add            :     57 nodes (  9.2%)
+  - Concat         :     20 nodes (  3.2%)
+  - Unsqueeze      :     16 nodes (  2.6%)
+  - Reshape        :     15 nodes (  2.4%)
+  - Split          :     12 nodes (  1.9%)
+[0;93m2026-11-10 16:11:11.232032971 [W:onnxruntime:, inference_session.cc:3240 operator()] Serializing optimized model with Graph Optimization level greater than ORT_ENABLE_EXTENDED and the NchwcTransformer enabled. The generated model may contain hardware specific optimizations, and should only be used in the same environment the model was optimized in.[m
+Nodes after ORT graph optimization: 541
+
+Saved detailed ORT profile log to: results/edge/parscan_saurieng_20261110_1519/profiles/ort_profile_yolo11s_ss2d_arm3_par_2026-11-10_16-11-10_897.json
+
+Operator Time Breakdown (Top 8):
+  - Conv           :  4522.21 ms ( 41.1%)
+  - Mul            :  2270.07 ms ( 20.7%)
+  - Add            :  1117.01 ms ( 10.2%)
+  - Pad            :   885.15 ms (  8.1%)
+  - Slice          :   820.40 ms (  7.5%)
+  - QuickGelu      :   740.92 ms (  6.7%)
+  - Concat         :   163.86 ms (  1.5%)
+  - Softmax        :   111.96 ms (  1.0%)
+[SAVED] results/edge/parscan_saurieng_20261110_1519/profiles/yolo11s_ss2d_arm3_par_t4_profile.json
+[DONE] results in results/edge/parscan_saurieng_20261110_1519
+ALL_DONE

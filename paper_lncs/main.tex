@@ -1,0 +1,66 @@
+% TAIMMA 2027 submission, Springer LNCS format (llncs v2.25, splncs04).
+% Full papers: 12-15 pages including references.
+% Double-blind review format configured for submission.
+\documentclass[runningheads]{llncs}
+
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\IfFileExists{newtxtext.sty}{%
+  \usepackage{newtxtext}
+  \usepackage[varvw]{newtxmath}
+}{%
+  \usepackage{mathptmx}
+}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{microtype}
+\usepackage{color}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks=true,
+  linkcolor=blue,
+  citecolor=blue,
+  urlcolor=blue,
+  bookmarksnumbered=true,
+  bookmarksopen=true
+}
+\setcounter{tocdepth}{2}
+\renewcommand\UrlFont{\color{blue}\rmfamily}
+\urlstyle{rm}
+
+\begin{document}
+
+\title{Why a Cheaper Block Runs Slower: Replacing Self-Attention with 2D Selective Scans in YOLO11s on an Embedded CPU}
+\titlerunning{Why a Cheaper Block Runs Slower}
+
+% Single-blind review: authors and institute included per TAIMMA 2027 policy
+\author{Vo Tuan Hung\inst{1} \and
+Huynh Tan Phat\inst{2}\thanks{Corresponding author.}}
+\authorrunning{T. H. Vo and T. P. Huynh}
+\institute{Information Technology Department, Song Hung Thuan Co., Ltd.,\\
+50C Hanoi Highway, Phuoc Long Ward, Ho Chi Minh City, Vietnam\\
+\email{votuanhung1205.work@gmail.com}
+\and
+Ho Chi Minh City Open University, Ho Chi Minh City, Vietnam\\
+\email{phat.ht@ou.edu.vn}}
+
+\maketitle
+
+\begin{abstract}
+\input{sections/00_abstract}
+\keywords{Object detection \and YOLO \and Mamba \and State space models \and Edge AI \and Warehouse perception.}
+\end{abstract}
+
+\input{sections/01_introduction}
+\input{sections/02_related_work}
+\input{sections/03_methodology}
+\input{sections/04_experimental_setup}
+\input{sections/05_results_discussion}
+\input{sections/06_conclusion}
+
+\bibliographystyle{splncs04}
+\bibliography{references}
+
+\end{document}

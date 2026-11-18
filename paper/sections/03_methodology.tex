@@ -1,114 +1,82 @@
-\section{Proposed Method}
+\section{Method}
 \label{sec:methodology}
 
-\subsection{Problem Formulation}
-\label{sec:formulation}
-Warehouse logistics perception presents severe scale disparities, visual clutter, and pervasive occlusion between moving machinery and personnel. We formulate the multi-class warehouse perception task as real-time 2D bounding box detection. Given an input RGB frame $\mathbf{X} \in \mathbb{R}^{H \times W \times 3}$ captured from stationary or automated mobile robot (AMR) camera views, the objective is to predict a set of bounding boxes $\mathcal{B} = \{(\mathbf{b}_i, c_i, s_i)\}_{i=1}^{M}$, where $\mathbf{b}_i = (x_c, y_c, w, h) \in [0, 1]^4$ specifies the normalized center coordinates and bounding box dimensions, $c_i \in \mathcal{C}$ denotes the object category, and $s_i \in [0, 1]$ represents the classification confidence score.
-
-The target class taxonomy is derived from logistics-critical warehouse categories:
-\begin{equation}
-    \mathcal{C} = \{\texttt{worker}, \texttt{forklift}, \texttt{pallet\_truck}, \texttt{amr}\}.
-\end{equation}
+\subsection{Architecture}
+\label{sec:arch_overview}
+The detector predicts boxes for four classes: \texttt{worker}, \texttt{forklift}, \texttt{pallet\_truck}, and \texttt{amr}. It keeps the YOLO11s backbone (Layers 0--9, ending with \texttt{SPPF}), its FPN/PAN neck, and its decoupled anchor-free \texttt{Detect} head, trained with the Ultralytics CIoU, binary cross-entropy, and distribution focal losses. In \textbf{SS2D-P5}, the \texttt{C2PSA} block at Layer~10 is replaced by a shape-compatible \texttt{WarehouseSS2DBlock}, $[b, 512, 20, 20] \to [b, 512, 20, 20]$, at stage $P_5$. \textbf{SS2D-P4P5} adds a second block at $P_4$ ($[b, 256, 40, 40]$, Layer~7). Fig.~\ref{fig:arch_diagram} shows the block.
 
 \begin{figure*}[!t]
 \centering
-\includegraphics[width=\textwidth]{figures/fig_architecture_diagram.pdf}
-\caption{Detailed architectural overview of \textbf{YOLO11s-SS2D}: (Left) Macro architecture showing surgical replacement of Layer 10 attention with the lightweight \texttt{WarehouseSS2DBlock} at Stage $P_5$; (Right) Internal micro-architecture illustrating the 4-direction vectorized selective state-space scan (SS2D) core, input-dependent parameter projections, and zero-initialized residual connection ($\mathbf{W}_{\text{out}} = \mathbf{0}$) ensuring exact identity pass-through at initialization.}
+\includegraphics[width=\textwidth]{figures/fig_ss2d_block.pdf}
+\caption{The \texttt{WarehouseSS2DBlock} that replaces \texttt{C2PSA} at Layer~10. The red label marks the $\mathbf{W}_{\text{out}} = \mathbf{0}$ initialization used for all reported models (Eq.~\eqref{eq:zero_wout}).}
 \label{fig:arch_diagram}
 \end{figure*}
 
-\subsection{Overall Architecture Overview}
-\label{sec:arch_overview}
-As illustrated in Figure~\ref{fig:arch_diagram}, the proposed hybrid architecture anchors on the verified lightweight \textbf{YOLO11s} detector. To achieve deployable long-range spatial context reasoning without suffering the quadratic memory scaling $\mathcal{O}(N^2)$ of vision transformers or excessive Memory Access Costs (MAC) at large resolutions, the model enforces a strict stage-wise separation:
-\begin{enumerate}
-    \item \textbf{High-Resolution Stages ($P_1$--$P_3$):} Retained as standard local convolutions to preserve edge gradients and fine details with optimal cache locality.
-    \item \textbf{Single-Scale Stage Context Modeling (Case B, $P_5$):} Selectively replaces the deepest Pointwise Spatial Attention block (\texttt{C2PSA}) at Layer 10 with an input/output shape-compatible 2D Selective Scan (\textbf{SS2D}) block accepting $[B, 512, 20, 20] \to [B, 512, 20, 20]$.
-    \item \textbf{Dual-Scale Context Modeling (Case C, $P_4 + P_5$):} Extends selective state-space processing to intermediate feature resolution $P_4$ ($[B, 256, 40, 40]$ at Layer 7) alongside $P_5$ ($[B, 512, 20, 20]$ at Layer 11) to capture multi-scale warehouse context across both distant small entities and large industrial vehicles.
-    \item \textbf{Feature Neck \& Head:} Preserves the original unmodified YOLO11s FPN/PAN neck and decoupled anchor-free \texttt{Detect} head to maintain baseline stability and enable clean, unconfounded ablation isolation.
-\end{enumerate}
-
-\subsection{CNN Local Feature Extraction}
-\label{sec:cnn_features}
-The backbone progressively downsamples the input image through convolutional strides of 2, generating a multi-scale feature pyramid:
-\begin{itemize}
-    \item Stage $P_3$ ($80 \times 80$, stride 8, 128 channels): Captures fine spatial details and small objects (e.g., distant AMRs or tags).
-    \item Stage $P_4$ ($40 \times 40$, stride 16, 256 channels): Encodes medium-scale object features and localized structural cues.
-    \item Stage $P_5$ ($20 \times 20$, stride 32, 512 channels): Represents low-resolution semantic abstractions across long warehouse aisles.
-\end{itemize}
-Local feature aggregation is governed by Cross-Stage Partial blocks (\texttt{C3k2}) and Spatial Pyramid Pooling Fast (\texttt{SPPF}) at Layer 9, producing a dense $512$-channel feature map at $P_5$.
-
-\subsection{Warehouse SS2D Contextual Block}
+\subsection{Warehouse SS2D Block}
 \label{sec:mamba_integration}
-To capture global aisle-level context without quadratic self-attention costs, we introduce the \textbf{WarehouseSS2DBlock} at Layer 10. The block accepts the $P_5$ feature tensor $\mathbf{F} \in \mathbb{R}^{B \times 512 \times 20 \times 20}$ and processes it as follows:
-
-\subsubsection{Local Projection and Channel Expansion}
-An initial $1 \times 1$ convolution projects input channels $C_{\text{in}} = 512$ to inner state dimension $d_{\text{inner}} = \lfloor \text{expand} \times C_{\text{in}} \rfloor = 256$ (with expansion ratio $\text{expand} = 0.5$):
+A $1 \times 1$ convolution with batch normalization (BN) and SiLU projects the $C_{\text{in}} = 512$ input channels of $\mathbf{F}$ to $d_{\text{inner}} = 256$ channels, and a depthwise $3 \times 3$ convolution with BN and SiLU adds local context, giving $\mathbf{F}_{\text{dw}} \in \mathbb{R}^{b \times d_{\text{inner}} \times H \times W}$. $\mathbf{F}_{\text{dw}}$ is flattened along four traversal orders of the $L = H \times W = 400$ grid: row-major, reversed row-major, column-major, and reversed column-major, giving sequences $\mathbf{u}_k \in \mathbb{R}^{b \times L \times d_{\text{inner}}}$, $k = 1, \dots, 4$. A projection $\mathbf{W}_{\text{proj}} \in \mathbb{R}^{d_{\text{inner}} \times (2 d_{\text{state}} + d_{\text{inner}})}$, shared by all directions, produces the input-dependent parameters
 \begin{equation}
-    \mathbf{F}_0 = \text{SiLU}(\text{BN}(\text{Conv}_{1 \times 1}(\mathbf{F}))).
+    [\mathbf{B}_k, \mathbf{C}_k, \mathbf{d}_k] = \mathbf{u}_k \mathbf{W}_{\text{proj}}, \quad \boldsymbol{\Delta}_k = \operatorname{softplus}(\mathbf{d}_k),
 \end{equation}
-A depthwise $3 \times 3$ convolution then aggregates immediate localized spatial context:
-\begin{equation}
-    \mathbf{F}_{\text{dw}} = \text{SiLU}(\text{BN}(\text{DWConv}_{3 \times 3}(\mathbf{F}_0))).
-\end{equation}
-
-\subsubsection{Four-Way 2D Selective State Space Scan}
-To eliminate the 1D causal scanning bias of sequence models and handle 2D spatial layouts, $\mathbf{F}_{\text{dw}}$ is unfolded along four traversal directions across the spatial grid $L = H \times W = 400$:
-\begin{enumerate}
-    \item Top-down, left-to-right (standard row-major scan): $\mathbf{u}_1$
-    \item Bottom-up, right-to-left (reversed row-major scan): $\mathbf{u}_2$
-    \item Left-to-right, top-down (column-major scan): $\mathbf{u}_3$
-    \item Right-to-left, bottom-up (reversed column-major scan): $\mathbf{u}_4$
-\end{enumerate}
-
-For each direction $k \in \{1, 2, 3, 4\}$, continuous state-space parameters $(\mathbf{A}_k, \mathbf{B}_k, \mathbf{C}_k, \mathbf{\Delta}_k)$ are dynamically conditioned on the input tokens through linear projections:
+which are discretized as $\overline{\mathbf{A}}_k = \exp(\boldsymbol{\Delta}_k \odot \mathbf{A}_k)$, the exact zero-order hold for the diagonal state matrix $\mathbf{A}_k = -\exp(\mathbf{A}_{\text{log}, k})$, and $(\overline{\mathbf{B}}\mathbf{u})_k = (\boldsymbol{\Delta}_k \odot \mathbf{u}_k) \odot \mathbf{B}_k$, a first-order approximation of the input term ($\odot$ broadcasts element-wise). With $d_{\text{state}} = 16$, the hidden state $\mathbf{h}_{k,t} \in \mathbb{R}^{d_{\text{inner}} \times d_{\text{state}}}$ is updated over $t = 1, \dots, L$:
 \begin{align}
-    \mathbf{\Delta}_k &= \text{softplus}(\mathbf{W}_{\Delta, k} \mathbf{u}_k), \\
-    \mathbf{B}_k &= \mathbf{W}_{B, k} \mathbf{u}_k, \quad \mathbf{C}_k = \mathbf{W}_{C, k} \mathbf{u}_k.
+    \mathbf{h}_{k,t} &= \overline{\mathbf{A}}_{k,t} \odot \mathbf{h}_{k,t-1} + (\overline{\mathbf{B}}\mathbf{u})_{k,t}, \\
+    \mathbf{y}_{k,t} &= \textstyle\sum_{n=1}^{d_{\text{state}}} \mathbf{h}_{k,t,n} \odot \mathbf{C}_{k,t,n} + \mathbf{D}_k \odot \mathbf{u}_{k,t}.
 \end{align}
-Discretization maps continuous parameters to discrete step operators:
-\begin{equation}
-    \overline{\mathbf{A}}_k = \exp(\mathbf{\Delta}_k \mathbf{A}_k), \quad \overline{\mathbf{B}}_k = (\mathbf{\Delta}_k \mathbf{u}_k) \otimes \mathbf{B}_k,
-\end{equation}
-where $\overline{\mathbf{A}}_k$ implements the exact matrix exponential of diagonal state matrix $\mathbf{A}_k = -\exp(\mathbf{A}_{\text{logs}, k})$ and $\overline{\mathbf{B}}_k$ adopts a lightweight first-order Euler-bilinear input modulation.
-The discrete recurrence updates the hidden state $\mathbf{h}_k(t) \in \mathbb{R}^{d_{\text{inner}} \times d_{\text{state}}}$ (with state dimension $d_{\text{state}} = 16$) in linear time:
-\begin{align}
-    \mathbf{h}_k(t) &= \overline{\mathbf{A}}_k(t) \mathbf{h}_k(t-1) + \overline{\mathbf{B}}_k(t), \\
-    \mathbf{y}_k(t) &= \sum_{n=1}^{d_{\text{state}}} \mathbf{h}_{k, n}(t) \mathbf{C}_{k, n}(t) + \mathbf{D}_k \mathbf{u}_k(t).
-\end{align}
-The four scanned sequences are reversed back to original spatial orientation, folded into 2D tensors, and summed:
-\begin{equation}
-    \mathbf{F}_{\text{ssm}} = \sum_{k=1}^{4} \text{Unfold}_{2\text{D}}(\mathbf{y}_k).
-\end{equation}
+The four outputs are restored to row-major order and summed into $\mathbf{F}_{\text{ssm}}$, which a $1 \times 1$ convolution $\mathbf{W}_{\text{out}}$ and BN map back to $512$ channels before the residual sum $\mathbf{Y} = \mathbf{F} + \operatorname{BN}_{\gamma, \beta}(\mathbf{W}_{\text{out}} * \mathbf{F}_{\text{ssm}})$.
 
-The resulting feature representation is projected back to $C_{\text{out}} = 512$ channels and recombined via an identity shortcut:
+Compared with Mamba~\cite{gu2023mamba} and VMamba~\cite{liu2024vmamba}, the block has no multiplicative gating branch, uses a full-rank step-size projection without bias or Mamba's step-size initialization, initializes $\mathbf{A}_{\text{log}}$ from a standard normal distribution rather than S4D-real, and shares $\mathbf{W}_{\text{proj}}$ across directions. These simplifications keep the block small and export-friendly but have not been ablated, so our results should not be read as representative of a standard Mamba block.
+
+\textbf{Initialization.} To avoid perturbing pretrained features, all reported models zero-initialize the output convolution and keep the default BN parameters:
 \begin{equation}
-    \mathbf{Y} = \mathbf{F} + \text{BN}(\text{Conv}_{1 \times 1}(\mathbf{F}_{\text{ssm}})).
+    \mathbf{W}_{\text{out},0} = \mathbf{0}, \; \gamma_0 = \mathbf{1}, \; \beta_0 = \mathbf{0} \implies \mathbf{Y}_0 \equiv \mathbf{F}.
+    \label{eq:zero_wout}
 \end{equation}
-This projection preserves the spatial dimensions and channel depth $[B, 512, 20, 20]$, guaranteeing seamless drop-in integration with the downstream YOLO11s feature aggregation network.
-
-\subsection{Multi-Scale Feature Fusion and Detection Head}
-\label{sec:fusion}
-The output $\mathbf{Y}$ feeds into the standard YOLO11s Path Aggregation Network (PANet). Multi-scale contextual information propagates top-down ($P_5 \to P_4 \to P_3$) via upsampling and concatenation, followed by bottom-up refinement ($P_3 \to P_4 \to P_5$).
-
-The decoupled anchor-free \texttt{Detect} head computes task-specific predictions across scales. Training minimizes a composite loss function:
+This is an identity only at step $0$: once $\mathbf{W}_{\text{out}}$ becomes small but nonzero, BN rescales its output to unit variance, so with $\gamma = \mathbf{1}$ the untrained branch contributes at full scale from the first iterations. We hypothesize, without having tested it, that this contributes to the unstable early-epoch validation metrics that motivated two-stage training. Following the zero-$\gamma$ residual principle~\cite{goyal2017accurate}, our current implementation instead sets
 \begin{equation}
-    \mathcal{L} = \lambda_{\text{box}} \mathcal{L}_{\text{box}} + \lambda_{\text{cls}} \mathcal{L}_{\text{cls}} + \lambda_{\text{dfl}} \mathcal{L}_{\text{dfl}},
+    \gamma_0 = \mathbf{0}, \; \beta_0 = \mathbf{0} \implies \mathbf{Y}_0 \equiv \mathbf{F},
+    \label{eq:zero_gamma}
 \end{equation}
-where $\mathcal{L}_{\text{box}}$ is Complete Intersection-over-Union (CIoU) loss, $\mathcal{L}_{\text{cls}}$ is Binary Cross-Entropy (BCE) classification loss, and $\mathcal{L}_{\text{dfl}}$ is Distribution Focal Loss (DFL).
+so that the branch grows gradually with $\gamma$ while $\partial \mathbf{Y} / \partial \gamma = \hat{\mathbf{Z}} \neq \mathbf{0}$ keeps it trainable. We verified this on an isolated block; none of the reported results use it.
 
-\subsection{Analytical Complexity and Parameter Footprint}
+\subsection{Analytical Cost}
 \label{sec:complexity}
-The surgical substitution of Layer 10 significantly reduces both model parameters and computational complexity:
-\begin{itemize}
-    \item \textbf{Standard \texttt{C2PSA} (Self-Attention):} Requires $990,976$ parameters.
-    \item \textbf{Proposed \texttt{WarehouseSS2DBlock}:} Requires $357,632$ parameters ($633,344$ fewer block parameters, a $63.9\%$ parameter reduction in the attention stage).
-    \item \textbf{Global Model Impact:} Overall parameters decrease from $9,429,340$ ($9.43\text{ M}$) to $8,795,996$ ($8.80\text{ M}$, a $-6.72\%$ overall reduction on warehouse detection). Computational complexity is maintained at $21.2\text{ GFLOPs}$.
-\end{itemize}
+The replacement reduces Layer~10 from $990{,}976$ to $357{,}632$ parameters ($-63.9\%$) and the model from $9{,}429{,}340$ to $8{,}795{,}996$ parameters ($-6.72\%$) and from $21.7$ to $21.2$ GFLOPs at $640 \times 640$. Table~\ref{tab:layer10_breakdown} shows where the savings come from. The token-mixing cores are both small: the attention products of \texttt{C2PSA} ($h L^2 (d_k + d_v)$ with $h = 4$, $d_k = 32$, $d_v = 64$) cost $61.4$\,M MACs, and the SS2D parameter projection ($K L d (2s + d)$ with $K = 4$, $d = 256$, $s = 16$) and recurrence ($\approx 2 K L d s$) cost $118.0$ and $13.1$\,M MACs, each about $1\%$ of the roughly $10.8$ GMACs of the model. At $L = 400$ the SS2D core is thus not cheaper than attention; the net saving of $633{,}344$ parameters and about $219$\,M MACs comes from narrower $512 \leftrightarrow 256$ projections and the removal of the feed-forward network. The decisive difference is the sequential dependency chain: attention has none across tokens, whereas the reference scan runs $K = 4$ independent chains of $L = 400$ dependent steps.
 
-\subsection{Two-Stage Training Protocol}
+\begin{table*}[!t]
+\caption{Per-component cost of Layer~10 at $P_5$ ($20 \times 20$). BN: batch-normalization affine parameters.}
+\label{tab:layer10_breakdown}
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{llrr}
+\toprule
+\textbf{Block} & \textbf{Component} & \textbf{Params} & \textbf{MACs (M)} \\
+\midrule
+\multirow{8}{*}{\texttt{C2PSA}} & \texttt{cv1} $1\times1$, $512 \to 512$ & 262,144 & 104.9 \\
+ & \texttt{qkv} $1\times1$, $256 \to 512$ & 131,072 & 52.4 \\
+ & \texttt{proj} $1\times1$, $256 \to 256$ & 65,536 & 26.2 \\
+ & Positional DWConv $3\times3$ & 2,304 & 0.9 \\
+ & Attention $QK^{\top}$, $AV$ & -- & 61.4 \\
+ & FFN $256 \to 512 \to 256$ & 262,144 & 104.9 \\
+ & \texttt{cv2} $1\times1$, $512 \to 512$ & 262,144 & 104.9 \\
+ & BN & 5,632 & -- \\
+\cmidrule(lr){2-4}
+ & \textbf{Total} & \textbf{990,976} & \textbf{455.6} \\
+\midrule
+\multirow{7}{*}{SS2D} & In-projection $1\times1$, $512 \to 256$ & 131,072 & 52.4 \\
+ & DWConv $3\times3$ & 2,304 & 0.9 \\
+ & $\mathbf{W}_{\text{proj}}$ (shared by 4 directions) & 73,728 & 118.0 \\
+ & $\mathbf{A}_{\text{log}}$, $\mathbf{D}$ & 17,408 & -- \\
+ & Recurrence and readout ($4 \times 400$ sequential steps) & -- & 13.1 \\
+ & Out-projection $1\times1$, $256 \to 512$ & 131,072 & 52.4 \\
+ & BN & 2,048 & -- \\
+\cmidrule(lr){2-4}
+ & \textbf{Total} & \textbf{357,632} & \textbf{236.8} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Two-Stage Training}
 \label{sec:training_workflow}
-Empirical evidence reveals a ``cold block'' perturbation phenomenon when inserting a newly initialized SSM block into a pretrained CNN backbone. We establish a structured two-stage optimization strategy:
-\begin{enumerate}
-    \item \textbf{Stage 1 (SSM Warmup):} The pretrained CNN backbone stages ($P_1$--$P_4$) are frozen. The learning rate is applied strictly to the \texttt{WarehouseSS2DBlock} and detection head for $5$ warm-up epochs to align the continuous state-space matrices without destabilizing early visual filters.
-    \item \textbf{Stage 2 (End-to-End Fine-Tuning):} All parameters are unfrozen for fine-tuning using AdamW with cosine learning rate decay.
-\end{enumerate}
+Because early trials showed unstable early-epoch validation metrics after inserting a new block, we also evaluate a two-stage protocol: in stage~1, Layers 0--9 are frozen (\texttt{freeze=10}) for $5$ epochs, so only the SS2D block, neck, and head are updated (BN running statistics in frozen layers still update); in stage~2, all parameters are trained for $15$ epochs from the stage-1 weights. Each stage is a separate Ultralytics run, so stage~2 restarts the learning-rate warmup and decay.

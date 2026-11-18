@@ -1,0 +1,13 @@
+\section{Conclusion}
+\label{sec:conclusion}
+\textbf{RQ1.} Replacing \texttt{C2PSA} with a plugin-free 2D selective scan removes $63.9\%$ of the Layer-10 parameters and $6.72\%$ of the model at $21.2$ instead of $21.7$ GFLOPs, but does not preserve overall accuracy in our single-seed experiments: all SS2D variants have lower $\text{mAP}_{50-95}$, and the baseline has the highest final-epoch $\text{mAP}_{50}$. The higher forklift accuracy of the SS2D variants ($75.3$--$79.7\%$ vs.\ $70.1\%$) correlates with large bounding-box spatial footprint at stage $P_5$, though multi-seed confirmation is needed. \textbf{RQ2.} Two-stage training gave mixed results (higher final-epoch but lower best-fitness accuracy than single-stage training, with a shifted operating point). The zero-initialized output convolution preserves identity only at step $0$; whether zero-$\gamma$ initialization makes a dedicated protocol unnecessary requires re-training. \textbf{RQ3.} The model runs on a Raspberry Pi~4 without plugins and within $1$\,GiB ($373.6$\,MiB), but it is slower than the baseline ($1314$ vs.\ $1117$\,ms with four threads, $+18\%$; $+6\%$ with one thread). The overhead follows how the scan is executed, not its arithmetic or graph size: an ONNX \texttt{Loop} with $367$ nodes, a chunked scan, and a parallel associative scan with $619$ nodes and no sequential chain were all slower than the unrolled scan with $14{,}767$ nodes (the parallel scan by $58\%$ with four threads), while removing \texttt{C2PSA} altogether saved only $2$--$5\%$.
+
+Future work will re-train all arms with zero-$\gamma$ initialization over multiple seeds, with trained identity and convolution-only ablations and a held-out test facility; measure fused scan kernels and an SSD-style block with scalar decays, also on accelerators and with quantization; and evaluate on real warehouse footage.
+
+\begin{credits}
+\subsubsection{\ackname} The authors thank the Ultralytics developers and the NVIDIA PhysicalAI-SmartSpaces contributors for making their detectors and benchmark publicly available.
+
+\subsubsection{\discintname} The authors have no competing interests to declare that are relevant to the content of this article.
+\end{credits}
+
+\subsubsection{Code Availability} The complete code, evaluation logs, PyTorch checkpoints, and ONNX models are available at \url{https://github.com/h4nsx/nckh}.

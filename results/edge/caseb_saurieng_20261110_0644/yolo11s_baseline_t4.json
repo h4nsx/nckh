@@ -1,0 +1,34 @@
+{
+  "model": "yolo11s_baseline.onnx",
+  "onnx_size_mib": 36.175724029541016,
+  "onnx_nodes": 320,
+  "provider": "CPUExecutionProvider",
+  "intra_op_threads": 4,
+  "cpu_count": 4,
+  "platform": "Linux-6.18.50+rpt-rpi-v8-aarch64-with-glibc2.41",
+  "machine": "aarch64",
+  "onnxruntime": "1.31.0",
+  "input_shape": [
+    1,
+    3,
+    640,
+    640
+  ],
+  "warmup": 5,
+  "runs": 30,
+  "forward_only": {
+    "median_ms": 1117.273749987362,
+    "mean_ms": 1120.6246982008452,
+    "std_ms": 7.453096590126798,
+    "p90_ms": 1130.6344548793277,
+    "p95_ms": 1135.6329027679749,
+    "fps": 0.895035795847984
+  },
+  "end_to_end": null,
+  "rss_idle_mib": 47.85546875,
+  "rss_after_load_mib": 96.015625,
+  "rss_end_mib": 233.3515625,
+  "peak_rss_mib": 233.3515625,
+  "rss_end_with_e2e_mib": 233.3515625,
+  "peak_rss_with_e2e_mib": 233.3515625
+}

@@ -1,0 +1,339 @@
+nohup: ignoring input
+[RUN] yolo11s_baseline threads=1 runs=100  06:46:32
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_baseline.onnx
+=================================================================
+
+1. Warming up (10 iterations)...
+2. Timing forward pass over 100 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_baseline.onnx  (320 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 1
+Forward median:   3192.88 ms  (P95 3203.38 ms, 0.31 FPS)
+RSS idle / end:   47.8 / 233.2 MiB
+Peak RSS (HWM):   233.2 MiB
+----------------------------------------
+[SAVED] results/edge/caseb_saurieng_20261110_0644/yolo11s_baseline_t1.json
+[RUN] yolo11s_ss2d_arm3 threads=1 runs=100  07:00:16
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_ss2d_arm3.onnx
+=================================================================
+
+1. Warming up (10 iterations)...
+2. Timing forward pass over 100 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_ss2d_arm3.onnx  (14771 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 1
+Forward median:   3374.10 ms  (P95 3380.67 ms, 0.30 FPS)
+RSS idle / end:   47.8 / 373.1 MiB
+Peak RSS (HWM):   373.1 MiB
+----------------------------------------
+[SAVED] results/edge/caseb_saurieng_20261110_0644/yolo11s_ss2d_arm3_t1.json
+[RUN] yolo11s_baseline threads=4 runs=30  07:11:37
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_baseline.onnx
+=================================================================
+
+1. Warming up (5 iterations)...
+2. Timing forward pass over 30 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_baseline.onnx  (320 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 4
+Forward median:   1117.27 ms  (P95 1135.63 ms, 0.90 FPS)
+RSS idle / end:   47.9 / 233.4 MiB
+Peak RSS (HWM):   233.4 MiB
+----------------------------------------
+[SAVED] results/edge/caseb_saurieng_20261110_0644/yolo11s_baseline_t4.json
+[RUN] yolo11s_ss2d_arm3 threads=4 runs=30  07:16:48
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_ss2d_arm3.onnx
+=================================================================
+
+1. Warming up (5 iterations)...
+2. Timing forward pass over 30 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_ss2d_arm3.onnx  (14771 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 4
+Forward median:   1314.26 ms  (P95 1325.32 ms, 0.76 FPS)
+RSS idle / end:   47.9 / 373.6 MiB
+Peak RSS (HWM):   373.6 MiB
+----------------------------------------
+[SAVED] results/edge/caseb_saurieng_20261110_0644/yolo11s_ss2d_arm3_t4.json
+[PROFILE] yolo11s_ss2d_arm3  07:23:54
+=================================================================
+PROFILING ONNX GRAPH: yolo11s_ss2d_arm3.onnx
+=================================================================
+Total Graph Nodes: 14771
+Operator Distribution:
+  - Gather         :   4800 nodes ( 32.5%)
+  - Mul            :   3293 nodes ( 22.3%)
+  - Unsqueeze      :   3212 nodes ( 21.7%)
+  - Add            :   1621 nodes ( 11.0%)
+  - ReduceSum      :   1600 nodes ( 10.8%)
+  - Conv           :     84 nodes (  0.6%)
+  - Sigmoid        :     77 nodes (  0.5%)
+  - Concat         :     24 nodes (  0.2%)
+  - Reshape        :     15 nodes (  0.1%)
+  - Split          :     12 nodes (  0.1%)
+[0;93m2026-11-10 07:24:42.525992413 [W:onnxruntime:, inference_session.cc:3240 operator()] Serializing optimized model with Graph Optimization level greater than ORT_ENABLE_EXTENDED and the NchwcTransformer enabled. The generated model may contain hardware specific optimizations, and should only be used in the same environment the model was optimized in.[m
+Nodes after ORT graph optimization: 14701
+
+Saved detailed ORT profile log to: results/edge/caseb_saurieng_20261110_0644/profiles/ort_profile_yolo11s_ss2d_arm3_2026-11-10_07-23-55_748.json
+
+Operator Time Breakdown (Top 8):
+  - Conv           :  4327.09 ms ( 50.0%)
+  - Mul            :   929.53 ms ( 10.7%)
+  - QuickGelu      :   733.82 ms (  8.5%)
+  - Squeeze        :   485.36 ms (  5.6%)
+  - Unsqueeze      :   463.32 ms (  5.4%)
+  - Add            :   379.26 ms (  4.4%)
+  - ReduceSum      :   290.64 ms (  3.4%)
+  - Split          :   251.50 ms (  2.9%)
+[SAVED] results/edge/caseb_saurieng_20261110_0644/profiles/yolo11s_ss2d_arm3_t4_profile.json
+[DONE] results in results/edge/caseb_saurieng_20261110_0644
+[RUN] g1_baseline threads=1  07:27:57
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: g1_baseline.onnx
+=================================================================
+
+1. Warming up (3 iterations)...
+2. Timing forward pass over 20 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            g1_baseline.onnx  (320 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 1
+Forward median:   3146.73 ms  (P95 3149.34 ms, 0.32 FPS)
+RSS idle / end:   47.8 / 233.2 MiB
+Peak RSS (HWM):   233.2 MiB
+----------------------------------------
+[SAVED] results/edge/g1_saurieng_20261110_0725/g1_baseline_t1.json
+[RUN] g1_identity threads=1  07:32:12
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: g1_identity.onnx
+=================================================================
+
+1. Warming up (3 iterations)...
+2. Timing forward pass over 20 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            g1_identity.onnx  (292 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 1
+Forward median:   3070.43 ms  (P95 3071.64 ms, 0.33 FPS)
+RSS idle / end:   47.8 / 228.9 MiB
+Peak RSS (HWM):   228.9 MiB
+----------------------------------------
+[SAVED] results/edge/g1_saurieng_20261110_0725/g1_identity_t1.json
+[RUN] g1_convonly threads=1  07:36:24
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: g1_convonly.onnx
+=================================================================
+
+1. Warming up (3 iterations)...
+2. Timing forward pass over 20 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            g1_convonly.onnx  (300 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 1
+Forward median:   3105.40 ms  (P95 3108.27 ms, 0.32 FPS)
+RSS idle / end:   47.8 / 230.0 MiB
+Peak RSS (HWM):   230.0 MiB
+----------------------------------------
+[SAVED] results/edge/g1_saurieng_20261110_0725/g1_convonly_t1.json
+[RUN] g1_ss2d_seq threads=1  07:41:27
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: g1_ss2d_seq.onnx
+=================================================================
+
+1. Warming up (3 iterations)...
+2. Timing forward pass over 20 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            g1_ss2d_seq.onnx  (14767 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 1
+Forward median:   3593.80 ms  (P95 3604.15 ms, 0.28 FPS)
+RSS idle / end:   47.9 / 373.1 MiB
+Peak RSS (HWM):   373.1 MiB
+----------------------------------------
+[SAVED] results/edge/g1_saurieng_20261110_0725/g1_ss2d_seq_t1.json
+[RUN] g1_ss2d_loop threads=1  07:46:58
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: g1_ss2d_loop.onnx
+=================================================================
+
+1. Warming up (3 iterations)...
+2. Timing forward pass over 20 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            g1_ss2d_loop.onnx  (367 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 1
+Forward median:   7778.61 ms  (P95 7783.09 ms, 0.13 FPS)
+RSS idle / end:   47.9 / 273.6 MiB
+Peak RSS (HWM):   273.6 MiB
+----------------------------------------
+[SAVED] results/edge/g1_saurieng_20261110_0725/g1_ss2d_loop_t1.json
+[RUN] g1_ss2d_chunk4 threads=1  07:54:10
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: g1_ss2d_chunk4.onnx
+=================================================================
+
+1. Warming up (3 iterations)...
+2. Timing forward pass over 20 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            g1_ss2d_chunk4.onnx  (8355 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 1
+Forward median:   3752.51 ms  (P95 3759.07 ms, 0.27 FPS)
+RSS idle / end:   47.9 / 303.9 MiB
+Peak RSS (HWM):   303.9 MiB
+----------------------------------------
+[SAVED] results/edge/g1_saurieng_20261110_0725/g1_ss2d_chunk4_t1.json
+[RUN] g1_baseline threads=4  07:59:33
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: g1_baseline.onnx
+=================================================================
+
+1. Warming up (3 iterations)...
+2. Timing forward pass over 20 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            g1_baseline.onnx  (320 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 4
+Forward median:   1132.78 ms  (P95 1146.49 ms, 0.88 FPS)
+RSS idle / end:   47.9 / 233.3 MiB
+Peak RSS (HWM):   233.3 MiB
+----------------------------------------
+[SAVED] results/edge/g1_saurieng_20261110_0725/g1_baseline_t4.json
+[RUN] g1_identity threads=4  08:03:51
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: g1_identity.onnx
+=================================================================
+
+1. Warming up (3 iterations)...
+2. Timing forward pass over 20 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            g1_identity.onnx  (292 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 4
+Forward median:   1072.71 ms  (P95 1085.05 ms, 0.93 FPS)
+RSS idle / end:   47.8 / 229.4 MiB
+Peak RSS (HWM):   229.4 MiB
+----------------------------------------
+[SAVED] results/edge/g1_saurieng_20261110_0725/g1_identity_t4.json
+[RUN] g1_convonly threads=4  08:07:47
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: g1_convonly.onnx
+=================================================================
+
+1. Warming up (3 iterations)...
+2. Timing forward pass over 20 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            g1_convonly.onnx  (300 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 4
+Forward median:   1095.87 ms  (P95 1111.81 ms, 0.91 FPS)
+RSS idle / end:   47.9 / 230.5 MiB
+Peak RSS (HWM):   230.5 MiB
+----------------------------------------
+[SAVED] results/edge/g1_saurieng_20261110_0725/g1_convonly_t4.json
+[RUN] g1_ss2d_seq threads=4  08:10:24
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: g1_ss2d_seq.onnx
+=================================================================
+
+1. Warming up (3 iterations)...
+2. Timing forward pass over 20 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            g1_ss2d_seq.onnx  (14767 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 4
+Forward median:   1311.31 ms  (P95 1326.05 ms, 0.76 FPS)
+RSS idle / end:   47.9 / 373.6 MiB
+Peak RSS (HWM):   373.6 MiB
+----------------------------------------
+[SAVED] results/edge/g1_saurieng_20261110_0725/g1_ss2d_seq_t4.json
+[RUN] g1_ss2d_loop threads=4  08:17:12
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: g1_ss2d_loop.onnx
+=================================================================
+
+1. Warming up (3 iterations)...
+2. Timing forward pass over 20 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            g1_ss2d_loop.onnx  (367 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 4
+Forward median:   5938.43 ms  (P95 5954.65 ms, 0.17 FPS)
+RSS idle / end:   47.8 / 274.0 MiB
+Peak RSS (HWM):   274.0 MiB
+----------------------------------------
+[SAVED] results/edge/g1_saurieng_20261110_0725/g1_ss2d_loop_t4.json
+[RUN] g1_ss2d_chunk4 threads=4  08:23:41
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: g1_ss2d_chunk4.onnx
+=================================================================
+
+1. Warming up (3 iterations)...
+2. Timing forward pass over 20 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            g1_ss2d_chunk4.onnx  (8355 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 4
+Forward median:   1494.74 ms  (P95 1505.57 ms, 0.67 FPS)
+RSS idle / end:   47.8 / 304.3 MiB
+Peak RSS (HWM):   304.3 MiB
+----------------------------------------
+[SAVED] results/edge/g1_saurieng_20261110_0725/g1_ss2d_chunk4_t4.json
+[DONE] results in results/edge/g1_saurieng_20261110_0725
+ALL_DONE

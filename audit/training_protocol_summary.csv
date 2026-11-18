@@ -1,0 +1,5 @@
+arm,final_epoch,final_mAP50,peak_mAP50,lr_stage2,lr0_stage2,seed_present
+arm2,20,0.65462,0.71812,7.4375e-05,0.000411111,False
+arm4,20,0.67172,0.67172,7.4375e-05,0.000411111,False
+arm3,15,0.67101,0.67486,9.5e-05,0.000411111,False
+arm1,20,0.69748,0.70323,7.4375e-05,0.000411111,False

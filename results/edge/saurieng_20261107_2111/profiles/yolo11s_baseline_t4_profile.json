@@ -1,0 +1,36 @@
+{
+  "model": "yolo11s_baseline.onnx",
+  "total_nodes": 320,
+  "nodes_after_ort_optimization": 236,
+  "intra_op_threads": 4,
+  "warmup_runs": 2,
+  "profiled_runs_requested": 5,
+  "profiled_runs": 5,
+  "mean_model_run_ms": 1161.1516000000001,
+  "top_ops": {
+    "Conv": 88,
+    "Mul": 79,
+    "Sigmoid": 78,
+    "Concat": 21,
+    "Add": 16,
+    "Reshape": 11,
+    "Split": 10,
+    "MaxPool": 3,
+    "Transpose": 3,
+    "MatMul": 2
+  },
+  "durations_ms": {
+    "Conv": 4523.784,
+    "QuickGelu": 747.204,
+    "Concat": 165.238,
+    "Softmax": 120.064,
+    "Split": 65.03,
+    "Add": 51.28,
+    "FusedConv": 38.129,
+    "FusedMatMul": 26.595,
+    "Resize": 17.158,
+    "Transpose": 6.125
+  },
+  "kernel_total_ms": 5770.453,
+  "ort_profile_file": "results/edge/saurieng_20261107_2111/profiles/ort_profile_yolo11s_baseline_2026-11-08_08-15-35_720.json"
+}

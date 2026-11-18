@@ -12,7 +12,15 @@ __pycache__/
 .pytest_cache/
 
 # Datasets and heavy binary files
-data/
+data/*
+!data/smartspaces_micro/
+data/smartspaces_micro/*
+!data/smartspaces_micro/images/
+data/smartspaces_micro/images/*
+!data/smartspaces_micro/images/val/
+!data/smartspaces_micro/labels/
+data/smartspaces_micro/labels/*
+!data/smartspaces_micro/labels/val/
 datasets/
 *.h5
 *.hdf5
@@ -20,10 +28,16 @@ datasets/
 *.tar.gz
 *.zip
 
-# Ultralytics runs & weights
-runs/
-*.pt
-*.onnx
+# Allow runs directory
+!runs/
+!runs/**
+
+# Ignore large standalone root model weights and models/ pt files
+yolo11s.pt
+yolo11s.onnx
+models/*.pt
+
+# Global extension ignore (except inside runs/)
 *.engine
 
 # LaTeX compilation temporaries
@@ -37,3 +51,12 @@ paper/*.synctex.gz
 texput.log
 gpu_training_package/*.tar.gz
 models/*.onnx
+onnxruntime_profile*.json
+
+# LNCS build temporaries
+paper_lncs/*.aux
+paper_lncs/*.log
+paper_lncs/*.bbl
+paper_lncs/*.blg
+paper_lncs/*.out
+paper_lncs/*.synctex.gz

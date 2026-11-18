@@ -1,0 +1,114 @@
+nohup: ignoring input
+[INFO] system info -> results/edge/saurieng_20261107_2111/system_info.txt
+[RUN] yolo11s_baseline  threads=1
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_baseline.onnx
+=================================================================
+
+1. Warming up (10 iterations)...
+2. Timing forward pass over 100 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_baseline.onnx  (320 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 1
+Forward median:   3360.50 ms  (P95 3367.76 ms, 0.30 FPS)
+RSS idle / end:   47.8 / 233.2 MiB
+Peak RSS (HWM):   233.2 MiB
+----------------------------------------
+[SAVED] results/edge/saurieng_20261107_2111/yolo11s_baseline_t1.json
+[RUN] yolo11s_baseline  threads=4
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_baseline.onnx
+=================================================================
+
+1. Warming up (10 iterations)...
+2. Timing forward pass over 100 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_baseline.onnx  (320 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 4
+Forward median:   1112.34 ms  (P95 1144.02 ms, 0.90 FPS)
+RSS idle / end:   47.9 / 233.4 MiB
+Peak RSS (HWM):   233.4 MiB
+----------------------------------------
+[SAVED] results/edge/saurieng_20261107_2111/yolo11s_baseline_t4.json
+[PROFILE] yolo11s_baseline
+[0;93m2026-11-07 21:21:19.667163215 [W:onnxruntime:, inference_session.cc:3240 operator()] Serializing optimized model with Graph Optimization level greater than ORT_ENABLE_EXTENDED and the NchwcTransformer enabled. The generated model may contain hardware specific optimizations, and should only be used in the same environment the model was optimized in.[m
+=================================================================
+PROFILING ONNX GRAPH: yolo11s_baseline.onnx
+=================================================================
+Total Graph Nodes: 320
+Operator Distribution:
+  - Conv           :     88 nodes ( 27.5%)
+  - Mul            :     79 nodes ( 24.7%)
+  - Sigmoid        :     78 nodes ( 24.4%)
+  - Concat         :     21 nodes (  6.6%)
+  - Add            :     16 nodes (  5.0%)
+  - Reshape        :     11 nodes (  3.4%)
+  - Split          :     10 nodes (  3.1%)
+  - MaxPool        :      3 nodes (  0.9%)
+  - Transpose      :      3 nodes (  0.9%)
+  - MatMul         :      2 nodes (  0.6%)
+Nodes after ORT graph optimization: 236
+
+Saved detailed ORT profile log to: results/edge/saurieng_20261107_2111/profiles/ort_profile_yolo11s_baseline_2026-11-07_21-21-19_412.json
+
+Operator Time Breakdown (Top 8):
+  - Conv           : 13730.96 ms ( 78.1%)
+  - QuickGelu      :  2304.09 ms ( 13.1%)
+  - Concat         :   520.88 ms (  3.0%)
+  - Softmax        :   371.31 ms (  2.1%)
+  - Split          :   206.03 ms (  1.2%)
+  - Add            :   152.15 ms (  0.9%)
+  - FusedConv      :   101.87 ms (  0.6%)
+  - FusedMatMul    :    83.81 ms (  0.5%)
+[SAVED] results/edge/saurieng_20261107_2111/profiles/yolo11s_baseline_t4_profile.json
+[RUN] yolo11s_case_c  threads=1
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_case_c.onnx
+=================================================================
+
+1. Warming up (10 iterations)...
+2. Timing forward pass over 100 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_case_c.onnx  (90201 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 1
+Forward median:   4178.68 ms  (P95 4185.68 ms, 0.24 FPS)
+RSS idle / end:   47.9 / 716.5 MiB
+Peak RSS (HWM):   716.5 MiB
+----------------------------------------
+[SAVED] results/edge/saurieng_20261107_2111/yolo11s_case_c_t1.json
+[RUN] yolo11s_case_c  threads=4
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_case_c.onnx
+=================================================================
+
+1. Warming up (10 iterations)...
+2. Timing forward pass over 100 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_case_c.onnx  (90201 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 4
+Forward median:   1989.84 ms  (P95 2101.44 ms, 0.50 FPS)
+RSS idle / end:   47.8 / 718.0 MiB
+Peak RSS (HWM):   718.0 MiB
+----------------------------------------
+[SAVED] results/edge/saurieng_20261107_2111/yolo11s_case_c_t4.json
+[PROFILE] yolo11s_case_c
+[0;93m2026-11-07 22:36:45.451869736 [W:onnxruntime:, inference_session.cc:3240 operator()] Serializing optimized model with Graph Optimization level greater than ORT_ENABLE_EXTENDED and the NchwcTransformer enabled. The generated model may contain hardware specific optimizations, and should only be used in the same environment the model was optimized in.[m
+[1;31m2026-11-07 22:38:01.948440888 [E:onnxruntime:, profiler.cc:176 RecordEventImpl] Maximum number of events reached, could not record profile event.[m
+scripts/run_pi_benchmarks.sh: line 48:  2232 Killed                  python3 scripts/profile_onnx_operators.py --model "$model" --threads 4 --out-dir "$OUT/profiles"
+      2233 Done                    | tee "$OUT/profiles/${name}.log"

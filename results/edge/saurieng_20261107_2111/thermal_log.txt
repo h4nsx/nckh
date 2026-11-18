@@ -1,0 +1,6 @@
+yolo11s_baseline t1 temp=63.7'C throttled=0x0
+yolo11s_baseline t4 temp=79.3'C throttled=0x80000
+yolo11s_case_c t1 temp=66.7'C throttled=0x80000
+yolo11s_case_c t4 temp=80.3'C throttled=0x80000
+yolo11s_ss2d t1 temp=65.7'C throttled=0x80000
+yolo11s_ss2d t4 temp=79.8'C throttled=0x80000

@@ -89,22 +89,22 @@ def test_identity_and_numerical_gradients():
     print(f"  [PASS] Pure Identity Pass-Through at initialization: max abs diff = {max_diff:.2e}")
 
     # 2. Step 0 Gradient test:
-    # When out_proj.weight is zero, upstream SS2D parameters MUST receive 0.0 gradient
-    # and only norm3.bias and x receive gradients.
+    # Under Zero-Gamma (norm3.weight=0, norm3.bias=0), the residual path x receives gradient 1.0,
+    # norm3.weight receives active gradient (dY/dgamma != 0), allowing the block to learn smoothly,
+    # while upstream parameters receive zero gradient until gamma develops.
     x_step0 = torch.randn(2, 512, 10, 10, requires_grad=True)
     y_step0 = block(x_step0)
     loss0 = y_step0.sum()
     loss0.backward()
 
     assert x_step0.grad is not None and not torch.isnan(x_step0.grad).any(), "Input gradient missing at step 0"
+    assert block.norm3.weight.grad is not None and block.norm3.weight.grad.norm().item() > 0, "norm3.weight should have active gradient"
     assert block.norm3.bias.grad is not None and block.norm3.bias.grad.norm().item() > 0, "norm3.bias should have gradient"
-    assert block.in_proj.weight.grad.norm().item() == 0.0, "in_proj.weight should have 0 gradient when out_proj.weight=0"
-    assert block.ss2d.proj_params.weight.grad.norm().item() == 0.0, "ss2d proj_params should have 0 gradient when out_proj.weight=0"
-    print("  [PASS] Step 0 gradient correctly verified: zero upstream gradient due to zero-init out_proj.")
+    print("  [PASS] Step 0 gradient correctly verified: active norm3 gradient enables smooth adaptive emergence.")
 
-    # 3. Post-initialization Gradient test (after weights become non-zero):
+    # 3. Post-initialization Gradient test (after norm3 weights become non-zero):
     with torch.no_grad():
-        block.out_proj.weight.add_(torch.randn_like(block.out_proj.weight) * 0.01)
+        block.norm3.weight.add_(torch.randn_like(block.norm3.weight) * 0.01)
 
     block.zero_grad()
     x_step1 = torch.randn(2, 512, 10, 10, requires_grad=True)
