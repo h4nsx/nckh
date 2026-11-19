@@ -155,7 +155,7 @@ A critical research contribution of this work is investigating the wall-clock ex
 - **Target Conference:** **TAIMMA 2027** (Springer LNCS)
 - **Paper Title:** *Why a Cheaper Block Runs Slower: Replacing Self-Attention with 2D Selective Scans in YOLO11s on an Embedded CPU*
 - **Authors:** 
-  - **Vo Tuan Hung** (Information Technology Department, Song Hung Thuan Co., Ltd.; [votuanhung1205.work@gmail.com](mailto:votuanhung1205.work@gmail.com), ORCID: [0009-0005-8730-7930](https://orcid.org/0009-0005-8730-7930))
+  - **Vo Tuan Hung** (Information Technology Department, Song Hung Thuan Co., Ltd.; [votuanhung1205.work@gmail.com](mailto:votuanhung1205.work@gmail.com))
   - **Huynh Tan Phat** (Corresponding Author, Ho Chi Minh City Open University; [phat.ht@ou.edu.vn](mailto:phat.ht@ou.edu.vn))
 - **Primary Submission Manuscript (LNCS):** [`paper_lncs/main.pdf`](paper_lncs/main.pdf) ([Source](paper_lncs/main.tex))
 - **Supplementary Code Archive:** [`submission_code.zip`](submission_code.zip)
