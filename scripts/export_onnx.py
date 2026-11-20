@@ -115,6 +115,8 @@ def main():
     src.add_argument("--untrained", action="store_true", help="Random weights from the arm's YAML")
     parser.add_argument("--chunk", type=int, default=0, help="0 = unrolled sequential scan; -1 = same scan as one ONNX Loop; "
                              "-2 = parallel associative scan (log2 L steps); e.g. 20 = chunked scan")
+    parser.add_argument("--hoist-proj", action="store_true",
+                        help="Compute the shared W_proj once and permute it (identical outputs, 1/4 of the MACs)")
     parser.add_argument("--imgsz", type=int, default=640)
     parser.add_argument("--opset", type=int, default=17)
     parser.add_argument("--out", type=str, required=True, help="Destination .onnx path")
@@ -124,10 +126,13 @@ def main():
     PurePyTorch2DSelectiveScan.default_chunk_size = args.chunk
     yolo = YOLO(args.weights) if args.weights else build_untrained(args.arm)
     n_scans = set_scan_chunk_size(yolo.model, args.chunk)
+    for m in yolo.model.modules():
+        if isinstance(m, PurePyTorch2DSelectiveScan):
+            m.hoist_proj = args.hoist_proj
     if args.arm in ("ss2d", "ss2d_2dir", "case_c") and n_scans == 0:
         sys.exit(f"[ERROR] arm '{args.arm}' should contain a selective scan, but none was found")
     print(f"[INFO] arm={args.arm} source={'weights' if args.weights else 'untrained'} "
-          f"chunk={args.chunk} selective_scans={n_scans} nc={len(yolo.model.names)}")
+          f"chunk={args.chunk} hoist_proj={args.hoist_proj} selective_scans={n_scans} nc={len(yolo.model.names)}")
 
     # Ultralytics writes the export next to the checkpoint (e.g. weights/best.onnx). Keep an
     # existing file there (such as the measured export) from being overwritten and moved away.

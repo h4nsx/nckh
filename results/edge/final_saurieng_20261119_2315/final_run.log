@@ -1,0 +1,163 @@
+nohup: ignoring input
+[RUN] yolo11s_baseline threads=1 runs=100  23:15:31
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_baseline.onnx
+=================================================================
+Session creation: 0.53 s
+
+1. Warming up (10 iterations)...
+2. Timing forward pass over 100 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_baseline.onnx  (320 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 1
+Forward median:   3204.13 ms  (P95 3209.23 ms, 0.31 FPS)
+RSS idle / end:   47.8 / 233.2 MiB
+Peak RSS (HWM):   233.2 MiB
+----------------------------------------
+[SAVED] results/edge/final_saurieng_20261119_2315/yolo11s_baseline_t1.json
+[RUN] yolo11s_ss2d_arm3 threads=1 runs=100  23:23:06
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_ss2d_arm3.onnx
+=================================================================
+Session creation: 46.31 s
+
+1. Warming up (10 iterations)...
+2. Timing forward pass over 100 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_ss2d_arm3.onnx  (14771 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 1
+Forward median:   3396.60 ms  (P95 3403.01 ms, 0.29 FPS)
+RSS idle / end:   47.9 / 373.2 MiB
+Peak RSS (HWM):   373.2 MiB
+----------------------------------------
+[SAVED] results/edge/final_saurieng_20261119_2315/yolo11s_ss2d_arm3_t1.json
+[RUN] yolo11s_ss2d_arm3_hoist threads=1 runs=100  23:45:58
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_ss2d_arm3_hoist.onnx
+=================================================================
+Session creation: 43.48 s
+
+1. Warming up (10 iterations)...
+2. Timing forward pass over 100 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_ss2d_arm3_hoist.onnx  (14773 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 1
+Forward median:   3406.96 ms  (P95 3411.91 ms, 0.29 FPS)
+RSS idle / end:   47.9 / 373.6 MiB
+Peak RSS (HWM):   373.6 MiB
+----------------------------------------
+[SAVED] results/edge/final_saurieng_20261119_2315/yolo11s_ss2d_arm3_hoist_t1.json
+[RUN] yolo11s_ss2d_arm3_par threads=1 runs=100  00:26:00
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_ss2d_arm3_par.onnx
+=================================================================
+Session creation: 0.34 s
+
+1. Warming up (10 iterations)...
+2. Timing forward pass over 100 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_ss2d_arm3_par.onnx  (619 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 1
+Forward median:   4089.56 ms  (P95 4101.34 ms, 0.24 FPS)
+RSS idle / end:   47.9 / 389.2 MiB
+Peak RSS (HWM):   389.2 MiB
+----------------------------------------
+[SAVED] results/edge/final_saurieng_20261119_2315/yolo11s_ss2d_arm3_par_t1.json
+[RUN] yolo11s_baseline threads=4 runs=30  00:59:03
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_baseline.onnx
+=================================================================
+Session creation: 0.26 s
+
+1. Warming up (5 iterations)...
+2. Timing forward pass over 30 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_baseline.onnx  (320 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 4
+Forward median:   1171.80 ms  (P95 1210.54 ms, 0.85 FPS)
+RSS idle / end:   47.9 / 233.4 MiB
+Peak RSS (HWM):   233.4 MiB
+----------------------------------------
+[SAVED] results/edge/final_saurieng_20261119_2315/yolo11s_baseline_t4.json
+[RUN] yolo11s_ss2d_arm3 threads=4 runs=30  01:13:16
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_ss2d_arm3.onnx
+=================================================================
+Session creation: 47.29 s
+
+1. Warming up (5 iterations)...
+2. Timing forward pass over 30 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_ss2d_arm3.onnx  (14771 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 4
+Forward median:   1370.85 ms  (P95 1421.38 ms, 0.73 FPS)
+RSS idle / end:   47.9 / 373.6 MiB
+Peak RSS (HWM):   373.6 MiB
+----------------------------------------
+[SAVED] results/edge/final_saurieng_20261119_2315/yolo11s_ss2d_arm3_t4.json
+[RUN] yolo11s_ss2d_arm3_hoist threads=4 runs=30  01:28:03
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_ss2d_arm3_hoist.onnx
+=================================================================
+Session creation: 44.72 s
+
+1. Warming up (5 iterations)...
+2. Timing forward pass over 30 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_ss2d_arm3_hoist.onnx  (14773 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 4
+Forward median:   1407.45 ms  (P95 1458.06 ms, 0.71 FPS)
+RSS idle / end:   47.8 / 374.1 MiB
+Peak RSS (HWM):   374.1 MiB
+----------------------------------------
+[SAVED] results/edge/final_saurieng_20261119_2315/yolo11s_ss2d_arm3_hoist_t4.json
+[RUN] yolo11s_ss2d_arm3_par threads=4 runs=30  01:40:00
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_ss2d_arm3_par.onnx
+=================================================================
+Session creation: 0.34 s
+
+1. Warming up (5 iterations)...
+2. Timing forward pass over 30 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_ss2d_arm3_par.onnx  (619 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 4
+Forward median:   2253.62 ms  (P95 2279.23 ms, 0.44 FPS)
+RSS idle / end:   47.9 / 389.6 MiB
+Peak RSS (HWM):   389.6 MiB
+----------------------------------------
+[SAVED] results/edge/final_saurieng_20261119_2315/yolo11s_ss2d_arm3_par_t4.json
+[DONE] results in results/edge/final_saurieng_20261119_2315
+ALL_DONE

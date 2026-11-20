@@ -177,14 +177,21 @@ class PurePyTorch2DSelectiveScan(nn.Module):
         # 2. Extract direction-specific continuous A matrices:
         A = -torch.exp(self.A_logs)
 
-        # 3. Process each direction with strictly matched, self-projected parameters:
+        # 3. Process each direction with strictly matched, self-projected parameters.
+        # proj_params acts per token and the four sequences are permutations of the same tokens, so
+        # with hoist_proj=True the projection is computed once and permuted like the inputs; this is
+        # mathematically identical and costs 1/4 of the MACs (runtime-only option, same weights).
+        hoist = getattr(self, "hoist_proj", False)
+        if hoist:
+            p_row = self.proj_params(x_1)                                         # [B, L, P], row-major
+            p_col = p_row.reshape(B, H, W, -1).permute(0, 2, 1, 3).reshape(B, L, -1)  # column-major
         # Direction 1:
-        p_1 = self.proj_params(x_1)
+        p_1 = p_row if hoist else self.proj_params(x_1)
         B_1, C_1, d_1 = torch.split(p_1, [self.d_state, self.d_state, self.d_model], dim=-1)
         y_1 = self._selective_scan_1d(x_1, F.softplus(d_1), A[0], B_1, C_1, self.D[0])
 
         # Direction 2:
-        p_2 = self.proj_params(x_2)
+        p_2 = torch.flip(p_row, dims=[1]) if hoist else self.proj_params(x_2)
         B_2, C_2, d_2 = torch.split(p_2, [self.d_state, self.d_state, self.d_model], dim=-1)
         y_2 = self._selective_scan_1d(x_2, F.softplus(d_2), A[1], B_2, C_2, self.D[1])
         # Restore row-major orientation
@@ -195,14 +202,14 @@ class PurePyTorch2DSelectiveScan(nn.Module):
             return y.reshape(B, H, W, C).permute(0, 3, 1, 2)
 
         # Direction 3:
-        p_3 = self.proj_params(x_3)
+        p_3 = p_col if hoist else self.proj_params(x_3)
         B_3, C_3, d_3 = torch.split(p_3, [self.d_state, self.d_state, self.d_model], dim=-1)
         y_3 = self._selective_scan_1d(x_3, F.softplus(d_3), A[2], B_3, C_3, self.D[2])
         # Restore from column-major [B, W, H, C] to row-major [B, H, W, C]
         y_3 = y_3.reshape(B, W, H, C).permute(0, 2, 1, 3).reshape(B, L, C)
 
         # Direction 4:
-        p_4 = self.proj_params(x_4)
+        p_4 = torch.flip(p_col, dims=[1]) if hoist else self.proj_params(x_4)
         B_4, C_4, d_4 = torch.split(p_4, [self.d_state, self.d_state, self.d_model], dim=-1)
         y_4 = self._selective_scan_1d(x_4, F.softplus(d_4), A[3], B_4, C_4, self.D[3])
         # Reverse back and restore from column-major to row-major

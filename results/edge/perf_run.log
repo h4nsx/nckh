@@ -1,0 +1,125 @@
+nohup: ignoring input
+perf: perf (perf version 6.18.60)
+1872728,,r11,1272704,100.00,,
+852356,,r08,1272704,100.00,,
+11872,,r17,1272704,100.00,,
+[RUN] yolo11s_baseline threads=4  05:33:03
+[core] median 1240.2 ms over 10 calls
+[memory] median 1238.8 ms over 10 calls
+Session creation: 0.26 s
+  CPU_CYCLES         7,310,299,335 per call
+  INST_RETIRED       5,961,911,766 per call
+  STALL_FRONTEND     0 per call
+  STALL_BACKEND      0 per call
+  L1D_CACHE          2,240,954,660 per call
+  L1D_CACHE_REFILL   48,572,315 per call
+  L2D_CACHE          430,163,403 per call
+  L2D_CACHE_REFILL   22,687,900 per call
+  L2D_CACHE_WB       8,736,302 per call
+  BUS_ACCESS         148,819,069 per call
+  MEM_ACCESS         2,250,943,780 per call
+  L1I_CACHE_REFILL   352,355 per call
+  ipc                        0.8155
+  backend_stall_frac         0.0000
+  frontend_stall_frac        0.0000
+  l1d_miss_rate              0.0217
+  l2_miss_rate               0.0527
+  dram_traffic_mib_per_call  1917.9811
+  dram_bw_gib_s              1.5120
+[SAVED] results/edge/perf_saurieng_20261120_0522/yolo11s_baseline_t4.json
+[RUN] yolo11s_ss2d_arm3 threads=4  05:41:45
+[core] median 1375.7 ms over 10 calls
+[memory] median 1382.8 ms over 10 calls
+Session creation: 46.93 s
+  CPU_CYCLES         8,121,161,628 per call
+  INST_RETIRED       7,258,607,280 per call
+  STALL_FRONTEND     0 per call
+  STALL_BACKEND      0 per call
+  L1D_CACHE          2,919,132,916 per call
+  L1D_CACHE_REFILL   45,218,960 per call
+  L2D_CACHE          447,220,643 per call
+  L2D_CACHE_REFILL   25,290,263 per call
+  L2D_CACHE_WB       9,317,951 per call
+  BUS_ACCESS         166,217,188 per call
+  MEM_ACCESS         2,920,873,049 per call
+  L1I_CACHE_REFILL   858,780 per call
+  ipc                        0.8938
+  backend_stall_frac         0.0000
+  frontend_stall_frac        0.0000
+  l1d_miss_rate              0.0155
+  l2_miss_rate               0.0565
+  dram_traffic_mib_per_call  2112.3177
+  dram_bw_gib_s              1.4918
+[SAVED] results/edge/perf_saurieng_20261120_0522/yolo11s_ss2d_arm3_t4.json
+[RUN] yolo11s_ss2d_arm3_par threads=4  05:54:57
+[core] median 2176.3 ms over 10 calls
+[memory] median 2196.3 ms over 10 calls
+Session creation: 0.34 s
+  CPU_CYCLES         12,725,437,453 per call
+  INST_RETIRED       9,203,391,698 per call
+  STALL_FRONTEND     0 per call
+  STALL_BACKEND      0 per call
+  L1D_CACHE          4,143,299,871 per call
+  L1D_CACHE_REFILL   45,726,002 per call
+  L2D_CACHE          544,686,184 per call
+  L2D_CACHE_REFILL   57,789,235 per call
+  L2D_CACHE_WB       9,766,951 per call
+  BUS_ACCESS         387,928,976 per call
+  MEM_ACCESS         4,207,389,917 per call
+  L1I_CACHE_REFILL   638,183 per call
+  ipc                        0.7232
+  backend_stall_frac         0.0000
+  frontend_stall_frac        0.0000
+  l1d_miss_rate              0.0110
+  l2_miss_rate               0.1061
+  dram_traffic_mib_per_call  4123.3024
+  dram_bw_gib_s              1.8334
+[SAVED] results/edge/perf_saurieng_20261120_0522/yolo11s_ss2d_arm3_par_t4.json
+[RUN] yolo11s_baseline threads=1  06:07:11
+[core] median 3164.8 ms over 10 calls
+[memory] median 3165.3 ms over 10 calls
+Session creation: 0.26 s
+  CPU_CYCLES         4,745,748,823 per call
+  INST_RETIRED       4,178,921,468 per call
+  STALL_FRONTEND     0 per call
+  STALL_BACKEND      0 per call
+  L1D_CACHE          1,210,002,900 per call
+  L1D_CACHE_REFILL   38,086,872 per call
+  L2D_CACHE          447,815,452 per call
+  L2D_CACHE_REFILL   17,484,339 per call
+  L2D_CACHE_WB       5,179,629 per call
+  BUS_ACCESS         109,848,996 per call
+  MEM_ACCESS         1,210,023,972 per call
+  L1I_CACHE_REFILL   220,348 per call
+  ipc                        0.8806
+  backend_stall_frac         0.0000
+  frontend_stall_frac        0.0000
+  l1d_miss_rate              0.0315
+  l2_miss_rate               0.0390
+  dram_traffic_mib_per_call  1383.2988
+  dram_bw_gib_s              0.4268
+[SAVED] results/edge/perf_saurieng_20261120_0522/yolo11s_baseline_t1.json
+[RUN] yolo11s_ss2d_arm3 threads=1  08:04:02
+[core] median 3440.1 ms over 10 calls
+[memory] median 3442.0 ms over 10 calls
+Session creation: 47.13 s
+  CPU_CYCLES         5,158,353,506 per call
+  INST_RETIRED       4,588,412,319 per call
+  STALL_FRONTEND     0 per call
+  STALL_BACKEND      0 per call
+  L1D_CACHE          1,354,976,616 per call
+  L1D_CACHE_REFILL   42,968,395 per call
+  L2D_CACHE          428,748,418 per call
+  L2D_CACHE_REFILL   21,782,957 per call
+  L2D_CACHE_WB       6,183,574 per call
+  BUS_ACCESS         136,857,816 per call
+  MEM_ACCESS         1,355,206,045 per call
+  L1I_CACHE_REFILL   660,046 per call
+  ipc                        0.8895
+  backend_stall_frac         0.0000
+  frontend_stall_frac        0.0000
+  l1d_miss_rate              0.0317
+  l2_miss_rate               0.0508
+  dram_traffic_mib_per_call  1706.9416
+  dram_bw_gib_s              0.4843
+[SAVED] results/edge/perf_saurieng_20261120_0522/yolo11s_ss2d_arm3_t1.json

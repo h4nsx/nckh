@@ -1,0 +1,23 @@
+[core] median 1375.7 ms over 10 calls
+[memory] median 1382.8 ms over 10 calls
+Session creation: 46.93 s
+  CPU_CYCLES         8,121,161,628 per call
+  INST_RETIRED       7,258,607,280 per call
+  STALL_FRONTEND     0 per call
+  STALL_BACKEND      0 per call
+  L1D_CACHE          2,919,132,916 per call
+  L1D_CACHE_REFILL   45,218,960 per call
+  L2D_CACHE          447,220,643 per call
+  L2D_CACHE_REFILL   25,290,263 per call
+  L2D_CACHE_WB       9,317,951 per call
+  BUS_ACCESS         166,217,188 per call
+  MEM_ACCESS         2,920,873,049 per call
+  L1I_CACHE_REFILL   858,780 per call
+  ipc                        0.8938
+  backend_stall_frac         0.0000
+  frontend_stall_frac        0.0000
+  l1d_miss_rate              0.0155
+  l2_miss_rate               0.0565
+  dram_traffic_mib_per_call  2112.3177
+  dram_bw_gib_s              1.4918
+[SAVED] results/edge/perf_saurieng_20261120_0522/yolo11s_ss2d_arm3_t4.json

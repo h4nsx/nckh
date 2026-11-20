@@ -30,6 +30,11 @@
 \renewcommand\UrlFont{\color{blue}\rmfamily}
 \urlstyle{rm}
 
+% Typography and float tuning for clean 15-page fit
+\setlength{\textfloatsep}{10pt plus 2pt minus 2pt}
+\setlength{\floatsep}{8pt plus 2pt minus 2pt}
+\setlength{\intextsep}{8pt plus 2pt minus 2pt}
+
 \begin{document}
 
 \title{Why a Cheaper Block Runs Slower: Replacing Self-Attention with 2D Selective Scans in YOLO11s on an Embedded CPU}
@@ -45,12 +50,16 @@
 \authorrunning{Anonymous Author(s)}
 \institute{Paper under double-blind review}
 \else
-\author{Vo Tuan Hung\inst{1} \and
-Huynh Tan Phat\inst{2}\thanks{Corresponding author.}}
-\authorrunning{T. H. Vo and T. P. Huynh}
+\author{Vo Tuan Hung\inst{1}\orcidID{0009-0005-8730-7930} \and
+Nguyen Thanh Binh\inst{2}\orcidID{0009-0006-6107-5681} \and
+Huynh Tan Phat\inst{3}\thanks{Corresponding author.}}
+\authorrunning{T. H. Vo, T. B. Nguyen, and T. P. Huynh}
 \institute{Information Technology Department, Song Hung Thuan Co., Ltd.,\\
 50C Hanoi Highway, Phuoc Long Ward, Ho Chi Minh City, Vietnam\\
-\email{votuanhung1205.work@gmail.com}
+\email{hungvt.songhungthuan@gmail.com}
+\and
+SYSMAC Joint Stock Company, Ho Chi Minh City, Vietnam\\
+\email{ntbinh1001@gmail.com}
 \and
 Ho Chi Minh City Open University,\\
 35--37 Ho Hao Hon Street, Cau Ong Lanh Ward, Ho Chi Minh City, Vietnam\\
