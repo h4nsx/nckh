@@ -148,7 +148,10 @@ def benchmark_onnx(model_path: str, num_runs: int = 100, warmup: int = 10, imgsz
     if threads > 0:
         session_opts.intra_op_num_threads = threads
         session_opts.inter_op_num_threads = 1
+    t_create = time.perf_counter()
     session = ort.InferenceSession(model_path, session_opts, providers=["CPUExecutionProvider"])
+    session_create_s = time.perf_counter() - t_create  # includes ORT graph optimization
+    print(f"Session creation: {session_create_s:.2f} s")
     rss_after_load = current_rss_mib()
 
     input_name = session.get_inputs()[0].name
@@ -219,6 +222,7 @@ def benchmark_onnx(model_path: str, num_runs: int = 100, warmup: int = 10, imgsz
         "input_shape": input_shape,
         "warmup": warmup,
         "runs": num_runs,
+        "session_create_s": session_create_s,
         "forward_only": forward,
         "end_to_end": end_to_end,
         "rss_idle_mib": rss_idle,

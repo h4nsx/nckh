@@ -1,0 +1,19 @@
+
+=================================================================
+BENCHMARKING ONNX RUNTIME: yolo11s_baseline.onnx
+=================================================================
+Session creation: 0.53 s
+
+1. Warming up (10 iterations)...
+2. Timing forward pass over 100 iterations (Batch Size = 1)...
+
+----------------------------------------
+BENCHMARK METRICS SUMMARY
+----------------------------------------
+Model:            yolo11s_baseline.onnx  (320 ONNX nodes)
+Provider/threads: CPUExecutionProvider / 1
+Forward median:   3204.13 ms  (P95 3209.23 ms, 0.31 FPS)
+RSS idle / end:   47.8 / 233.2 MiB
+Peak RSS (HWM):   233.2 MiB
+----------------------------------------
+[SAVED] results/edge/final_saurieng_20261119_2315/yolo11s_baseline_t1.json

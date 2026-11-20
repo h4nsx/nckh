@@ -52,6 +52,18 @@ def test_chunked_matches_sequential():
             assert torch.allclose(a, b, atol=1e-7), f"Parallel-scan gradient mismatch at {H}x{W}"
         print(f"  [PASS] {H}x{W}, parallel scan: max forward diff = {par_diff:.2e}")
 
+        # Hoisted projection: W_proj computed once and permuted (forward and backward)
+        scan.chunk_size = 0
+        scan.hoist_proj = True
+        y_h = scan(x)
+        g_h = torch.autograd.grad(y_h.square().sum(), [x] + list(scan.parameters()))
+        scan.hoist_proj = False
+        h_diff = (y_seq - y_h).abs().max().item()
+        assert h_diff < 1e-10, f"Hoisted-projection mismatch at {H}x{W}: {h_diff}"
+        for a, b in zip(g_seq, g_h):
+            assert torch.allclose(a, b, atol=1e-7), f"Hoisted-projection gradient mismatch at {H}x{W}"
+        print(f"  [PASS] {H}x{W}, hoisted projection: max forward diff = {h_diff:.2e}")
+
 
 def test_ablation_variants():
     """Shape contract and zero-gamma identity for the ablation blocks."""
